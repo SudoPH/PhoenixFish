@@ -1,0 +1,43 @@
+prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
+
+# Rarity Names
+rarity_1: "Sıradan"
+rarity_2: "Nadir"
+rarity_3: "Çok Nadir"
+rarity_4: "Efsanevi"
+rarity_5: "İlahi"
+
+# Catch Titles (For high rarity fish)
+catch_title_epic: "<gold><bold>EFSANEVİ YAKALAMA!</bold></gold>"
+catch_subtitle_epic: "<white>Şanslısın! %fish_name% tuttun!</white>"
+catch_title_legendary: "<#9D00FF><bold>İLAHİ YAKALAMA!</bold></#9D00FF>"
+catch_subtitle_legendary: "<white>Bir mucize! %fish_name% tuttun!</white>"
+
+# Fishing Listener
+fish_bite: "<gold>Balık vurdu! Çek!</gold>"
+fish_caught_single: "<aqua>Bir %fish_name% tuttun!</aqua>"
+fish_caught_multiple: "<aqua>Harika! %amount%x %fish_name% tuttun!</aqua>"
+
+# Minigame Task
+minigame_win_single: "<green><bold>✓ Balığı yakaladın! 🐟</bold></green>"
+minigame_win_multiple: "<green><bold>✓ Harika! Tek seferde %amount% balık yakaladın! 🐟</bold></green>"
+minigame_lose: "<red><bold>✖ Misina koptu! Balık kaçtı.</bold></red>"
+
+# Cache Manager (XP System)
+level_up: "<gold>Balıkçılık seviyen arttı! Yeni Seviye: %level%</gold>"
+
+# Commands
+no_permission: "<red>Bu komutu kullanma yetkin yok!</red>"
+fix_inventory: "<green>Envanterin tarandı: %rods% olta, %baits% yem güncellendi.</green>"
+fixall_start: "<yellow>Container taraması başlatıldı (%chunks% yüklü chunk)... bu biraz sürebilir.</yellow>"
+fixall_done_online: "<green>%players% online oyuncu tarandı: %rods% olta, %baits% yem güncellendi.</green>"
+fixall_done_containers: "<green>Container taraması tamamlandı! %containers% container tarandı, %rods% olta, %baits% yem güncellendi.</green>"
+fixall_offline_note: "<gray>Not: Offline oyuncuların eşyaları, bir dahaki girişlerinde otomatik düzeltilecek.</gray>"
+rod_not_found: "<red>Bu olta bulunamadı!</red>"
+rod_given: "<green>Sana özel olta verildi!</green>"
+invalid_material: "<red>rods.yml içinde geçersiz materyal: %material%</red>"
+usage_giverod: "<yellow>Kullanım: /phoenixfish giverod <olta-ismi></yellow>"
+usage_fix: "<yellow>Eşyalarını güncellemek için: /phoenixfish fix</yellow>"
+usage_fixall: "<yellow>Tüm sunucuyu güncellemek için: /phoenixfish fixall</yellow>"
+player_only: "<red>Bu komut sadece oyuncular tarafından kullanılabilir!</red>"
+rods_not_found: "<red>rods.yml bulunamadı!</red>"

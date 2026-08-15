@@ -1,0 +1,125 @@
+# ==========================================
+# PhoenixFish - Custom Fishing Rods
+# ==========================================
+# Rod IDs must be unique and match the IDs in custom_recipes.yml if applicable.
+# luck-multiplier: Multiplies the chance of rarer fish appearing.
+# WARNING: The plugin uses exponential math for rarity chances (luck^(rarity-1)).
+# Do NOT set this value above 3.0, or rare fish will become too common and break the economy!
+# (1.0 = Normal, 1.5 = Good, 2.0 = End-Game)
+
+rods:
+  # Default vanilla rod (No custom model data)
+  default_rod:
+    display-name: "<white>Old Rod</white>"
+    material: FISHING_ROD
+    custom-model-data: 0
+    luck-multiplier: 1.0
+    lore:
+      - "<dark_gray>» <gray>Standart"
+      - "<gray>A basic fishing rod."
+      - ""
+      - "<dark_gray>Luck Multiplier: <white>x1.0"
+
+  # Tier 1 Rod
+  hardwood_rod:
+    display-name: "<#D2B48C>Hardwood Rod</#D2B48C>"
+    material: FISHING_ROD
+    custom-model-data: 20001
+    luck-multiplier: 1.1
+    lore:
+      - "<dark_gray>» <gray>Başlangıç"
+      - "<gray>Made of compressed wood,"
+      - "<gray>a cheap but functional rod."
+      - ""
+      - "<dark_gray>Luck Multiplier: <white>x1.1"
+
+  # Tier 2 Rod
+  iron_rod:
+    display-name: "<white>Iron Rod</white>"
+    material: FISHING_ROD
+    custom-model-data: 20002
+    luck-multiplier: 1.2
+    lore:
+      - "<dark_gray>» <gray>Yaygın"
+      - "<gray>Reinforced with iron bars."
+      - "<gray>A sturdy rod that resists line breaks."
+      - ""
+      - "<dark_gray>Luck Multiplier: <white>x1.2"
+
+  # Tier 3 Rod
+  gold_rod:
+    display-name: "<gold>Gold Rod</gold>"
+    material: FISHING_ROD
+    custom-model-data: 20003
+    luck-multiplier: 1.35
+    lore:
+      - "<dark_gray>» <gold>Nadir"
+      - "<gold>Gold plating attracts stronger magic."
+      - "<gray>Provides high luck but is slightly fragile."
+      - ""
+      - "<dark_gray>Luck Multiplier: <gold>x1.35"
+
+  # Tier 4 Rod
+  diamond_rod:
+    display-name: "<#55FFFF>Diamond Rod</#55FFFF>"
+    material: FISHING_ROD
+    custom-model-data: 20004
+    luck-multiplier: 1.5
+    lore:
+      - "<dark_gray>» <aqua>Çok Nadir"
+      - "<aqua>Crafted with flawless cut diamonds."
+      - "<gray>Can pull prey even from the deep depths."
+      - ""
+      - "<dark_gray>Luck Multiplier: <aqua>x1.5"
+
+  # Tier 5 Rod
+  netherite_rod:
+    display-name: "<#5C5C5C><bold>Netherite Rod</bold></#5C5C5C>"
+    material: FISHING_ROD
+    custom-model-data: 20005
+    luck-multiplier: 1.7
+    lore:
+      - "<dark_gray>» <dark_red>Üstün"
+      - "<dark_red>Forged in hellfire."
+      - "<gray>Easily subdues even legendary fish."
+      - ""
+      - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
+
+  # Tier 6 Rod
+  ocean_rod:
+    display-name: "<#00CED1><bold>Ocean's Wrath</bold></#00CED1>"
+    material: FISHING_ROD
+    custom-model-data: 20006
+    luck-multiplier: 1.85
+    lore:
+      - "<dark_gray>» <dark_aqua>Mistik"
+      - "<#00CED1>Adorned with tentacles and nautilus shells."
+      - "<gray>Attracts even the masters of the sea."
+      - ""
+      - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
+
+  # Tier 7 Rod
+  legendary_rod:
+    display-name: "<#FFD700><bold>Legendary Rod</bold></#FFD700>"
+    material: FISHING_ROD
+    custom-model-data: 20007
+    luck-multiplier: 2.0
+    lore:
+      - "<dark_gray>» <gold><bold>Efsanevi</bold></gold>"
+      - "<gold>Woven with pure magic derived from legends."
+      - "<gray>Bestows the luck of the ocean upon the wielder."
+      - ""
+      - "<dark_gray>Luck Multiplier: <gold>x2.0"
+
+  # Tier 8 Rod
+  cosmic_rod:
+    display-name: "<#9D00FF><bold>Cosmic Rod</bold></#9D00FF>"
+    material: FISHING_ROD
+    custom-model-data: 20008
+    luck-multiplier: 2.5
+    lore:
+      - "<dark_gray>» <#9D00FF><bold>İlahi</bold></#9D00FF>"
+      - "<#9D00FF>Forged with stardust and dragon's breath."
+      - "<gray>The tip of this rod can fish in the void."
+      - ""
+      - "<dark_gray>Luck Multiplier: <#9D00FF>x2.5"

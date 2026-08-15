@@ -1,0 +1,31 @@
+name: PhoenixFish
+version: "${project.version}"
+main: com.phoenix.fish.PhoenixFish
+api-version: "1.21"
+author: Sudo
+description: Albion-style custom fishing system with optional XP and minigame.
+
+# Ensures PhoenixCraft loads first if installed (required for custom recipe API hook)
+softdepend:
+  - PhoenixCraft
+
+# Paper automatically downloads these libraries at startup.
+libraries:
+  - com.zaxxer:HikariCP:5.1.0
+  - org.slf4j:slf4j-jdk14:2.0.9
+
+# Command Registrations
+commands:
+  phoenixfish:
+    description: Main command for PhoenixFish (give custom rods, fix items).
+    usage: /phoenixfish <fix | fixall | giverod>
+    aliases: [pfish, pf]
+
+# Permission Registrations
+permissions:
+  phoenixfish.admin:
+    description: Allows giving custom rods and using fixall command.
+    default: op
+  phoenixfish.use:
+    description: Allows using the /phoenixfish fix command to fix own inventory.
+    default: true

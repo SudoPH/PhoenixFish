@@ -1,0 +1,70 @@
+# ==========================================
+# PhoenixFish - Main Configuration
+# ==========================================
+# Supports TR and EN languages.
+# Language files (messages_tr.yml, messages_en.yml) are generated automatically.
+
+settings:
+  # Set the plugin language (tr / en)
+  language: "en"
+  # Enable the interactive fishing minigame
+  minigame-enabled: true
+
+# ==========================================
+# Minigame Settings
+# ==========================================
+# These values control the difficulty and mechanics of the fishing minigame.
+# Note: The minigame updates every 2 ticks (10 times per second).
+minigame:
+  # The total width of the minigame area.
+  area-width: 20
+  # The half-width of the player's catching bar. (2 means 5 characters wide total)
+  rod-width: 2
+  # Chance for the fish to change direction (0.0 to 1.0)
+  fish-move-chance: 0.4
+  # How far the fish moves when it changes direction
+  fish-move-distance: 2
+  # How much progress is gained when the fish is inside the bar. (10 seconds to win at 2.0)
+  progress-rate: 1.5
+  # How much tension increases when the fish is outside the bar.
+  tension-increase-rate: 1.5
+  # How much tension decreases when the fish is inside the bar.
+  tension-decrease-rate: 3.0
+
+# ==========================================
+# XP & Leveling System
+# ==========================================
+# If disabled, the plugin will run in fishing-only mode without levels or databases.
+xp-system:
+  enabled: false
+
+  database:
+    # Database type: sqlite or mysql
+    type: sqlite
+    # MySQL credentials (ignored if type is sqlite)
+    # WARNING: Do not use default credentials on production servers!
+    host: localhost
+    port: 3306
+    name: phoenix_db
+    username: root
+    password: ""
+
+  # Adds a 2% (0.02) luck bonus per fishing level.
+  # Example: A level 50 player gets +100% (x1.0 extra) luck.
+  # Note: High values can break the late-game economy by making rare fish too common.
+  level-luck-bonus: 0.02
+
+  # ==========================================
+  # Multi-Catch System
+  # ==========================================
+  # Allows players to catch multiple fish at once based on their level.
+  multi-catch:
+    enabled: true
+
+    # Level 50+ players have a 30% chance to catch 2 fish
+    level-2x: 50
+    chance-2x: 0.30
+
+    # Level 100+ players have a 15% chance to catch 3 fish
+    level-3x: 100
+    chance-3x: 0.15

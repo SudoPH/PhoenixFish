@@ -1,0 +1,19 @@
+# Maven Build Files
+target/
+dependency-reduced-pom.xml
+*.jar
+
+# IDE Files (IntelliJ, Eclipse, VSCode)
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

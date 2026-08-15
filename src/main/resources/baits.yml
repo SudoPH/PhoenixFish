@@ -1,0 +1,121 @@
+# ==========================================
+# PhoenixFish - Baits Configuration
+# ==========================================
+# Bait IDs must be unique. Do not use spaces in IDs.
+# target-rarity: The rarity level of fish this bait boosts (1-5).
+# chance-modifier: The multiplier applied to the base catch chance for the target rarity.
+# Note: Values above 2.0 are not recommended as they break the late-game balance.
+# Recommended range: 1.1 to 1.8
+
+baits:
+  # ==========================================
+  # Early Game (Common & Uncommon)
+  # ==========================================
+  worm:
+    display-name: "<#8B4513>Common Worm</#8B4513>"
+    material: STICK
+    custom-model-data: 40001
+    target-rarity: 1
+    chance-modifier: 1.3
+    lore:
+      - "<gray>A simple worm found in the dirt."
+      - "<dark_gray>» <white>Slightly attracts common fish."
+
+  bread_crust:
+    display-name: "<#FFDAB9>Bread Crust</#FFDAB9>"
+    material: BREAD
+    custom-model-data: 40002
+    target-rarity: 1
+    chance-modifier: 1.2
+    lore:
+      - "<gray>A leftover piece of bread."
+      - "<dark_gray>» <white>Cheap bait for desperate fish."
+
+  glowing_bait:
+    display-name: "<aqua>Glowing Bait</aqua>"
+    material: SLIME_BALL
+    custom-model-data: 40003
+    target-rarity: 2
+    chance-modifier: 1.4
+    lore:
+      - "<gray>An iridescent glow mesmerizes fish."
+      - "<dark_gray>» <aqua>Attracts uncommon fish."
+
+  enchanted_dough:
+    display-name: "<#FFC0CB>Enchanted Dough</#FFC0CB>"
+    material: HONEYCOMB
+    custom-model-data: 40004
+    target-rarity: 2
+    chance-modifier: 1.5
+    lore:
+      - "<gray>Dough baked with a touch of magic."
+      - "<dark_gray>» <aqua>A reliable choice for uncommon fish."
+
+  # ==========================================
+  # Mid Game (Rare)
+  # ==========================================
+  bloodied_flesh:
+    display-name: "<red>Bloodied Flesh</red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 40005
+    target-rarity: 3
+    chance-modifier: 1.5
+    lore:
+      - "<gray>A pungent smell that drives predators crazy."
+      - "<dark_gray>» <red>Attracts rare fish."
+
+  spider_silk:
+    display-name: "<#F5F5DC>Spider Silk</#F5F5DC>"
+    material: COBWEB
+    custom-model-data: 40006
+    target-rarity: 3
+    chance-modifier: 1.6
+    lore:
+      - "<gray>Woven silk that entangles rare prey."
+      - "<dark_gray>» <red>A premium bait for rare fish."
+
+  # ==========================================
+  # Late Game (Epic)
+  # ==========================================
+  ocean_essence:
+    display-name: "<#00CED1>Ocean Essence</#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 40007
+    target-rarity: 4
+    chance-modifier: 1.6
+    lore:
+      - "<#00CED1>The pure magic of the seas."
+      - "<dark_gray>» <gold>Attracts epic fish."
+
+  golden_roe:
+    display-name: "<gold>Golden Roe</gold>"
+    material: EGG
+    custom-model-data: 40008
+    target-rarity: 4
+    chance-modifier: 1.7
+    lore:
+      - "<gold>Rare fish eggs shimmering with gold."
+      - "<dark_gray>» <gold>Highly attractive to epic fish."
+
+  # ==========================================
+  # End Game (Legendary)
+  # ==========================================
+  void_leech:
+    display-name: "<dark_purple>Void Leech</dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 40009
+    target-rarity: 5
+    chance-modifier: 1.7
+    lore:
+      - "<dark_purple>A parasitic creature from the deep void."
+      - "<dark_gray>» <light_purple>Attracts legendary fish."
+
+  lunar_moth:
+    display-name: "<#C0C0C0>Lunar Moth</#C0C0C0>"
+    material: PHANTOM_MEMBRANE
+    custom-model-data: 40010
+    target-rarity: 5
+    chance-modifier: 1.8
+    lore:
+      - "<#C0C0C0>Draws energy from the moonlight."
+      - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."

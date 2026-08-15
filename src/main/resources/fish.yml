@@ -1,0 +1,267 @@
+# ==========================================
+# PhoenixFish - Custom Fish Configuration
+# ==========================================
+# Fish IDs must be unique. Do not use spaces in IDs.
+# rarity: Affects luck probability and bait matching (1-5).
+# weight: Base spawn weight (higher = more common).
+# base-speed: Movement speed during the minigame.
+# fight-strength: Affects tension increase rate during the minigame.
+# xp-reward: XP given to the player upon catching (if XP system is enabled).
+
+fishes:
+  # ==========================================
+  # COMMON FISH (Rarity 1)
+  # ==========================================
+  sea_bass:
+    display-name: "<#55FF55>Sea Bass</#55FF55>"
+    material: COD
+    custom-model-data: 10001
+    weight: 50
+    rarity: 1
+    base-speed: 1.0
+    fight-strength: 1.0
+    xp-reward: 10
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>An active and delicious fish"
+      - "<gray>that lives near the shores."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  anchovy:
+    display-name: "<#55FF55>Anchovy</#55FF55>"
+    material: COD
+    custom-model-data: 10005
+    weight: 60
+    rarity: 1
+    base-speed: 0.8
+    fight-strength: 0.5
+    xp-reward: 5
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A beloved fish, often traveling"
+      - "<gray>in large schools."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  sardine:
+    display-name: "<#55FF55>Sardine</#55FF55>"
+    material: SALMON
+    custom-model-data: 10006
+    weight: 55
+    rarity: 1
+    base-speed: 1.1
+    fight-strength: 0.8
+    xp-reward: 8
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A small but fast fish with"
+      - "<gray>shiny silver scales."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  pufferfish:
+    display-name: "<#55FF55>Pufferfish</#55FF55>"
+    material: PUFFERFISH
+    custom-model-data: 10010
+    weight: 40
+    rarity: 1
+    base-speed: 0.5
+    fight-strength: 1.2
+    xp-reward: 12
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>Slow but dangerous if not"
+      - "<gray>prepared correctly."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  # ==========================================
+  # UNCOMMON FISH (Rarity 2)
+  # ==========================================
+  grouper:
+    display-name: "<aqua>Grouper</aqua>"
+    material: SALMON
+    custom-model-data: 10002
+    weight: 25
+    rarity: 2
+    base-speed: 1.5
+    fight-strength: 1.5
+    xp-reward: 25
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A large and strong prey"
+      - "<gray>hiding in the shadows of rocks."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  bonito:
+    display-name: "<aqua>Bonito</aqua>"
+    material: COD
+    custom-model-data: 10007
+    weight: 20
+    rarity: 2
+    base-speed: 1.8
+    fight-strength: 1.4
+    xp-reward: 20
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A very strong swimmer,"
+      - "<gray>usually caught in autumn."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  clownfish:
+    display-name: "<aqua>Clownfish</aqua>"
+    material: TROPICAL_FISH
+    custom-model-data: 10011
+    weight: 15
+    rarity: 2
+    base-speed: 2.0
+    fight-strength: 1.0
+    xp-reward: 18
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A colorful and agile fish"
+      - "<gray>that loves coral reefs."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  # ==========================================
+  # RARE FISH (Rarity 3)
+  # ==========================================
+  shark:
+    display-name: "<red>Shark</red>"
+    material: COD
+    custom-model-data: 10003
+    weight: 5
+    rarity: 3
+    base-speed: 2.5
+    fight-strength: 3.0
+    xp-reward: 100
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>The ruthless predator of the seas."
+      - "<red>Be careful, it might snap the line!"
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  bluefish:
+    display-name: "<red>Bluefish</red>"
+    material: SALMON
+    custom-model-data: 10008
+    weight: 8
+    rarity: 3
+    base-speed: 3.0
+    fight-strength: 2.5
+    xp-reward: 85
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>An aggressive and very fast"
+      - "<gray>predator with sharp teeth."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  manta_ray:
+    display-name: "<red>Manta Ray</red>"
+    material: COD
+    custom-model-data: 10012
+    weight: 6
+    rarity: 3
+    base-speed: 1.8
+    fight-strength: 4.0
+    xp-reward: 120
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>A gentle giant that pulls"
+      - "<gray>the line with immense weight."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  # ==========================================
+  # EPIC FISH (Rarity 4)
+  # ==========================================
+  sea_god:
+    display-name: "<#9D00FF><bold>Sea God</bold></#9D00FF>"
+    material: COD
+    custom-model-data: 10009
+    weight: 1
+    rarity: 4
+    base-speed: 5.0
+    fight-strength: 8.0
+    xp-reward: 2500
+    lore:
+      - "<dark_gray>» <#9D00FF><bold>Epic</bold></#9D00FF>"
+      - "<#9D00FF>The legendary god of the deep."
+      - "<gray>You must be very lucky (or crazy)"
+      - "<gray>to catch this massive creature."
+      - ""
+      - "<dark_gray>Tier: <white>4"
+
+  kraken:
+    display-name: "<dark_purple><bold>Kraken Spawn</bold></dark_purple>"
+    material: INK_SAC
+    custom-model-data: 10013
+    weight: 0.5
+    rarity: 4
+    base-speed: 4.5
+    fight-strength: 7.5
+    xp-reward: 2000
+    lore:
+      - "<dark_gray>» <dark_purple><bold>Epic</bold></dark_purple>"
+      - "<gray>An infant sea monster with"
+      - "<dark_purple>terrifying tentacles.</dark_purple>"
+      - ""
+      - "<dark_gray>Tier: <white>4"
+
+  # ==========================================
+  # LEGENDARY FISH (Rarity 5)
+  # ==========================================
+  golden_fish:
+    display-name: "<gold><bold>Legendary Golden Fish</bold></gold>"
+    material: SALMON
+    custom-model-data: 10004
+    weight: 0.1
+    rarity: 5
+    base-speed: 6.0
+    fight-strength: 10.0
+    xp-reward: 5000
+    lore:
+      - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
+      - "<gold>It doesn't look like an ordinary fish..."
+      - "<gray>Legend says the catcher is granted 3 wishes."
+      - ""
+      - "<dark_gray>Tier: <white>5"
+
+  leviathan:
+    display-name: "<light_purple><bold>Leviathan</bold></light_purple>"
+    material: COD
+    custom-model-data: 10014
+    weight: 0.05
+    rarity: 5
+    base-speed: 7.0
+    fight-strength: 12.0
+    xp-reward: 7500
+    lore:
+      - "<dark_gray>» <light_purple><bold>Legendary</bold></light_purple>"
+      - "<light_purple>The ancient titan of the abyss."
+      - "<gray>Only the most skilled anglers"
+      - "<gray>can survive its immense pull."
+      - ""
+      - "<dark_gray>Tier: <white>5"
+
+  void_whale:
+    display-name: "<black><bold>Void Whale</bold></black>"
+    material: COD
+    custom-model-data: 10015
+    weight: 0.01
+    rarity: 5
+    base-speed: 8.0
+    fight-strength: 15.0
+    xp-reward: 10000
+    lore:
+      - "<dark_gray>» <black><bold>Legendary</bold></black>"
+      - "<gray>A creature that swims between"
+      - "<black>the fabric of reality.</black>"
+      - ""
+      - "<dark_gray>Tier: <white>5"

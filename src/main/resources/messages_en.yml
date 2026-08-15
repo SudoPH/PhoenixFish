@@ -1,0 +1,43 @@
+prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
+
+# Rarity Names
+rarity_1: "Common"
+rarity_2: "Uncommon"
+rarity_3: "Rare"
+rarity_4: "Epic"
+rarity_5: "Legendary"
+
+# Catch Titles (For high rarity fish)
+catch_title_epic: "<gold><bold>EPIC CATCH!</bold></gold>"
+catch_subtitle_epic: "<white>You are lucky! Caught %fish_name%!</white>"
+catch_title_legendary: "<#9D00FF><bold>LEGENDARY CATCH!</bold></#9D00FF>"
+catch_subtitle_legendary: "<white>A miracle! Caught %fish_name%!</white>"
+
+# Fishing Listener
+fish_bite: "<gold>Fish bite! Reel in!</gold>"
+fish_caught_single: "<aqua>You caught a %fish_name%!</aqua>"
+fish_caught_multiple: "<aqua>Great! You caught %amount%x %fish_name%!</aqua>"
+
+# Minigame Task
+minigame_win_single: "<green><bold>✓ You caught the fish! 🐟</bold></green>"
+minigame_win_multiple: "<green><bold>✓ Amazing! You caught %amount% fish at once! 🐟</bold></green>"
+minigame_lose: "<red><bold>✖ The line snapped! The fish escaped.</bold></red>"
+
+# Cache Manager (XP System)
+level_up: "<gold>Your fishing level increased! New Level: %level%</gold>"
+
+# Commands
+no_permission: "<red>You don't have permission to use this command!</red>"
+fix_inventory: "<green>Inventory scanned: updated %rods% rods and %baits% baits.</green>"
+fixall_start: "<yellow>Container scan started (%chunks% loaded chunks)... this may take a while.</yellow>"
+fixall_done_online: "<green>Scanned %players% online players: updated %rods% rods and %baits% baits.</green>"
+fixall_done_containers: "<green>Container scan completed! Scanned %containers% containers, updated %rods% rods and %baits% baits.</green>"
+fixall_offline_note: "<gray>Note: Items of offline players will be automatically fixed on their next login.</gray>"
+rod_not_found: "<red>Rod not found!</red>"
+rod_given: "<green>You have received a custom rod!</green>"
+invalid_material: "<red>Invalid material in rods.yml: %material%</red>"
+usage_giverod: "<yellow>Usage: /phoenixfish giverod <rod-name></yellow>"
+usage_fix: "<yellow>Update your items: /phoenixfish fix</yellow>"
+usage_fixall: "<yellow>Update the whole server: /phoenixfish fixall</yellow>"
+player_only: "<red>This command can only be run by a player!</red>"
+rods_not_found: "<red>rods.yml not found!</red>"

@@ -1,0 +1,398 @@
+# ==========================================
+# PhoenixFish - Custom Crafting Recipes
+# ==========================================
+# Recipe IDs must be unique.
+# Ingredients can be vanilla materials or custom items.
+# For custom items, only 'material' and 'custom-model-data' are required to match.
+
+recipes:
+  # ==========================================
+  # FISHING RODS (Tiered Progression)
+  # ==========================================
+  # WARNING: Do not set luck-multiplier above 3.0. Math is exponential!
+
+  # 1. Hardwood Rod (Starter Rod)
+  hardwood_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20001
+      display-name: "<#D2B48C>Hardwood Rod</#D2B48C>"
+      luck-multiplier: 1.1
+      lore:
+        - "<dark_gray>» <gray>Starter"
+        - "<gray>Made of compressed wood,"
+        - "<gray>a cheap but functional rod."
+        - ""
+        - "<dark_gray>Luck Multiplier: <white>x1.1"
+    shape:
+      - "  S"
+      - " ST"
+      - "S  "
+    ingredients:
+      S:
+        material: STICK
+      T:
+        material: STRING
+
+  # 2. Iron Rod (Upgrades from Hardwood)
+  iron_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20002
+      display-name: "<white>Iron Rod</white>"
+      luck-multiplier: 1.2
+      lore:
+        - "<dark_gray>» <gray>Common"
+        - "<gray>Reinforced with iron bars."
+        - "<gray>A sturdy rod that resists line breaks."
+        - ""
+        - "<dark_gray>Luck Multiplier: <white>x1.2"
+    shape:
+      - "  I"
+      - " IR"
+      - "R  "
+    ingredients:
+      I:
+        material: IRON_INGOT
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20001
+
+  # 3. Gold Rod (Upgrades from Iron)
+  gold_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20003
+      display-name: "<gold>Gold Rod</gold>"
+      luck-multiplier: 1.35
+      lore:
+        - "<dark_gray>» <gold>Rare"
+        - "<gold>Gold plating attracts stronger magic."
+        - "<gray>Provides high luck but is slightly fragile."
+        - ""
+        - "<dark_gray>Luck Multiplier: <gold>x1.35"
+    shape:
+      - "  G"
+      - " GR"
+      - "R  "
+    ingredients:
+      G:
+        material: GOLD_INGOT
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20002
+
+  # 4. Diamond Rod (Upgrades from Gold)
+  diamond_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20004
+      display-name: "<#55FFFF>Diamond Rod</#55FFFF>"
+      luck-multiplier: 1.5
+      lore:
+        - "<dark_gray>» <aqua>Epic"
+        - "<aqua>Crafted with flawless cut diamonds."
+        - "<gray>Can pull prey even from the deep depths."
+        - ""
+        - "<dark_gray>Luck Multiplier: <aqua>x1.5"
+    shape:
+      - "  D"
+      - " DR"
+      - "R  "
+    ingredients:
+      D:
+        material: DIAMOND
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20003
+
+  # 5. Netherite Rod (Upgrades from Diamond)
+  netherite_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20005
+      display-name: "<#5C5C5C><bold>Netherite Rod</bold></#5C5C5C>"
+      luck-multiplier: 1.7
+      lore:
+        - "<dark_gray>» <dark_red>Superior"
+        - "<dark_red>Forged in hellfire."
+        - "<gray>Easily subdues even legendary fish."
+        - ""
+        - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
+    shape:
+      - "  N"
+      - " NR"
+      - "R  "
+    ingredients:
+      N:
+        material: NETHERITE_INGOT
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20004
+
+  # 6. Ocean's Wrath (Upgrades from Netherite)
+  ocean_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20006
+      display-name: "<#00CED1><bold>Ocean's Wrath</bold></#00CED1>"
+      luck-multiplier: 1.85
+      lore:
+        - "<dark_gray>» <dark_aqua>Mystic"
+        - "<#00CED1>Adorned with tentacles and nautilus shells."
+        - "<gray>Attracts even the masters of the sea."
+        - ""
+        - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
+    shape:
+      - "NSN"
+      - "SRP"
+      - "NSN"
+    ingredients:
+      N:
+        material: NAUTILUS_SHELL
+      S:
+        material: STRING
+      P:
+        material: PRISMARINE_CRYSTALS
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20005
+
+  # 7. Legendary Rod (Upgrades from Ocean)
+  legendary_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20007
+      display-name: "<#FFD700><bold>Legendary Rod</bold></#FFD700>"
+      luck-multiplier: 2.0
+      lore:
+        - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
+        - "<gold>Woven with pure magic derived from legends."
+        - "<gray>Bestows the luck of the ocean upon the wielder."
+        - ""
+        - "<dark_gray>Luck Multiplier: <gold>x2.0"
+    shape:
+      - " C "
+      - "CRC"
+      - " C "
+    ingredients:
+      C:
+        material: HEART_OF_THE_SEA
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20006
+
+  # 8. Cosmic Rod (Final Tier)
+  cosmic_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20008
+      display-name: "<#9D00FF><bold>Cosmic Rod</bold></#9D00FF>"
+      luck-multiplier: 2.5
+      lore:
+        - "<dark_gray>» <#9D00FF><bold>Divine</bold></#9D00FF>"
+        - "<#9D00FF>Forged with stardust and dragon's breath."
+        - "<gray>The tip of this rod can fish in the void."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#9D00FF>x2.5"
+    shape:
+      - " E "
+      - "ERE"
+      - " E "
+    ingredients:
+      E:
+        material: END_CRYSTAL
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20007
+
+  # ==========================================
+  # BAITS
+  # ==========================================
+  # Note: 'bait-id' must match the ID defined in baits.yml
+
+  worm:
+    result:
+      material: STICK
+      custom-model-data: 40001
+      display-name: "<#8B4513>Common Worm</#8B4513>"
+      bait-id: "worm"
+      lore:
+        - "<gray>A simple worm found in the dirt."
+        - "<dark_gray>» <white>Slightly attracts common fish."
+    shape:
+      - " D "
+      - "DDD"
+      - " D "
+    ingredients:
+      D:
+        material: DIRT
+
+  bread_crust:
+    result:
+      material: BREAD
+      custom-model-data: 40002
+      display-name: "<#FFDAB9>Bread Crust</#FFDAB9>"
+      bait-id: "bread_crust"
+      lore:
+        - "<gray>A leftover piece of bread."
+        - "<dark_gray>» <white>Cheap bait for desperate fish."
+    shape:
+      - " B "
+      - "BBB"
+      - " B "
+    ingredients:
+      B:
+        material: BREAD
+
+  glowing_bait:
+    result:
+      material: SLIME_BALL
+      custom-model-data: 40003
+      display-name: "<aqua>Glowing Bait</aqua>"
+      bait-id: "glowing_bait"
+      lore:
+        - "<gray>An iridescent glow mesmerizes fish."
+        - "<dark_gray>» <aqua>Attracts uncommon fish."
+    shape:
+      - " S "
+      - "SGS"
+      - " S "
+    ingredients:
+      S:
+        material: SLIME_BALL
+      G:
+        material: GLOWSTONE_DUST
+
+  enchanted_dough:
+    result:
+      material: HONEYCOMB
+      custom-model-data: 40004
+      display-name: "<#FFC0CB>Enchanted Dough</#FFC0CB>"
+      bait-id: "enchanted_dough"
+      lore:
+        - "<gray>Dough baked with a touch of magic."
+        - "<dark_gray>» <aqua>A reliable choice for uncommon fish."
+    shape:
+      - " W "
+      - "WHW"
+      - " W "
+    ingredients:
+      W:
+        material: WHEAT
+      H:
+        material: HONEYCOMB
+
+  bloodied_flesh:
+    result:
+      material: ROTTEN_FLESH
+      custom-model-data: 40005
+      display-name: "<red>Bloodied Flesh</red>"
+      bait-id: "bloodied_flesh"
+      lore:
+        - "<gray>A pungent smell that drives predators crazy."
+        - "<dark_gray>» <red>Attracts rare fish."
+    shape:
+      - " R "
+      - "RFR"
+      - " R "
+    ingredients:
+      R:
+        material: REDSTONE
+      F:
+        material: ROTTEN_FLESH
+
+  spider_silk:
+    result:
+      material: COBWEB
+      custom-model-data: 40006
+      display-name: "<#F5F5DC>Spider Silk</#F5F5DC>"
+      bait-id: "spider_silk"
+      lore:
+        - "<gray>Woven silk that entangles rare prey."
+        - "<dark_gray>» <red>A premium bait for rare fish."
+    shape:
+      - " C "
+      - "CSC"
+      - " C "
+    ingredients:
+      C:
+        material: COBWEB
+      S:
+        material: SPIDER_EYE
+
+  ocean_essence:
+    result:
+      material: PRISMARINE_CRYSTALS
+      custom-model-data: 40007
+      display-name: "<#00CED1>Ocean Essence</#00CED1>"
+      bait-id: "ocean_essence"
+      lore:
+        - "<#00CED1>The pure magic of the seas."
+        - "<dark_gray>» <gold>Attracts epic fish."
+    shape:
+      - " P "
+      - "PCP"
+      - " P "
+    ingredients:
+      P:
+        material: PRISMARINE_CRYSTALS
+      C:
+        material: NAUTILUS_SHELL
+
+  golden_roe:
+    result:
+      material: EGG
+      custom-model-data: 40008
+      display-name: "<gold>Golden Roe</gold>"
+      bait-id: "golden_roe"
+      lore:
+        - "<gold>Rare fish eggs shimmering with gold."
+        - "<dark_gray>» <gold>Highly attractive to epic fish."
+    shape:
+      - " E "
+      - "EGE"
+      - " E "
+    ingredients:
+      E:
+        material: EGG
+      G:
+        material: GOLD_NUGGET
+
+  void_leech:
+    result:
+      material: NETHERITE_SCRAP
+      custom-model-data: 40009
+      display-name: "<dark_purple>Void Leech</dark_purple>"
+      bait-id: "void_leech"
+      lore:
+        - "<dark_purple>A parasitic creature from the deep void."
+        - "<dark_gray>» <light_purple>Attracts legendary fish."
+    shape:
+      - " N "
+      - "NSN"
+      - " N "
+    ingredients:
+      N:
+        material: NETHERITE_SCRAP
+      S:
+        material: SOUL_SAND
+
+  lunar_moth:
+    result:
+      material: PHANTOM_MEMBRANE
+      custom-model-data: 40010
+      display-name: "<#C0C0C0>Lunar Moth</#C0C0C0>"
+      bait-id: "lunar_moth"
+      lore:
+        - "<#C0C0C0>Draws energy from the moonlight."
+        - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
+    shape:
+      - " P "
+      - "PCP"
+      - " P "
+    ingredients:
+      P:
+        material: PHANTOM_MEMBRANE
+      C:
+        material: END_CRYSTAL
