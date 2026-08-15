@@ -5,7 +5,7 @@
 
     <groupId>com.Phoenix.Fish</groupId>
     <artifactId>PhoenixFish</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>PhoenixFish</name>
 
