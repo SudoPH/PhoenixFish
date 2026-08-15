@@ -1,31 +1,43 @@
 # PhoenixFish
 
-**PhoenixFish** is a highly customizable and performance-focused fishing plugin for **Paper** servers.
+**PhoenixFish** is a highly customizable, performance-focused fishing plugin for **Paper** servers.
 
 [![PhoenixFish Demo](https://img.youtube.com/vi/JEfE1KNi5do/maxresdefault.jpg)](https://www.youtube.com/watch?v=JEfE1KNi5do)
 
 It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities, XP progression, multi-catch mechanics, and extensive configuration options.
 
-> **Status:** In Development
-> **License:** GNU GPL v3.0
-> **Minecraft:** 1.21+
-> **Java:** 21
-> **Server Software:** Paper / Purpur
+> **Status:** In Development · **License:** GNU GPL v3.0 · **Minecraft:** 1.21+ · **Java:** 21 · **Server Software:** Paper / Purpur
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Commands & Permissions](#commands--permissions)
+- [Database Support](#database-support)
+- [Configuration](#configuration)
+- [Languages](#languages)
+- [Add-ons](#add-ons)
+- [Development Status](#development-status)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Features
 
-### Interactive Fishing Minigame
+### 🎣 Interactive Fishing Minigame
 
-PhoenixFish replaces the vanilla fishing experience with an interactive Action Bar minigame.
-
-Players need to:
+PhoenixFish replaces the vanilla fishing experience with an interactive Action Bar minigame. Players need to:
 
 - Track fish movement
 - Manage the progress bar
 - Control line tension
 - Successfully secure their catch
 
-### Custom Fish & Rods
+### 🐟 Custom Fish & Rods
 
 Create unlimited custom fish and fishing rods with configurable:
 
@@ -39,42 +51,34 @@ Create unlimited custom fish and fishing rods with configurable:
 - Custom Model Data
 - Luck multipliers
 
-### Custom Bait
+### 🪱 Custom Bait
 
-Create custom bait items that can target specific fish rarities.
+Create custom bait items that can target specific fish rarities. This allows players to make strategic decisions about which fish they want to catch.
 
-This allows players to make strategic decisions about which fish they want to catch.
+### ⭐ Rarity System
 
-### Rarity System
+PhoenixFish includes **5 configurable rarity tiers**, ranging from **Common** to **Legendary**. Each rarity can have its own colors, lore, sounds, and visual effects. Legendary catches can trigger custom **Title** and **Subtitle** effects.
 
-PhoenixFish includes **5 configurable rarity tiers**, ranging from **Common** to **Legendary**.
+### 📈 XP & Level Progression
 
-Each rarity can have its own colors, lore, sounds, and visual effects.
-
-Legendary catches can trigger custom **Title** and **Subtitle** effects.
-
-### XP & Level Progression
-
-Players gain XP by catching fish and can level up their fishing skill.
-
-The progression system supports:
+Players gain XP by catching fish and can level up their fishing skill. The progression system supports:
 
 - Fishing XP
 - Fishing levels
 - Passive luck bonuses
-- Configurable 2x multi-catch chances
-- Configurable 3x multi-catch chances
+- Configurable 2x multi-catch chance
+- Configurable 3x multi-catch chance
 
-### Performance
+### ⚙️ Performance
 
-PhoenixFish is designed with server performance in mind.
-
-It uses:
+PhoenixFish is designed with server performance in mind. It uses:
 
 - Asynchronous database operations
 - HikariCP connection pooling
 - Thread-safe caching
 - Folia-compatible task handling
+
+---
 
 ## Installation
 
@@ -82,21 +86,19 @@ PhoenixFish requires a server running **Paper or a compatible fork such as Purpu
 
 ### 1. Download
 
-Download the latest `PhoenixFish.jar` from the [Releases](../../releases) page.
+Download the latest `PhoenixFish.jar` from the [Releases](https://github.com/SudoPH/PhoenixFish/releases) page.
 
 ### 2. Install
 
 Place `PhoenixFish.jar` into your server's `plugins` directory.
 
 **Linux:**
-
-```text
+```
 /home/username/server/plugins/
 ```
 
 **Windows:**
-
-```text
+```
 C:\Users\Username\Desktop\Server\plugins\
 ```
 
@@ -108,19 +110,19 @@ If you want custom crafting recipes for fishing rods and bait, place `PhoenixCra
 
 Restart your server after installing the plugin.
 
-> Do not use `/reload`. Reloading can cause issues with plugin state and database connections.
+> ⚠️ Do not use `/reload`. Reloading can cause issues with plugin state and database connections.
 
 ### 5. Configure
 
 After the first startup, configuration files will be generated in:
 
-```text
+```
 plugins/PhoenixFish/
 ```
 
-Edit the configuration files to customize fish, rods, bait, messages, fishing mechanics, and other plugin features.
+Edit these files to customize fish, rods, bait, messages, fishing mechanics, and other plugin features. Restart the server after making configuration changes.
 
-Restart the server after making configuration changes.
+---
 
 ## Getting Started
 
@@ -128,19 +130,15 @@ Restart the server after making configuration changes.
 
 Use:
 
-```text
+```
 /phoenixfish giverod <rod-name>
 ```
 
-to receive a custom fishing rod.
-
-Alternatively, rods can be crafted if **PhoenixCraft** is installed and the corresponding recipes are configured.
+to receive a custom fishing rod. Alternatively, rods can be crafted if **PhoenixCraft** is installed and the corresponding recipes are configured.
 
 ### Equip Bait
 
-Place a custom bait item in your **off-hand**.
-
-Bait can increase the spawn chance of specific fish rarities.
+Place a custom bait item in your **off-hand**. Bait can increase the spawn chance of specific fish rarities.
 
 ### Cast the Line
 
@@ -148,7 +146,7 @@ Right-click on water while holding a fishing rod.
 
 ### Fishing Minigame
 
-When a fish bites, an Action Bar interface will appear.
+When a fish bites, an Action Bar interface appears:
 
 - **Right-click / Hold:** Moves the bar upward.
 - **Release:** Allows the bar to move downward.
@@ -160,21 +158,34 @@ When a fish bites, an Action Bar interface will appear.
 
 Catch fish to earn XP, increase your fishing level, unlock passive bonuses, and gain access to multi-catch chances.
 
+---
+
 ## Commands & Permissions
 
-| Command                      | Description                                                     | Permission          |
-| ---------------------------- | --------------------------------------------------------------- | ------------------- |
-| `/phoenixfish`               | Shows the help menu.                                            | `phoenixfish.use`   |
-| `/phoenixfish fix`           | Scans and fixes broken custom items in your own inventory.      | `phoenixfish.use`   |
-| `/phoenixfish giverod <rod>` | Gives a custom fishing rod to the player.                       | `phoenixfish.admin` |
-| `/phoenixfish fixall`        | Scans online players and loaded containers to fix custom items. | `phoenixfish.admin` |
+| Command | Description | Required Permission |
+| --- | --- | --- |
+| `/phoenixfish` | Shows the help menu. | `phoenixfish.use` |
+| `/phoenixfish fix` | Scans and fixes broken custom items in your own inventory. | `phoenixfish.use` |
+| `/phoenixfish giverod <rod>` | Gives a custom fishing rod to the player. | `phoenixfish.admin` |
+| `/phoenixfish fixall` | Fixes online players' inventories and ender chests; loaded containers are fixed automatically when opened. | `phoenixfish.admin` |
+
+> Offline players' items are automatically fixed the next time they join — no manual action needed.
+
+### Permission Defaults
+
+| Permission | Default |
+| --- | --- |
+| `phoenixfish.use` | All players |
+| `phoenixfish.admin` | OP only |
 
 ### Aliases
 
-```text
+```
 /pfish
 /pf
 ```
+
+---
 
 ## Database Support
 
@@ -199,18 +210,22 @@ Example:
 ```yaml
 xp-system:
   enabled: true
-
-database:
-  type: mysql
+  database:
+    type: mysql
+    host: localhost
+    port: 3306
+    name: phoenix_db
+    username: root
+    password: "your-password"
 ```
 
-Refer to your generated configuration files for the complete database configuration.
+> `database` settings are nested **under** `xp-system`. Refer to your generated `config.yml` for the full configuration.
+
+---
 
 ## Configuration
 
-Almost every part of PhoenixFish can be configured.
-
-You can customize:
+Almost every part of PhoenixFish can be configured, including:
 
 - Fish movement
 - Progress speed
@@ -228,6 +243,8 @@ You can customize:
 - Bait
 - Language settings
 
+---
+
 ## Languages
 
 PhoenixFish currently includes:
@@ -237,26 +254,28 @@ PhoenixFish currently includes:
 
 Messages, rarity names, titles, and fishing minigame messages can be customized.
 
+---
+
 ## Add-ons
 
 ### PhoenixCraft
 
 **PhoenixCraft** is an optional add-on that provides custom crafting recipes for PhoenixFish fishing rods and bait.
 
+---
+
 ## Development Status
 
-PhoenixFish is currently **in development**.
+PhoenixFish is currently **in development**. Additional features, integrations, and improvements are planned for future releases.
 
-Additional features, integrations, and improvements are planned for future releases.
+---
 
 ## Contributing
 
-Contributions, bug reports, and feature suggestions are welcome.
+Contributions, bug reports, and feature suggestions are welcome. If you find a bug or have an idea for PhoenixFish, open an **Issue** on GitHub and provide as much relevant information as possible.
 
-If you find a bug or have an idea for PhoenixFish, open an **Issue** on GitHub and provide as much relevant information as possible.
+---
 
 ## License
 
-PhoenixFish is open-source and free to use under the **GNU General Public License v3.0**.
-
-See the [`LICENSE`](LICENSE) file for the complete license text.
+PhoenixFish is open-source and free to use under the **GNU General Public License v3.0**. See the [`LICENSE`](https://github.com/SudoPH/PhoenixFish/blob/main/LICENSE) file for the complete license text.
