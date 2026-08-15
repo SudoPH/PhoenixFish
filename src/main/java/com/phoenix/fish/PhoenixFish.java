@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -71,8 +72,7 @@ public final class PhoenixFish extends JavaPlugin {
 
         if (cacheManager != null && database != null) {
             getLogger().info("Saving all cached player data...");
-
-            java.util.Collection<FishingData> allData = cacheManager.getAllCachedData();
+            Collection<FishingData> allData = cacheManager.getAllCachedData();
 
             if (!allData.isEmpty()) {
                 try {
@@ -113,14 +113,17 @@ public final class PhoenixFish extends JavaPlugin {
     private void setupDatabaseSystem() {
         if (getConfig().getBoolean("xp-system.enabled", false)) {
             String type = getConfig().getString("xp-system.database.type", "sqlite");
+
             try {
                 if ("mysql".equalsIgnoreCase(type)) {
                     this.database = new MySQLManager(this);
                 } else {
                     this.database = new SQLiteManager(this);
                 }
+
                 this.database.init();
                 getLogger().info("XP System is active! Database type: " + type.toUpperCase());
+
                 this.cacheManager = new CacheManager(this);
                 Bukkit.getPluginManager().registerEvents(cacheManager, this);
             } catch (Exception e) {

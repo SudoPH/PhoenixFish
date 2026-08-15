@@ -37,8 +37,7 @@ public class FishingListener implements Listener {
 
     private final PhoenixFish plugin;
     private final ConcurrentHashMap<UUID, MinigameTask> activeMinigames;
-    private final NamespacedKey rodKey = new NamespacedKey("phoenixfish", "luck_multiplier");
-
+    private final NamespacedKey rodKey;
     private final ItemFixer itemFixer;
     private final Enchantment luckEnchantment;
 
@@ -46,6 +45,7 @@ public class FishingListener implements Listener {
         this.plugin = plugin;
         this.activeMinigames = new ConcurrentHashMap<>();
         this.itemFixer = new ItemFixer(plugin);
+        this.rodKey = new NamespacedKey(plugin, "luck_multiplier");
 
         this.luckEnchantment = RegistryAccess.registryAccess()
                 .getRegistry(RegistryKey.ENCHANTMENT)
@@ -67,13 +67,15 @@ public class FishingListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
         itemFixer.fixInventory(player.getInventory());
         itemFixer.fixInventory(player.getEnderChest());
     }
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent event) {
+        if (!plugin.getConfig().getBoolean("settings.fix-items-on-chest-open", true))
+            return;
+
         InventoryType type = event.getInventory().getType();
         if (type == InventoryType.CHEST || type == InventoryType.BARREL || type == InventoryType.SHULKER_BOX
                 || type == InventoryType.ENDER_CHEST) {

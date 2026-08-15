@@ -11,7 +11,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
@@ -26,16 +25,16 @@ public class ItemFixer {
         NONE, ROD, BAIT, FAILED
     }
 
+    public record ItemIdentifier(Material material, int customModelData) {
+    }
+
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
     private final NamespacedKey rodKey;
     private final NamespacedKey baitKey;
 
-    private final Map<RodIdentifier, ConfigurationSection> rodCache;
-    private final Map<Double, ConfigurationSection> rodLuckCache;
-
-    private record RodIdentifier(Material material, int customModelData) {
-    }
+    private final Map<ItemIdentifier, ConfigurationSection> rodCache;
+    private final Map<String, ConfigurationSection> rodIdCache;
 
     public ItemFixer(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -43,7 +42,7 @@ public class ItemFixer {
         this.rodKey = new NamespacedKey(plugin, "luck_multiplier");
         this.baitKey = new NamespacedKey(plugin, "bait_id");
         this.rodCache = new ConcurrentHashMap<>();
-        this.rodLuckCache = new ConcurrentHashMap<>();
+        this.rodIdCache = new ConcurrentHashMap<>();
 
         cacheRodConfigurations();
     }
@@ -69,10 +68,9 @@ public class ItemFixer {
                 continue;
 
             int cmd = sec.getInt("custom-model-data", 0);
-            double luck = sec.getDouble("luck-multiplier", 1.0);
 
-            rodCache.put(new RodIdentifier(mat, cmd), sec);
-            rodLuckCache.put(luck, sec);
+            rodCache.put(new ItemIdentifier(mat, cmd), sec);
+            rodIdCache.put(key.toLowerCase(), sec);
         }
     }
 
@@ -87,7 +85,6 @@ public class ItemFixer {
         if (contents == null)
             return new int[] { 0, 0 };
 
-        boolean changed = false;
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (item == null || item.getType().isAir())
@@ -96,15 +93,13 @@ public class ItemFixer {
             FixResult result = fixItem(item);
             if (result == FixResult.ROD) {
                 rods++;
-                changed = true;
+                if (inv != null)
+                    inv.setItem(i, item);
             } else if (result == FixResult.BAIT) {
                 baits++;
-                changed = true;
+                if (inv != null)
+                    inv.setItem(i, item);
             }
-        }
-
-        if (changed && inv != null) {
-            inv.setContents(contents);
         }
 
         return new int[] { rods, baits };
@@ -122,55 +117,36 @@ public class ItemFixer {
         boolean isBait = meta.getPersistentDataContainer().has(baitKey, PersistentDataType.STRING);
 
         if (isRod)
-            return fixRod(itemInHand, meta, rodKey);
+            return fixRod(itemInHand, meta);
         if (isBait)
-            return fixBait(itemInHand, meta, baitKey);
+            return fixBait(itemInHand, meta);
 
-        if (!isRod && itemInHand.getType() == Material.FISHING_ROD) {
+        if (itemInHand.getType() == Material.FISHING_ROD) {
             ConfigurationSection rodSec = findRodByItem(itemInHand);
             if (rodSec != null) {
                 double luck = rodSec.getDouble("luck-multiplier", 1.0);
                 meta.getPersistentDataContainer().set(rodKey, PersistentDataType.DOUBLE, luck);
-                return fixRod(itemInHand, meta, rodKey);
+                return fixRod(itemInHand, meta);
             }
         }
 
-        if (!isBait) {
-            BaitManager.Bait detectedBait = findBaitByItem(itemInHand);
-            if (detectedBait != null) {
-                meta.getPersistentDataContainer().set(baitKey, PersistentDataType.STRING, detectedBait.id());
-                return fixBait(itemInHand, meta, baitKey);
-            }
+        BaitManager.Bait detectedBait = plugin.getBaitManager().getBaitFromItem(itemInHand);
+        if (detectedBait != null) {
+            meta.getPersistentDataContainer().set(baitKey, PersistentDataType.STRING, detectedBait.id());
+            return fixBait(itemInHand, meta);
         }
 
         return FixResult.NONE;
     }
 
     private ConfigurationSection findRodByItem(ItemStack item) {
-        int itemCmd = getCMD(item);
-        RodIdentifier identifier = new RodIdentifier(item.getType(), itemCmd);
+        int itemCmd = ItemUtils.getCMD(item);
+        ItemIdentifier identifier = new ItemIdentifier(item.getType(), itemCmd);
         return rodCache.get(identifier);
     }
 
-    private BaitManager.Bait findBaitByItem(ItemStack item) {
-        int itemCmd = getCMD(item);
-        if (itemCmd == 0)
-            return null;
-
-        for (BaitManager.Bait bait : plugin.getBaitManager().getBaits().values()) {
-            if (bait.item().getType() == item.getType()) {
-                int baitCmd = getCMD(bait.item());
-                if (baitCmd == itemCmd)
-                    return bait;
-            }
-        }
-        return null;
-    }
-
-    private FixResult fixRod(ItemStack itemInHand, ItemMeta meta, NamespacedKey rodKey) {
-        Double luckValue = meta.getPersistentDataContainer().get(rodKey, PersistentDataType.DOUBLE);
-
-        ConfigurationSection rodSec = (luckValue != null) ? rodLuckCache.get(luckValue) : findRodByItem(itemInHand);
+    private FixResult fixRod(ItemStack itemInHand, ItemMeta meta) {
+        ConfigurationSection rodSec = findRodByItem(itemInHand);
 
         if (rodSec == null)
             return FixResult.FAILED;
@@ -192,7 +168,7 @@ public class ItemFixer {
         return FixResult.ROD;
     }
 
-    private FixResult fixBait(ItemStack itemInHand, ItemMeta meta, NamespacedKey baitKey) {
+    private FixResult fixBait(ItemStack itemInHand, ItemMeta meta) {
         String baitId = meta.getPersistentDataContainer().get(baitKey, PersistentDataType.STRING);
         if (baitId == null)
             return FixResult.FAILED;
@@ -208,36 +184,16 @@ public class ItemFixer {
         meta.displayName(freshMeta.displayName());
         meta.lore(freshMeta.lore());
 
-        int cmd = getCMD(bait.item());
+        int cmd = ItemUtils.getCMD(bait.item());
         if (cmd > 0) {
-            CustomModelDataComponent cmdComponent = meta.getCustomModelDataComponent();
-            cmdComponent.setFloats(List.of((float) cmd));
-            meta.setCustomModelDataComponent(cmdComponent);
+            meta.getCustomModelDataComponent().setFloats(List.of((float) cmd));
         }
 
         itemInHand.setItemMeta(meta);
         return FixResult.BAIT;
     }
 
-    private int getCMD(ItemStack item) {
-        if (item == null || !item.hasItemMeta())
-            return 0;
-        try {
-            CustomModelDataComponent cmdComponent = item.getItemMeta().getCustomModelDataComponent();
-            if (cmdComponent != null && !cmdComponent.getFloats().isEmpty()) {
-                return cmdComponent.getFloats().get(0).intValue();
-            }
-        } catch (Exception ignored) {
-        }
-        return 0;
-    }
-
     public ConfigurationSection getRodConfig(String rodId) {
-        for (ConfigurationSection sec : rodCache.values()) {
-            if (sec.getName().equalsIgnoreCase(rodId)) {
-                return sec;
-            }
-        }
-        return null;
+        return rodIdCache.get(rodId.toLowerCase());
     }
 }

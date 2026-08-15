@@ -24,6 +24,7 @@ public class BaitManager {
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
     private final Map<String, Bait> baits = new ConcurrentHashMap<>();
+    private final Map<ItemFixer.ItemIdentifier, Bait> baitItemCache = new ConcurrentHashMap<>();
     private final NamespacedKey baitKey;
 
     public BaitManager(PhoenixFish plugin) {
@@ -34,6 +35,8 @@ public class BaitManager {
 
     public void loadBaits() {
         baits.clear();
+        baitItemCache.clear();
+
         File file = new File(plugin.getDataFolder(), "baits.yml");
         if (!file.exists()) {
             plugin.saveResource("baits.yml", false);
@@ -79,7 +82,9 @@ public class BaitManager {
                     item.setItemMeta(meta);
                 }
 
-                baits.put(key, new Bait(key, targetRarity, modifier, item));
+                Bait bait = new Bait(key, targetRarity, modifier, item);
+                baits.put(key, bait);
+                baitItemCache.put(new ItemFixer.ItemIdentifier(material, ItemUtils.getCMD(item)), bait);
             } catch (Exception e) {
                 plugin.getLogger().warning("Error while loading bait '" + key + "': " + e.getMessage());
             }
@@ -91,8 +96,12 @@ public class BaitManager {
     public Bait getBaitFromItem(ItemStack item) {
         if (item == null || !item.hasItemMeta())
             return null;
-        String baitId = item.getItemMeta().getPersistentDataContainer().get(baitKey, PersistentDataType.STRING);
-        return baitId != null ? baits.get(baitId) : null;
+
+        int itemCmd = ItemUtils.getCMD(item);
+        if (itemCmd == 0)
+            return null;
+
+        return baitItemCache.get(new ItemFixer.ItemIdentifier(item.getType(), itemCmd));
     }
 
     public ItemStack getBaitItem(String id) {

@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -77,30 +78,44 @@ public class FishCommand implements CommandExecutor {
         }
 
         ItemFixer fixer = plugin.getFishingListener().getItemFixer();
-        int totalRods = 0, totalBaits = 0, playerCount = 0;
-
-        for (Player online : plugin.getServer().getOnlinePlayers()) {
-            int[] mainResult = fixer.fixInventory(online.getInventory());
-            int[] enderResult = fixer.fixInventory(online.getEnderChest());
-            totalRods += mainResult[0] + enderResult[0];
-            totalBaits += mainResult[1] + enderResult[1];
-            playerCount++;
-        }
-
-        Map<String, String> onlinePh = new HashMap<>();
-        onlinePh.put("%players%", String.valueOf(playerCount));
-        onlinePh.put("%rods%", String.valueOf(totalRods));
-        onlinePh.put("%baits%", String.valueOf(totalBaits));
-        player.sendMessage(plugin.getMessageManager().getMessage("fixall_done_online", true, onlinePh));
 
         ContainerFixTask task = new ContainerFixTask(plugin, fixer, player);
         Map<String, String> startPh = new HashMap<>();
         startPh.put("%chunks%", String.valueOf(task.getTotalChunks()));
         player.sendMessage(plugin.getMessageManager().getMessage("fixall_start", true, startPh));
-
-        task.runTask(plugin);
-
         player.sendMessage(plugin.getMessageManager().getMessage("fixall_offline_note", true));
+
+        new BukkitRunnable() {
+            int totalRods = 0, totalBaits = 0, playerCount = 0;
+            final List<Player> players = new ArrayList<>(plugin.getServer().getOnlinePlayers());
+            int index = 0;
+
+            @Override
+            public void run() {
+                int processed = 0;
+                while (processed < 5 && index < players.size()) {
+                    Player online = players.get(index);
+                    int[] mainResult = fixer.fixInventory(online.getInventory());
+                    int[] enderResult = fixer.fixInventory(online.getEnderChest());
+                    totalRods += mainResult[0] + enderResult[0];
+                    totalBaits += mainResult[1] + enderResult[1];
+                    playerCount++;
+                    index++;
+                    processed++;
+                }
+
+                if (index >= players.size()) {
+                    cancel();
+                    Map<String, String> onlinePh = new HashMap<>();
+                    onlinePh.put("%players%", String.valueOf(playerCount));
+                    onlinePh.put("%rods%", String.valueOf(totalRods));
+                    onlinePh.put("%baits%", String.valueOf(totalBaits));
+                    player.sendMessage(plugin.getMessageManager().getMessage("fixall_done_online", true, onlinePh));
+
+                    task.runTaskTimer(plugin, 0L, 1L);
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
     }
 
     private void handleGiveRod(Player player, String rodId) {

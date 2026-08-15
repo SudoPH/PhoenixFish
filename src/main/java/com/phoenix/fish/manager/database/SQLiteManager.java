@@ -16,10 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * SQLite implementation of the {@link IDatabase} interface.
- * Uses WAL mode and a dedicated thread pool for async operations.
- */
 public class SQLiteManager implements IDatabase {
 
     private final PhoenixFish plugin;
@@ -45,7 +41,7 @@ public class SQLiteManager implements IDatabase {
 
             createTable();
 
-            this.dbExecutor = Executors.newFixedThreadPool(2, r -> {
+            this.dbExecutor = Executors.newFixedThreadPool(1, r -> {
                 Thread t = new Thread(r, "PhoenixFish-SQLite-Worker");
                 t.setDaemon(true);
                 return t;

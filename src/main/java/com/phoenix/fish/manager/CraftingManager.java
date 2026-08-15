@@ -24,13 +24,16 @@ public class CraftingManager {
     private boolean craftAPIExists;
     private Method cachedRegisterMethod;
 
-    private static final NamespacedKey LUCK_KEY = new NamespacedKey("phoenixfish", "luck_multiplier");
-    private static final NamespacedKey BAIT_KEY = new NamespacedKey("phoenixfish", "bait_id");
+    private final NamespacedKey LUCK_KEY;
+    private final NamespacedKey BAIT_KEY;
 
     public CraftingManager(PhoenixFish plugin) {
         this.plugin = plugin;
         this.miniMessage = MiniMessage.miniMessage();
         this.craftAPIExists = plugin.getServer().getPluginManager().getPlugin("PhoenixCraft") != null;
+
+        this.LUCK_KEY = new NamespacedKey(plugin, "luck_multiplier");
+        this.BAIT_KEY = new NamespacedKey(plugin, "bait_id");
     }
 
     public void loadRecipes() {

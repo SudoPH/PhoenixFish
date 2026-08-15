@@ -15,11 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * MySQL implementation of the {@link IDatabase} interface.
- * Uses HikariCP for connection pooling and a dedicated thread pool for async
- * operations.
- */
 public class MySQLManager implements IDatabase {
 
     private final PhoenixFish plugin;
@@ -54,8 +49,8 @@ public class MySQLManager implements IDatabase {
 
         this.dataSource = new HikariDataSource(config);
 
-        this.dbExecutor = Executors.newFixedThreadPool(2, r -> {
-            Thread t = new Thread(r, "PhoenixFish-DB-Worker");
+        this.dbExecutor = Executors.newFixedThreadPool(10, r -> {
+            Thread t = new Thread(r, "PhoenixFish-MySQL-Worker");
             t.setDaemon(true);
             return t;
         });

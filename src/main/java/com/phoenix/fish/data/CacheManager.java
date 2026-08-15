@@ -14,15 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Manages the in-memory caching of player fishing data.
- * Stores data in a thread-safe ConcurrentHashMap to reduce database load.
- */
 public class CacheManager implements Listener {
 
     private final PhoenixFish plugin;
     private final ConcurrentHashMap<UUID, FishingData> playerCache;
+    private final AtomicLong sessionIdCounter = new AtomicLong(0);
+    private final Map<UUID, Long> sessionGenerations = new ConcurrentHashMap<>();
 
     public CacheManager(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -34,18 +33,20 @@ public class CacheManager implements Listener {
         return playerCache.get(uuid);
     }
 
+    public java.util.Collection<FishingData> getAllCachedData() {
+        return playerCache.values();
+    }
+
     private void startAutoSave() {
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (playerCache.isEmpty())
                     return;
-
-                // Toplu kaydetme (Batch Save) ile MySQL yükü azaltılır
                 plugin.getDatabase().batchSave(playerCache.values());
                 plugin.getLogger().info("Auto-saved fishing data for " + playerCache.size() + " online players.");
             }
-        }.runTaskTimerAsynchronously(plugin, 6000L, 6000L); // 5 dakika
+        }.runTaskTimerAsynchronously(plugin, 6000L, 6000L);
     }
 
     @EventHandler
@@ -54,22 +55,23 @@ public class CacheManager implements Listener {
             return;
 
         UUID uuid = event.getPlayer().getUniqueId();
+        long gen = sessionIdCounter.incrementAndGet();
+        sessionGenerations.put(uuid, gen);
 
         FishingData tempData = new FishingData(uuid, 0, 1, 0);
         playerCache.put(uuid, tempData);
 
         plugin.getDatabase().loadData(uuid).thenAccept(loadedData -> {
-            if (Bukkit.getPlayer(uuid) == null) {
-                playerCache.remove(uuid);
-                plugin.getDatabase().saveData(uuid, loadedData);
-                return;
-            }
+            playerCache.compute(uuid, (key, currentTempData) -> {
+                if (sessionGenerations.getOrDefault(uuid, -1L) != gen || currentTempData == null) {
+                    return currentTempData;
+                }
 
-            int xpGainedDuringLoad = tempData.getCurrentXp();
-            if (xpGainedDuringLoad > 0) {
-                loadedData.addXp(xpGainedDuringLoad);
-            }
-            playerCache.put(uuid, loadedData);
+                if (currentTempData.getCurrentXp() > 0) {
+                    loadedData.addXp(currentTempData.getCurrentXp());
+                }
+                return loadedData;
+            });
         });
     }
 
@@ -79,6 +81,8 @@ public class CacheManager implements Listener {
             return;
 
         UUID uuid = event.getPlayer().getUniqueId();
+        sessionGenerations.remove(uuid);
+
         FishingData data = playerCache.remove(uuid);
         if (data != null) {
             plugin.getDatabase().saveData(uuid, data);
@@ -103,9 +107,5 @@ public class CacheManager implements Listener {
             placeholders.put("%level%", String.valueOf(data.getCurrentLevel()));
             player.sendMessage(plugin.getMessageManager().getMessage("level_up", true, placeholders));
         }
-    }
-
-    public java.util.Collection<FishingData> getAllCachedData() {
-        return playerCache.values();
     }
 }

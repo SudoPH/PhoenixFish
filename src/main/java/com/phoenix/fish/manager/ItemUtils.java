@@ -1,6 +1,7 @@
 package com.phoenix.fish.manager;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
@@ -36,5 +37,18 @@ public class ItemUtils {
         }
 
         meta.setCustomModelDataComponent(component);
+    }
+
+    public static int getCMD(ItemStack item) {
+        if (item == null || !item.hasItemMeta())
+            return 0;
+        try {
+            CustomModelDataComponent cmdComponent = item.getItemMeta().getCustomModelDataComponent();
+            if (cmdComponent != null && !cmdComponent.getFloats().isEmpty()) {
+                return cmdComponent.getFloats().get(0).intValue();
+            }
+        } catch (Exception ignored) {
+        }
+        return 0;
     }
 }

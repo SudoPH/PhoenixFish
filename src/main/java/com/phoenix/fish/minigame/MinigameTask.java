@@ -4,7 +4,9 @@ import com.phoenix.fish.PhoenixFish;
 import com.phoenix.fish.data.FishingData;
 import com.phoenix.fish.model.CustomFish;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +20,6 @@ public class MinigameTask {
     private final Player player;
     private final CustomFish fish;
     private final FishingSession session;
-    private final MiniMessage miniMessage;
 
     private final int areaWidth;
     private final int rodWidth;
@@ -30,11 +31,17 @@ public class MinigameTask {
 
     private volatile ScheduledTask task;
 
+    private static final TextColor PROGRESS_COLOR = TextColor.color(0x2ECC71);
+    private static final TextColor PROGRESS_EMPTY = TextColor.color(0x3B4A5A);
+    private static final TextColor TENSION_LOW = TextColor.color(0x1ABC9C);
+    private static final TextColor TENSION_MID = TextColor.color(0xF39C12);
+    private static final TextColor TENSION_HIGH = TextColor.color(0xE74C3C);
+    private static final TextColor GAME_BG = TextColor.color(0x4B5563);
+
     public MinigameTask(PhoenixFish plugin, Player player, CustomFish fish) {
         this.plugin = plugin;
         this.player = player;
         this.fish = fish;
-        this.miniMessage = MiniMessage.miniMessage();
 
         this.areaWidth = plugin.getConfig().getInt("minigame.area-width", 30);
         this.rodWidth = plugin.getConfig().getInt("minigame.rod-width", 2);
@@ -92,53 +99,17 @@ public class MinigameTask {
         session.setProgress(progress);
         session.setTension(tension);
 
-        // UI Building
-        int progressBars = (int) (progress / 10.0);
-        StringBuilder progressSb = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            progressSb.append(i < progressBars ? "<#2ECC71>▰</#2ECC71>" : "<#3B4A5A>▱</#3B4A5A>");
-        }
+        Component ui = Component.empty()
+                .append(Component.text("🎣 ").color(NamedTextColor.GRAY))
+                .append(buildBar((int) (progress / 10.0), PROGRESS_COLOR, PROGRESS_EMPTY))
+                .append(Component.text(" %" + (int) progress).color(NamedTextColor.DARK_GRAY))
+                .append(Component.text("  │  ").color(NamedTextColor.DARK_GRAY))
+                .append(buildGameArea(playerBarCenter, fishPos, isHitting))
+                .append(Component.text("  │  🧵 ").color(NamedTextColor.GRAY))
+                .append(buildTensionBar((int) (tension / 10.0), tension))
+                .append(Component.text(" %" + (int) tension).color(NamedTextColor.DARK_GRAY));
 
-        StringBuilder gameSb = new StringBuilder();
-        String barColor = isHitting ? "<#2ECC71>" : "<#E74C3C>";
-        String barClose = isHitting ? "</#2ECC71>" : "</#E74C3C>";
-
-        for (int i = 0; i <= areaWidth; i++) {
-            if (i == fishPos) {
-                gameSb.append(isHitting ? "<bold>🐠</bold>" : "🐟");
-            } else if (Math.abs(i - playerBarCenter) <= rodWidth) {
-                gameSb.append(barColor).append("▮").append(barClose);
-            } else {
-                gameSb.append("<#4B5563>·</#4B5563>");
-            }
-        }
-
-        int tensionBars = (int) (tension / 10.0);
-        StringBuilder tensionSb = new StringBuilder();
-
-        String tColor;
-        String tClose;
-        if (tension > 80) {
-            tColor = "<#E74C3C><bold>";
-            tClose = "</bold></#E74C3C>";
-        } else if (tension > 50) {
-            tColor = "<#F39C12>";
-            tClose = "</#F39C12>";
-        } else {
-            tColor = "<#1ABC9C>";
-            tClose = "</#1ABC9C>";
-        }
-
-        for (int i = 0; i < 10; i++) {
-            tensionSb.append(i < tensionBars ? tColor + "▰" + tClose : "<#3B4A5A>▱</#3B4A5A>");
-        }
-
-        String uiString = "<#95A5A6>🎣</#95A5A6> " + progressSb + " <#7F8C8D>%" + (int) progress + "</#7F8C8D>" +
-                "  <#4B5563>│</#4B5563>  " + gameSb +
-                "  <#4B5563>│</#4B5563>  <#95A5A6>🧵</#95A5A6> " + tensionSb + " <#7F8C8D>%" + (int) tension
-                + "</#7F8C8D>";
-
-        player.sendActionBar(miniMessage.deserialize(uiString));
+        player.sendActionBar(ui);
 
         if (progress >= 100.0) {
             cancel();
@@ -147,6 +118,42 @@ public class MinigameTask {
             cancel();
             player.sendActionBar(plugin.getMessageManager().getMessage("minigame_lose", false));
         }
+    }
+
+    private Component buildBar(int filled, TextColor filledColor, TextColor emptyColor) {
+        Component bar = Component.empty();
+        for (int i = 0; i < 10; i++) {
+            if (i < filled) {
+                bar = bar.append(Component.text("▰").color(filledColor));
+            } else {
+                bar = bar.append(Component.text("▱").color(emptyColor));
+            }
+        }
+        return bar;
+    }
+
+    private Component buildTensionBar(int filled, double tension) {
+        TextColor color = TENSION_LOW;
+        if (tension > 80)
+            color = TENSION_HIGH;
+        else if (tension > 50)
+            color = TENSION_MID;
+
+        return buildBar(filled, color, PROGRESS_EMPTY);
+    }
+
+    private Component buildGameArea(int playerBarCenter, int fishPos, boolean isHitting) {
+        Component game = Component.empty();
+        for (int i = 0; i <= areaWidth; i++) {
+            if (i == fishPos) {
+                game = game.append(Component.text(isHitting ? "🐠" : "🐟"));
+            } else if (Math.abs(i - playerBarCenter) <= rodWidth) {
+                game = game.append(Component.text("▮").color(isHitting ? PROGRESS_COLOR : TENSION_HIGH));
+            } else {
+                game = game.append(Component.text("·").color(GAME_BG));
+            }
+        }
+        return game;
     }
 
     private void handleWin() {
