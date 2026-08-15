@@ -82,7 +82,7 @@ PhoenixFish requires a server running **Paper or a compatible fork such as Purpu
 
 ### 1. Download
 
-Download the latest `PhoenixFish.jar` from the [Releases](../../releases) page or from Modrinth.
+Download the latest `PhoenixFish.jar` from the [Releases](../../releases) page.
 
 ### 2. Install
 
