@@ -2,6 +2,8 @@
 
 **PhoenixFish** is a highly customizable and performance-focused fishing plugin for **Paper** servers.
 
+[![PhoenixFish Demo](https://img.youtube.com/vi/JEfE1KNi5do/maxresdefault.jpg)](https://www.youtube.com/watch?v=JEfE1KNi5do)
+
 It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities, XP progression, multi-catch mechanics, and extensive configuration options.
 
 > **Status:** In Development
