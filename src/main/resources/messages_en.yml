@@ -17,6 +17,7 @@ catch_subtitle_legendary: "<white>A miracle! Caught %fish_name%!</white>"
 fish_bite: "<gold>Fish bite! Reel in!</gold>"
 fish_caught_single: "<aqua>You caught a %fish_name%!</aqua>"
 fish_caught_multiple: "<aqua>Great! You caught %amount%x %fish_name%!</aqua>"
+fish_discovered: "<gradient:#9D00FF:#00CED1>New Species Discovered!</gradient> <white>%fish_name%<white> added to catalog!"
 
 # Minigame Task
 minigame_win_single: "<green><bold>✓ You caught the fish! 🐟</bold></green>"
@@ -25,9 +26,15 @@ minigame_lose: "<red><bold>✖ The line snapped! The fish escaped.</bold></red>"
 
 # Cache Manager (XP System)
 level_up: "<gold>Your fishing level increased! New Level: %level%</gold>"
+console_autosave: "Auto-saved fishing data for %players% online players."
 
 # Commands
 no_permission: "<red>You don't have permission to use this command!</red>"
+player_only: "<red>This command can only be run by a player!</red>"
+usage_giverod: "<yellow>Usage: /phoenixfish giverod <rod-name></yellow>"
+usage_fix: "<yellow>Update your items: /phoenixfish fix</yellow>"
+usage_fixall: "<yellow>Update the whole server: /phoenixfish fixall</yellow>"
+usage_catalog: "<yellow>To open the catalog: /phoenixfish catalog</yellow>"
 fix_inventory: "<green>Inventory scanned: updated %rods% rods and %baits% baits.</green>"
 fixall_start: "<yellow>Container scan started (%chunks% loaded chunks)... this may take a while.</yellow>"
 fixall_done_online: "<green>Scanned %players% online players: updated %rods% rods and %baits% baits.</green>"
@@ -36,8 +43,70 @@ fixall_offline_note: "<gray>Note: Items of offline players will be automatically
 rod_not_found: "<red>Rod not found!</red>"
 rod_given: "<green>You have received a custom rod!</green>"
 invalid_material: "<red>Invalid material in rods.yml: %material%</red>"
-usage_giverod: "<yellow>Usage: /phoenixfish giverod <rod-name></yellow>"
-usage_fix: "<yellow>Update your items: /phoenixfish fix</yellow>"
-usage_fixall: "<yellow>Update the whole server: /phoenixfish fixall</yellow>"
-player_only: "<red>This command can only be run by a player!</red>"
 rods_not_found: "<red>rods.yml not found!</red>"
+word_page: "Page"
+
+# Catalog Menu
+catalog_main_menu_title: "<dark_gray>» <gradient:#9D00FF:#00CED1>Catalog</gradient>"
+catalog_title_fish: "Fish"
+catalog_title_bait: "Baits"
+catalog_title_rod: "Rods"
+catalog_title_default: "Catalog"
+catalog_page_title: "<%color%>%category% <dark_gray>(Page %page%/%total_pages%)"
+catalog_button_fish: "<aqua>Fish"
+catalog_button_rod: "<yellow>Rods"
+catalog_button_bait: "<gold>Baits"
+catalog_button_prev_page: "<yellow>« Previous Page"
+catalog_button_next_page: "<yellow>Next Page »"
+catalog_button_back: "<red>Back to Menu"
+catalog_undiscovered_name: "<dark_gray>??? <gray>Unknown Fish"
+catalog_undiscovered_lore_1: "<gray>You haven't caught this fish before."
+catalog_undiscovered_lore_2: "<dark_gray>Keep fishing to discover it!"
+item_default_rod_name: "<white>Fishing Rod</white>"
+
+# Fish Console Messages
+fish_file_not_found: "fish.yml does not exist! Cannot load custom fish."
+fish_section_not_found: "No 'fishes' section found in fish.yml."
+fish_invalid_material: "Invalid material '%material%' for fish: %fish%. Defaulting to COD."
+fish_load_error: "Error while loading fish '%fish%': %error%"
+fish_loaded_success: "Loaded %amount% custom fish successfully."
+fish_lore_rarity: "<bold>Rarity: %rarity%</bold>"
+
+# Bait Console Messages
+bait_invalid_material: "Invalid material '%material%' for bait: %bait%. Defaulting to STICK."
+bait_load_error: "Error while loading bait '%bait%': %error%"
+bait_loaded_success: "Loaded %amount% custom baits successfully."
+
+# Crafting Console Messages
+craft_api_not_found: "PhoenixCraft is not installed! Custom recipes are disabled."
+craft_api_hook_failed: "Failed to hook into PhoenixCraft API: %error%"
+craft_recipe_load_error: "Error while loading recipe '%recipe%': %error%"
+craft_recipes_loaded: "%amount% custom recipes have been sent to PhoenixCraft successfully."
+craft_invalid_material: "Invalid material '%material%' in recipe. Defaulting to STONE."
+
+# Database Console Messages (MySQL)
+db_connected_mysql: "Successfully connected to MySQL database using HikariCP."
+db_failed_create_table: "Failed to create MySQL table: %error%"
+db_failed_load_data: "Failed to load data from MySQL for %uuid%: %error%"
+db_failed_save_data: "Failed to save data to MySQL for %uuid%: %error%"
+db_failed_batch_save: "Failed to execute batch save in MySQL: %error%"
+
+# Database Console Messages (SQLite)
+db_connected_sqlite: "SQLite database has been initialized successfully (WAL mode enabled)."
+db_failed_connect_sqlite: "Failed to establish SQLite connection: %error%"
+db_failed_load_data_sqlite: "Failed to load data from SQLite for %uuid%: %error%"
+db_failed_save_data_sqlite: "Failed to save data to SQLite for %uuid%: %error%"
+db_failed_batch_save_sqlite: "Failed to execute batch save in SQLite: %error%"
+db_failed_close_sqlite: "An error occurred while closing the SQLite connection: %error%"
+
+# Main Plugin Console Messages
+plugin_saving_cache: "Saving all cached player data..."
+plugin_cache_saved: "Successfully saved all player data."
+plugin_cache_save_failed: "Failed to save batch data during shutdown: %error%"
+plugin_db_closed: "Database connection closed successfully."
+plugin_db_close_error: "An error occurred while closing the database: %error%"
+plugin_resource_save_error: "Could not save default resources: %error%"
+plugin_db_active: "Database system is active! (XP: %xp_status%, Discovery: %discovery_status%)"
+plugin_db_init_failed: "Failed to initialize the database! Systems disabled. Reason: %error%"
+plugin_systems_disabled: "XP and Discovery systems are disabled. Operating in fishing-only mode."
+plugin_cmd_not_defined: "Command 'phoenixfish' is not defined in plugin.yml! The /phoenixfish command will not work."

@@ -57,14 +57,14 @@ public class FishManager {
     public void loadFish() {
         File fishFile = new File(plugin.getDataFolder(), "fish.yml");
         if (!fishFile.exists()) {
-            plugin.getLogger().warning("fish.yml does not exist! Cannot load custom fish.");
+            plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("fish_file_not_found"));
             return;
         }
 
         FileConfiguration fishConfig = YamlConfiguration.loadConfiguration(fishFile);
         ConfigurationSection section = fishConfig.getConfigurationSection("fishes");
         if (section == null) {
-            plugin.getLogger().warning("No 'fishes' section found in fish.yml.");
+            plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("fish_section_not_found"));
             return;
         }
 
@@ -88,8 +88,8 @@ public class FishManager {
                 String materialStr = fishSec.getString("material", "COD").toUpperCase();
                 Material material = Material.matchMaterial(materialStr);
                 if (material == null) {
-                    plugin.getLogger().warning(
-                            "Invalid material '" + materialStr + "' for fish: " + key + ". Defaulting to COD.");
+                    String msg = plugin.getMessageManager().getPlainMessage("fish_invalid_material");
+                    plugin.getLogger().warning(msg.replace("%material%", materialStr).replace("%fish%", key));
                     material = Material.COD;
                 }
 
@@ -106,8 +106,11 @@ public class FishManager {
                     ItemUtils.applyCustomModelData(meta, fishSec);
 
                     List<Component> loreComponents = new ArrayList<>();
-                    loreComponents
-                            .add(miniMessage.deserialize(rarityColor + "<bold>Rarity: " + rarityName + "</bold>"));
+
+                    // Dil dosyasından nadirlik lore'unu al
+                    String rarityLoreStr = plugin.getMessageManager().getPlainMessage("fish_lore_rarity");
+                    rarityLoreStr = rarityLoreStr.replace("%rarity%", rarityName);
+                    loreComponents.add(miniMessage.deserialize(rarityColor + rarityLoreStr));
 
                     if (fishSec.contains("lore")) {
                         for (String line : fishSec.getStringList("lore")) {
@@ -120,11 +123,14 @@ public class FishManager {
 
                 newList.add(new CustomFish(key, finalName, rarity, weight, speed, strength, xp, item));
             } catch (Exception e) {
-                plugin.getLogger().warning("Error while loading fish '" + key + "': " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("fish_load_error");
+                plugin.getLogger().warning(msg.replace("%fish%", key).replace("%error%", e.getMessage()));
             }
         }
         this.fishList = Collections.unmodifiableList(newList);
-        plugin.getLogger().info("Loaded " + fishList.size() + " custom fish successfully.");
+
+        String loadedMsg = plugin.getMessageManager().getPlainMessage("fish_loaded_success");
+        plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(fishList.size())));
     }
 
     private String getRarityColor(int rarity) {

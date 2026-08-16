@@ -1,43 +1,112 @@
 prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
 
-# Rarity Names
-rarity_1: "Sıradan"
+# Nadirlik İsimleri
+rarity_1: "Sırdan"
 rarity_2: "Nadir"
 rarity_3: "Çok Nadir"
 rarity_4: "Efsanevi"
 rarity_5: "İlahi"
 
-# Catch Titles (For high rarity fish)
+# Yakalama Başlıkları (Yüksek nadirlikli balıklar için)
 catch_title_epic: "<gold><bold>EFSANEVİ YAKALAMA!</bold></gold>"
 catch_subtitle_epic: "<white>Şanslısın! %fish_name% tuttun!</white>"
 catch_title_legendary: "<#9D00FF><bold>İLAHİ YAKALAMA!</bold></#9D00FF>"
 catch_subtitle_legendary: "<white>Bir mucize! %fish_name% tuttun!</white>"
 
-# Fishing Listener
+# Balık Tutma Dinleyicisi
 fish_bite: "<gold>Balık vurdu! Çek!</gold>"
 fish_caught_single: "<aqua>Bir %fish_name% tuttun!</aqua>"
 fish_caught_multiple: "<aqua>Harika! %amount%x %fish_name% tuttun!</aqua>"
+fish_discovered: "<gradient:#9D00FF:#00CED1>Yeni Tür Keşfedildi!</gradient> <white>%fish_name%<white> kataloga eklendi!"
 
-# Minigame Task
+# Mini-oyun Görevi
 minigame_win_single: "<green><bold>✓ Balığı yakaladın! 🐟</bold></green>"
 minigame_win_multiple: "<green><bold>✓ Harika! Tek seferde %amount% balık yakaladın! 🐟</bold></green>"
 minigame_lose: "<red><bold>✖ Misina koptu! Balık kaçtı.</bold></red>"
 
-# Cache Manager (XP System)
+# Önbellek Yöneticisi (XP Sistemi)
 level_up: "<gold>Balıkçılık seviyen arttı! Yeni Seviye: %level%</gold>"
+console_autosave: "Çevrimiçi %players% oyuncunun balıkçılık verisi otomatik olarak kaydedildi."
 
-# Commands
+# Komutlar
 no_permission: "<red>Bu komutu kullanma yetkin yok!</red>"
-fix_inventory: "<green>Envanterin tarandı: %rods% olta, %baits% yem güncellendi.</green>"
-fixall_start: "<yellow>Container taraması başlatıldı (%chunks% yüklü chunk)... bu biraz sürebilir.</yellow>"
-fixall_done_online: "<green>%players% online oyuncu tarandı: %rods% olta, %baits% yem güncellendi.</green>"
-fixall_done_containers: "<green>Container taraması tamamlandı! %containers% container tarandı, %rods% olta, %baits% yem güncellendi.</green>"
-fixall_offline_note: "<gray>Not: Offline oyuncuların eşyaları, bir dahaki girişlerinde otomatik düzeltilecek.</gray>"
-rod_not_found: "<red>Bu olta bulunamadı!</red>"
-rod_given: "<green>Sana özel olta verildi!</green>"
-invalid_material: "<red>rods.yml içinde geçersiz materyal: %material%</red>"
+player_only: "<red>Bu komut sadece oyuncular tarafından kullanılabilir!</red>"
 usage_giverod: "<yellow>Kullanım: /phoenixfish giverod <olta-ismi></yellow>"
 usage_fix: "<yellow>Eşyalarını güncellemek için: /phoenixfish fix</yellow>"
 usage_fixall: "<yellow>Tüm sunucuyu güncellemek için: /phoenixfish fixall</yellow>"
-player_only: "<red>Bu komut sadece oyuncular tarafından kullanılabilir!</red>"
+usage_catalog: "<yellow>Katalogu açmak için: /phoenixfish catalog</yellow>"
+fix_inventory: "<green>Envanterin tarandı: %rods% olta, %baits% yem güncellendi.</green>"
+fixall_start: "<yellow>Depo taraması başlatıldı (%chunks% yüklü chunk)... bu biraz sürebilir.</yellow>"
+fixall_done_online: "<green>%players% çevrimiçi oyuncu tarandı: %rods% olta, %baits% yem güncellendi.</green>"
+fixall_done_containers: "<green>Depo taraması tamamlandı! %containers% depo tarandı, %rods% olta, %baits% yem güncellendi.</green>"
+fixall_offline_note: "<gray>Not: Çevrimdışı oyuncuların eşyaları, bir dahaki girişlerinde otomatik düzeltilecek.</gray>"
+rod_not_found: "<red>Bu olta bulunamadı!</red>"
+rod_given: "<green>Sana özel olta verildi!</green>"
+invalid_material: "<red>rods.yml içinde geçersiz materyal: %material%</red>"
 rods_not_found: "<red>rods.yml bulunamadı!</red>"
+word_page: "Sayfa"
+
+# Katalog Menüsü
+catalog_main_menu_title: "<dark_gray>» <gradient:#9D00FF:#00CED1>Katalog</gradient>"
+catalog_title_fish: "Balıklar"
+catalog_title_bait: "Yemler"
+catalog_title_rod: "Oltalar"
+catalog_title_default: "Katalog"
+catalog_page_title: "<%color%>%category% <dark_gray>(Sayfa %page%/%total_pages%)"
+catalog_button_fish: "<aqua>Balıklar"
+catalog_button_rod: "<yellow>Oltalar"
+catalog_button_bait: "<gold>Yemler"
+catalog_button_prev_page: "<yellow>« Önceki Sayfa"
+catalog_button_next_page: "<yellow>Sonraki Sayfa »"
+catalog_button_back: "<red>Menüye Dön"
+catalog_undiscovered_name: "<dark_gray>??? <gray>Bilinmeyen Balık"
+catalog_undiscovered_lore_1: "<gray>Bu balığı daha önce yakalamadın."
+catalog_undiscovered_lore_2: "<dark_gray>Keşfetmek için balık tutmaya devam et!"
+item_default_rod_name: "<white>Olta</white>"
+
+# Balık Konsol Mesajları
+fish_file_not_found: "fish.yml bulunamadı! Özel balıklar yüklenemiyor."
+fish_section_not_found: "fish.yml içinde 'fishes' bölümü bulunamadı."
+fish_invalid_material: "%fish% balığı için geçersiz materyal: %material%. Varsayılan olarak COD kullanılıyor."
+fish_load_error: "'%fish%' balığı yüklenirken hata oluştu: %error%"
+fish_loaded_success: "%amount% adet özel balık başarıyla yüklendi."
+fish_lore_rarity: "<bold>Nadirlik: %rarity%</bold>"
+
+# Yem Konsol Mesajları
+bait_invalid_material: "%bait% yemi için geçersiz materyal: %material%. Varsayılan olarak STICK kullanılıyor."
+bait_load_error: "'%bait%' yemi yüklenirken hata oluştu: %error%"
+bait_loaded_success: "%amount% adet özel yem başarıyla yüklendi."
+
+# Üretim Konsol Mesajları
+craft_api_not_found: "PhoenixCraft kurulu değil! Özel üretim tarifleri devre dışı bırakıldı."
+craft_api_hook_failed: "PhoenixCraft API'sine bağlanılamadı: %error%"
+craft_recipe_load_error: "'%recipe%' tarifi yüklenirken hata oluştu: %error%"
+craft_recipes_loaded: "%amount% adet özel tarif PhoenixCraft'a başarıyla gönderildi."
+craft_invalid_material: "Tarifte geçersiz materyal: %material%. Varsayılan olarak STONE kullanılıyor."
+
+# Veritabanı Konsol Mesajları (MySQL)
+db_connected_mysql: "HikariCP kullanılarak MySQL veritabanına başarıyla bağlanıldı."
+db_failed_create_table: "MySQL tablosu oluşturulamadı: %error%"
+db_failed_load_data: "%uuid% için MySQL'den veriler yüklenemedi: %error%"
+db_failed_save_data: "%uuid% için MySQL'e veriler kaydedilemedi: %error%"
+db_failed_batch_save: "MySQL'de toplu kayıt işlemi başarısız oldu: %error%"
+
+# Veritabanı Konsol Mesajları (SQLite)
+db_connected_sqlite: "SQLite veritabanı başarıyla başlatıldı (WAL modu etkin)."
+db_failed_connect_sqlite: "SQLite bağlantısı kurulamadı: %error%"
+db_failed_load_data_sqlite: "%uuid% için SQLite'tan veriler yüklenemedi: %error%"
+db_failed_save_data_sqlite: "%uuid% için SQLite'a veriler kaydedilemedi: %error%"
+db_failed_batch_save_sqlite: "SQLite'ta toplu kayıt işlemi başarısız oldu: %error%"
+db_failed_close_sqlite: "SQLite bağlantısı kapatılırken bir hata oluştu: %error%"
+
+# Ana Eklenti Konsol Mesajları
+plugin_saving_cache: "Tüm önbelleğe alınmış oyuncu verileri kaydediliyor..."
+plugin_cache_saved: "Tüm oyuncu verileri başarıyla kaydedildi."
+plugin_cache_save_failed: "Kapatılırken veriler kaydedilemedi: %error%"
+plugin_db_closed: "Veritabanı bağlantısı başarıyla kapatıldı."
+plugin_db_close_error: "Veritabanı kapatılırken bir hata oluştu: %error%"
+plugin_resource_save_error: "Varsayılan kaynaklar kaydedilemedi: %error%"
+plugin_db_active: "Veritabanı sistemi aktif! (XP: %xp_status%, Keşif: %discovery_status%)"
+plugin_db_init_failed: "Veritabanı başlatılamadı! Sistemler devre dışı bırakıldı. Sebep: %error%"
+plugin_systems_disabled: "XP ve Keşif sistemleri devre dışı. Sadece balık tutma modunda çalışıyor."
+plugin_cmd_not_defined: "'phoenixfish' komutu plugin.yml içinde tanımlanmamış! /phoenixfish komutu çalışmayacak."

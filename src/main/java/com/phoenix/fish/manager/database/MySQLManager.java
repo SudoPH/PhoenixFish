@@ -9,7 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -56,27 +58,30 @@ public class MySQLManager implements IDatabase {
         });
 
         createTable();
-        plugin.getLogger().info("Successfully connected to MySQL database using HikariCP.");
+        plugin.getLogger().info(plugin.getMessageManager().getPlainMessage("db_connected_mysql"));
     }
 
     private void createTable() {
+        // Added discovered_fish column
         String sql = "CREATE TABLE IF NOT EXISTS player_professions (" +
                 "uuid VARCHAR(36) PRIMARY KEY, " +
                 "total_xp BIGINT DEFAULT 0, " +
                 "fishing_xp INT DEFAULT 0, " +
-                "fishing_level INT DEFAULT 1" +
+                "fishing_level INT DEFAULT 1, " +
+                "discovered_fish TEXT" +
                 ");";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.execute();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to create MySQL table: " + e.getMessage());
+            String msg = plugin.getMessageManager().getPlainMessage("db_failed_create_table");
+            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
         }
     }
 
     @Override
     public CompletableFuture<FishingData> loadData(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
-            String sql = "SELECT fishing_xp, fishing_level, total_xp FROM player_professions WHERE uuid = ?;";
+            String sql = "SELECT fishing_xp, fishing_level, total_xp, discovered_fish FROM player_professions WHERE uuid = ?;";
             try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, uuid.toString());
                 try (ResultSet rs = ps.executeQuery()) {
@@ -84,34 +89,46 @@ public class MySQLManager implements IDatabase {
                         int totalXp = rs.getInt("total_xp");
                         int fishingXp = rs.getInt("fishing_xp");
                         int fishingLevel = rs.getInt("fishing_level");
-                        return new FishingData(uuid, fishingXp, fishingLevel, totalXp);
+
+                        // Parse discovered fish
+                        String discoveredStr = rs.getString("discovered_fish");
+                        HashSet<String> discoveredFish = new HashSet<>();
+                        if (discoveredStr != null && !discoveredStr.isEmpty()) {
+                            discoveredFish.addAll(Arrays.asList(discoveredStr.split(",")));
+                        }
+
+                        return new FishingData(uuid, fishingXp, fishingLevel, totalXp, discoveredFish);
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().severe("Failed to load data from MySQL for " + uuid + ": " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("db_failed_load_data");
+                plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
             }
-            return new FishingData(uuid, 0, 1, 0);
+            return new FishingData(uuid, 0, 1, 0, new HashSet<>());
         }, dbExecutor);
     }
 
     @Override
     public CompletableFuture<Void> saveData(UUID uuid, FishingData data) {
         return CompletableFuture.runAsync(() -> {
-            String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level) VALUES (?, ?, ?, ?) "
+            String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level, discovered_fish) VALUES (?, ?, ?, ?, ?) "
                     +
                     "ON DUPLICATE KEY UPDATE " +
                     "total_xp = VALUES(total_xp), " +
                     "fishing_xp = VALUES(fishing_xp), " +
-                    "fishing_level = VALUES(fishing_level);";
+                    "fishing_level = VALUES(fishing_level), " +
+                    "discovered_fish = VALUES(discovered_fish);";
 
             try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, data.getTotalXp());
                 ps.setInt(3, data.getCurrentXp());
                 ps.setInt(4, data.getCurrentLevel());
+                ps.setString(5, String.join(",", data.getDiscoveredFish()));
                 ps.executeUpdate();
             } catch (SQLException e) {
-                plugin.getLogger().severe("Failed to save data to MySQL for " + uuid + ": " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("db_failed_save_data");
+                plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
             }
         }, dbExecutor);
     }
@@ -119,12 +136,13 @@ public class MySQLManager implements IDatabase {
     @Override
     public CompletableFuture<Void> batchSave(Collection<FishingData> dataCollection) {
         return CompletableFuture.runAsync(() -> {
-            String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level) VALUES (?, ?, ?, ?) "
+            String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level, discovered_fish) VALUES (?, ?, ?, ?, ?) "
                     +
                     "ON DUPLICATE KEY UPDATE " +
                     "total_xp = VALUES(total_xp), " +
                     "fishing_xp = VALUES(fishing_xp), " +
-                    "fishing_level = VALUES(fishing_level);";
+                    "fishing_level = VALUES(fishing_level), " +
+                    "discovered_fish = VALUES(discovered_fish);";
 
             try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 conn.setAutoCommit(false);
@@ -133,12 +151,14 @@ public class MySQLManager implements IDatabase {
                     ps.setInt(2, data.getTotalXp());
                     ps.setInt(3, data.getCurrentXp());
                     ps.setInt(4, data.getCurrentLevel());
+                    ps.setString(5, String.join(",", data.getDiscoveredFish()));
                     ps.addBatch();
                 }
                 ps.executeBatch();
                 conn.commit();
             } catch (SQLException e) {
-                plugin.getLogger().severe("Failed to execute batch save in MySQL: " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("db_failed_batch_save");
+                plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
             }
         }, dbExecutor);
     }

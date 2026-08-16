@@ -4,6 +4,7 @@ import com.phoenix.fish.api.PhoenixFishAPI;
 import com.phoenix.fish.command.FishCommand;
 import com.phoenix.fish.data.CacheManager;
 import com.phoenix.fish.data.FishingData;
+import com.phoenix.fish.listener.CatalogListener;
 import com.phoenix.fish.listener.FishingListener;
 import com.phoenix.fish.manager.BaitManager;
 import com.phoenix.fish.manager.CraftingManager;
@@ -19,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import com.phoenix.fish.manager.CatalogManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
@@ -38,6 +40,7 @@ public final class PhoenixFish extends JavaPlugin {
     private FishingListener fishingListener;
     private CacheManager cacheManager;
     private MessageManager messageManager;
+    private CatalogManager catalogManager;
 
     @Override
     public void onEnable() {
@@ -45,9 +48,14 @@ public final class PhoenixFish extends JavaPlugin {
 
         PhoenixFishAPI.init(this);
 
-        loadPluginResources();
+        // Save essential config and language files first
+        saveDefaultConfig();
+        saveResource("messages_en.yml", false);
+        saveResource("messages_tr.yml", false);
 
         this.messageManager = new MessageManager(this);
+
+        loadPluginResources();
 
         this.fishManager = new FishManager(this);
         this.fishManager.loadFish();
@@ -63,6 +71,10 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishingListener = new FishingListener(this);
         Bukkit.getPluginManager().registerEvents(fishingListener, this);
 
+        this.catalogManager = new CatalogManager(this);
+        this.catalogManager.init();
+        Bukkit.getPluginManager().registerEvents(new CatalogListener(this), this);
+
         registerCommands();
     }
 
@@ -71,15 +83,16 @@ public final class PhoenixFish extends JavaPlugin {
         PhoenixFishAPI.shutdown();
 
         if (cacheManager != null && database != null) {
-            getLogger().info("Saving all cached player data...");
+            getLogger().info(messageManager.getPlainMessage("plugin_saving_cache"));
             Collection<FishingData> allData = cacheManager.getAllCachedData();
 
             if (!allData.isEmpty()) {
                 try {
                     database.batchSave(allData).get(10, TimeUnit.SECONDS);
-                    getLogger().info("Successfully saved all player data.");
+                    getLogger().info(messageManager.getPlainMessage("plugin_cache_saved"));
                 } catch (Exception e) {
-                    getLogger().severe("Failed to save batch data during shutdown: " + e.getMessage());
+                    String msg = messageManager.getPlainMessage("plugin_cache_save_failed");
+                    getLogger().severe(msg.replace("%error%", e.getMessage()));
                 }
             }
         }
@@ -87,9 +100,10 @@ public final class PhoenixFish extends JavaPlugin {
         if (database != null) {
             try {
                 database.close();
-                getLogger().info("Database connection closed successfully.");
+                getLogger().info(messageManager.getPlainMessage("plugin_db_closed"));
             } catch (Exception e) {
-                getLogger().severe("An error occurred while closing the database: " + e.getMessage());
+                String msg = messageManager.getPlainMessage("plugin_db_close_error");
+                getLogger().severe(msg.replace("%error%", e.getMessage()));
             }
         }
 
@@ -98,20 +112,21 @@ public final class PhoenixFish extends JavaPlugin {
 
     private void loadPluginResources() {
         try {
-            saveDefaultConfig();
             saveResource("fish.yml", false);
             saveResource("rods.yml", false);
             saveResource("custom_recipes.yml", false);
             saveResource("baits.yml", false);
-            saveResource("messages_en.yml", false);
-            saveResource("messages_tr.yml", false);
         } catch (IllegalArgumentException e) {
-            getLogger().severe("Could not save default resources: " + e.getMessage());
+            String msg = messageManager.getPlainMessage("plugin_resource_save_error");
+            getLogger().severe(msg.replace("%error%", e.getMessage()));
         }
     }
 
     private void setupDatabaseSystem() {
-        if (getConfig().getBoolean("xp-system.enabled", false)) {
+        boolean xpEnabled = getConfig().getBoolean("xp-system.enabled", false);
+        boolean discoveryEnabled = getConfig().getBoolean("settings.discovery-enabled", true); // New setting
+
+        if (xpEnabled || discoveryEnabled) {
             String type = getConfig().getString("xp-system.database.type", "sqlite");
 
             try {
@@ -122,16 +137,20 @@ public final class PhoenixFish extends JavaPlugin {
                 }
 
                 this.database.init();
-                getLogger().info("XP System is active! Database type: " + type.toUpperCase());
+
+                String msg = messageManager.getPlainMessage("plugin_db_active");
+                getLogger().info(msg.replace("%xp_status%", String.valueOf(xpEnabled))
+                        .replace("%discovery_status%", String.valueOf(discoveryEnabled)));
 
                 this.cacheManager = new CacheManager(this);
                 Bukkit.getPluginManager().registerEvents(cacheManager, this);
             } catch (Exception e) {
-                getLogger().severe("Failed to initialize the database! XP System disabled. Reason: " + e.getMessage());
+                String msg = messageManager.getPlainMessage("plugin_db_init_failed");
+                getLogger().severe(msg.replace("%error%", e.getMessage()));
                 this.database = null;
             }
         } else {
-            getLogger().info("XP System is disabled. Operating in fishing-only mode.");
+            getLogger().info(messageManager.getPlainMessage("plugin_systems_disabled"));
         }
     }
 
@@ -140,8 +159,7 @@ public final class PhoenixFish extends JavaPlugin {
         if (command != null) {
             command.setExecutor(new FishCommand(this));
         } else {
-            getLogger().severe(
-                    "Command 'phoenixfish' is not defined in plugin.yml! The /phoenixfish command will not work.");
+            getLogger().severe(messageManager.getPlainMessage("plugin_cmd_not_defined"));
         }
     }
 
@@ -200,6 +218,14 @@ public final class PhoenixFish extends JavaPlugin {
     }
 
     public boolean isXpSystemEnabled() {
-        return database != null;
+        return getConfig().getBoolean("xp-system.enabled", false) && database != null;
+    }
+
+    public boolean isDiscoveryEnabled() {
+        return getConfig().getBoolean("settings.discovery-enabled", true) && database != null;
+    }
+
+    public CatalogManager getCatalogManager() {
+        return catalogManager;
     }
 }

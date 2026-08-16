@@ -189,6 +189,13 @@ public class FishingListener implements Listener {
 
         plugin.playCatchEffects(player, fish);
 
+        if (plugin.isDiscoveryEnabled()) {
+            FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+            if (data != null && data.discoverFish(fish.id())) {
+                player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+            }
+        }
+
         if (plugin.isXpSystemEnabled() && fish.xpReward() > 0) {
             plugin.getCacheManager().addXpAndCheckLevel(player, fish.xpReward() * amountToGive);
         }

@@ -151,7 +151,8 @@ public class ItemFixer {
         if (rodSec == null)
             return FixResult.FAILED;
 
-        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", "<white>Fishing Rod</white>")));
+        String defaultRodName = plugin.getMessageManager().getPlainMessage("item_default_rod_name");
+        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", defaultRodName)));
         ItemUtils.applyCustomModelData(meta, rodSec);
 
         if (rodSec.contains("lore")) {
@@ -195,5 +196,40 @@ public class ItemFixer {
 
     public ConfigurationSection getRodConfig(String rodId) {
         return rodIdCache.get(rodId.toLowerCase());
+    }
+
+    public Map<String, ConfigurationSection> getRodConfigs() {
+        return rodIdCache;
+    }
+
+    public ItemStack createRodItem(ConfigurationSection rodSec) {
+        String matStr = rodSec.getString("material", "FISHING_ROD").toUpperCase();
+        Material mat = Material.matchMaterial(matStr);
+        if (mat == null)
+            return null;
+
+        ItemStack rod = new ItemStack(mat);
+        ItemMeta meta = rod.getItemMeta();
+        if (meta == null)
+            return rod;
+
+        String defaultRodName = plugin.getMessageManager().getPlainMessage("item_default_rod_name");
+        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", defaultRodName)));
+
+        ItemUtils.applyCustomModelData(meta, rodSec);
+
+        if (rodSec.contains("lore")) {
+            List<Component> loreComponents = new ArrayList<>();
+            for (String line : rodSec.getStringList("lore")) {
+                loreComponents.add(miniMessage.deserialize(line));
+            }
+            meta.lore(loreComponents);
+        }
+
+        double luck = rodSec.getDouble("luck-multiplier", 1.0);
+        meta.getPersistentDataContainer().set(rodKey, PersistentDataType.DOUBLE, luck);
+
+        rod.setItemMeta(meta);
+        return rod;
     }
 }

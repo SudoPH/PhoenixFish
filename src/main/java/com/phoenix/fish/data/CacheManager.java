@@ -44,7 +44,11 @@ public class CacheManager implements Listener {
                 if (playerCache.isEmpty())
                     return;
                 plugin.getDatabase().batchSave(playerCache.values());
-                plugin.getLogger().info("Auto-saved fishing data for " + playerCache.size() + " online players.");
+
+                // Konsol mesajını dil dosyasından çekiyoruz
+                String message = plugin.getMessageManager().getPlainMessage("console_autosave");
+                message = message.replace("%players%", String.valueOf(playerCache.size()));
+                plugin.getLogger().info(message);
             }
         }.runTaskTimerAsynchronously(plugin, 6000L, 6000L);
     }

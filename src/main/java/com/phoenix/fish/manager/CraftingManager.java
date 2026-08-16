@@ -38,7 +38,7 @@ public class CraftingManager {
 
     public void loadRecipes() {
         if (!craftAPIExists) {
-            plugin.getLogger().warning("PhoenixCraft is not installed! Custom recipes are disabled.");
+            plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("craft_api_not_found"));
             return;
         }
 
@@ -46,7 +46,8 @@ public class CraftingManager {
             Class<?> craftAPIClass = Class.forName("com.phoenix.craft.CraftAPI");
             this.cachedRegisterMethod = craftAPIClass.getMethod("registerRecipe", ItemStack[].class, ItemStack.class);
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to hook into PhoenixCraft API: " + e.getMessage());
+            String msg = plugin.getMessageManager().getPlainMessage("craft_api_hook_failed");
+            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
             this.craftAPIExists = false;
             return;
         }
@@ -80,11 +81,13 @@ public class CraftingManager {
                     count++;
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Error while loading recipe '" + recipeId + "': " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("craft_recipe_load_error");
+                plugin.getLogger().warning(msg.replace("%recipe%", recipeId).replace("%error%", e.getMessage()));
             }
         }
 
-        plugin.getLogger().info(count + " custom recipes have been sent to PhoenixCraft successfully.");
+        String loadedMsg = plugin.getMessageManager().getPlainMessage("craft_recipes_loaded");
+        plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(count)));
     }
 
     private ItemStack[] parseShape(ConfigurationSection recipeSec) {
@@ -114,7 +117,8 @@ public class CraftingManager {
         String matStr = sec.getString("material", "STONE").toUpperCase();
         Material mat = Material.matchMaterial(matStr);
         if (mat == null) {
-            plugin.getLogger().warning("Invalid material '" + matStr + "' in recipe. Defaulting to STONE.");
+            String msg = plugin.getMessageManager().getPlainMessage("craft_invalid_material");
+            plugin.getLogger().warning(msg.replace("%material%", matStr));
             mat = Material.STONE;
         }
 

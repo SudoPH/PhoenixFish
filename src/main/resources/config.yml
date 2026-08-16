@@ -6,9 +6,10 @@
 
 settings:
   # Set the plugin language (tr / en)
-  language: "en"
+  language: "tr"
   # Enable the interactive fishing minigame
   minigame-enabled: true
+  discovery-enabled: true
 
 # ==========================================
 # Minigame Settings

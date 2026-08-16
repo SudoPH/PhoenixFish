@@ -55,6 +55,7 @@ public class FishCommand implements CommandExecutor {
                 }
                 handleGiveRod(player, args[1]);
             }
+            case "catalog" -> plugin.getCatalogManager().openMainMenu(player);
             default -> sendHelp(player);
         }
         return true;
@@ -182,6 +183,7 @@ public class FishCommand implements CommandExecutor {
     private void sendHelp(Player player) {
         player.sendMessage(plugin.getMessageManager().getMessage("usage_giverod", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_fix", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_catalog", true));
         if (player.hasPermission("phoenixfish.admin")) {
             player.sendMessage(plugin.getMessageManager().getMessage("usage_fixall", true));
         }

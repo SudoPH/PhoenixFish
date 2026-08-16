@@ -60,8 +60,8 @@ public class BaitManager {
                 String materialStr = sec.getString("material", "STICK").toUpperCase();
                 Material material = Material.matchMaterial(materialStr);
                 if (material == null) {
-                    plugin.getLogger().warning(
-                            "Invalid material '" + materialStr + "' for bait: " + key + ". Defaulting to STICK.");
+                    String msg = plugin.getMessageManager().getPlainMessage("bait_invalid_material");
+                    plugin.getLogger().warning(msg.replace("%material%", materialStr).replace("%bait%", key));
                     material = Material.STICK;
                 }
 
@@ -86,11 +86,13 @@ public class BaitManager {
                 baits.put(key, bait);
                 baitItemCache.put(new ItemFixer.ItemIdentifier(material, ItemUtils.getCMD(item)), bait);
             } catch (Exception e) {
-                plugin.getLogger().warning("Error while loading bait '" + key + "': " + e.getMessage());
+                String msg = plugin.getMessageManager().getPlainMessage("bait_load_error");
+                plugin.getLogger().warning(msg.replace("%bait%", key).replace("%error%", e.getMessage()));
             }
         }
 
-        plugin.getLogger().info("Loaded " + baits.size() + " custom baits successfully.");
+        String loadedMsg = plugin.getMessageManager().getPlainMessage("bait_loaded_success");
+        plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(baits.size())));
     }
 
     public Bait getBaitFromItem(ItemStack item) {
