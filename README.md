@@ -76,7 +76,6 @@ PhoenixFish is designed with server performance in mind. It uses:
 - Asynchronous database operations
 - HikariCP connection pooling
 - Thread-safe caching
-- Folia-compatible task handling
 
 ---
 
