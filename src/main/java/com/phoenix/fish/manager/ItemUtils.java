@@ -3,52 +3,72 @@ package com.phoenix.fish.manager;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
-import java.util.List;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ItemUtils {
+public final class ItemUtils {
 
-    public static void applyCustomModelData(ItemMeta meta, ConfigurationSection config) {
-        if (!config.contains("custom-model-data"))
-            return;
+    private static final Logger LOGGER = Logger.getLogger(ItemUtils.class.getName());
 
-        CustomModelDataComponent component = meta.getCustomModelDataComponent();
-
-        if (config.isInt("custom-model-data")) {
-            int cmd = config.getInt("custom-model-data");
-            if (cmd > 0)
-                component.setFloats(List.of((float) cmd));
-        } else if (config.isConfigurationSection("custom-model-data")) {
-            ConfigurationSection cmdSec = config.getConfigurationSection("custom-model-data");
-            if (cmdSec != null) {
-                List<Float> floats = cmdSec.getFloatList("floats");
-                if (!floats.isEmpty())
-                    component.setFloats(floats);
-
-                List<String> strings = cmdSec.getStringList("strings");
-                if (!strings.isEmpty())
-                    component.setStrings(strings);
-
-                List<Boolean> flags = cmdSec.getBooleanList("flags");
-                if (!flags.isEmpty())
-                    component.setFlags(flags);
-            }
-        }
-
-        meta.setCustomModelDataComponent(component);
+    private ItemUtils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
+    @SuppressWarnings("deprecation")
+    public static void applyCustomModelData(ItemMeta meta, ConfigurationSection config) {
+        if (meta == null || config == null)
+            return;
+        if (!config.contains("custom-model-data")) {
+            meta.setCustomModelData(null);
+            return;
+        }
+        if (config.isInt("custom-model-data")) {
+            int cmd = config.getInt("custom-model-data");
+            meta.setCustomModelData(cmd > 0 ? cmd : null);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
     public static int getCMD(ItemStack item) {
         if (item == null || !item.hasItemMeta())
             return 0;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
+            return 0;
+
+        if (!meta.hasCustomModelData())
+            return 0;
         try {
-            CustomModelDataComponent cmdComponent = item.getItemMeta().getCustomModelDataComponent();
-            if (cmdComponent != null && !cmdComponent.getFloats().isEmpty()) {
-                return cmdComponent.getFloats().get(0).intValue();
-            }
-        } catch (Exception ignored) {
+            Integer cmd = meta.getCustomModelData();
+            return cmd != null ? cmd : 0;
+        } catch (Exception e) {
+            return 0;
         }
-        return 0;
+    }
+
+    public static String itemToBase64(ItemStack item) {
+        if (item == null)
+            return null;
+        try {
+            byte[] bytes = item.serializeAsBytes();
+            return Base64.getEncoder().encodeToString(bytes);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to serialize ItemStack to Base64", e);
+            return null;
+        }
+    }
+
+    public static ItemStack base64ToItem(String base64) {
+        if (base64 == null || base64.isEmpty())
+            return null;
+        try {
+            byte[] bytes = Base64.getDecoder().decode(base64);
+            return ItemStack.deserializeBytes(bytes);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to deserialize ItemStack from Base64", e);
+            return null;
+        }
     }
 }

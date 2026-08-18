@@ -1,17 +1,31 @@
 # ==========================================
 # PhoenixFish - Custom Fish Configuration
 # ==========================================
-# Fish IDs must be unique. Do not use spaces in IDs.
-# rarity: Affects luck probability and bait matching (1-5).
-# weight: Base spawn weight (higher = more common).
-# base-speed: Movement speed during the minigame.
-# fight-strength: Affects tension increase rate during the minigame.
-# xp-reward: XP given to the player upon catching (if XP system is enabled).
+# Total Fish: 30
+# All fish can be caught in every biome.
+#
+# rarity:
+#   1 = Common
+#   2 = Uncommon
+#   3 = Rare
+#   4 = Epic
+#   5 = Legendary
+#
+# weight = Spawn weight
+# base-speed = Movement speed
+# fight-strength = Fishing fight difficulty
+# xp-reward = XP reward
+# price = Base economy price (Final price = price * weight)
+#
+# biomes: []
+# = Fish can spawn everywhere
+# ==========================================
 
 fishes:
   # ==========================================
-  # COMMON FISH (Rarity 1)
+  # COMMON FISH - RARITY 1
   # ==========================================
+
   sea_bass:
     display-name: "<#55FF55>Sea Bass</#55FF55>"
     material: COD
@@ -21,6 +35,10 @@ fishes:
     base-speed: 1.0
     fight-strength: 1.0
     xp-reward: 10
+    min-weight: 0.5
+    max-weight: 2.5
+    biomes: []
+    price: 5.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>An active and delicious fish"
@@ -37,6 +55,10 @@ fishes:
     base-speed: 0.8
     fight-strength: 0.5
     xp-reward: 5
+    min-weight: 0.1
+    max-weight: 0.5
+    biomes: []
+    price: 2.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A beloved fish, often traveling"
@@ -53,6 +75,10 @@ fishes:
     base-speed: 1.1
     fight-strength: 0.8
     xp-reward: 8
+    min-weight: 0.2
+    max-weight: 0.8
+    biomes: []
+    price: 3.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A small but fast fish with"
@@ -69,6 +95,10 @@ fishes:
     base-speed: 0.5
     fight-strength: 1.2
     xp-reward: 12
+    min-weight: 0.5
+    max-weight: 2.0
+    biomes: []
+    price: 8.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>Slow but dangerous if not"
@@ -76,9 +106,90 @@ fishes:
       - ""
       - "<dark_gray>Tier: <white>1"
 
+  wild_salmon:
+    display-name: "<#55FF55>Wild Salmon</#55FF55>"
+    material: SALMON
+    custom-model-data: 10016
+    weight: 45
+    rarity: 1
+    base-speed: 1.3
+    fight-strength: 1.0
+    xp-reward: 12
+    min-weight: 0.5
+    max-weight: 4.0
+    biomes: []
+    price: 7.0
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A strong fish that swims"
+      - "<gray>against powerful currents."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  mackerel:
+    display-name: "<#55FF55>Mackerel</#55FF55>"
+    material: COD
+    custom-model-data: 10017
+    weight: 42
+    rarity: 1
+    base-speed: 1.6
+    fight-strength: 0.9
+    xp-reward: 10
+    min-weight: 0.3
+    max-weight: 2.0
+    biomes: []
+    price: 6.0
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A fast-moving fish commonly"
+      - "<gray>found in large schools."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  herring:
+    display-name: "<#55FF55>Herring</#55FF55>"
+    material: COD
+    custom-model-data: 10018
+    weight: 48
+    rarity: 1
+    base-speed: 1.0
+    fight-strength: 0.7
+    xp-reward: 7
+    min-weight: 0.1
+    max-weight: 0.8
+    biomes: []
+    price: 4.0
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A small silver fish often"
+      - "<gray>traveling in huge schools."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
+  eel:
+    display-name: "<#55FF55>Eel</#55FF55>"
+    material: SALMON
+    custom-model-data: 10019
+    weight: 35
+    rarity: 1
+    base-speed: 2.2
+    fight-strength: 1.3
+    xp-reward: 15
+    min-weight: 0.3
+    max-weight: 3.0
+    biomes: []
+    price: 9.0
+    lore:
+      - "<dark_gray>» <gray>Common"
+      - "<gray>A slippery creature that"
+      - "<gray>can escape at incredible speed."
+      - ""
+      - "<dark_gray>Tier: <white>1"
+
   # ==========================================
-  # UNCOMMON FISH (Rarity 2)
+  # UNCOMMON FISH - RARITY 2
   # ==========================================
+
   grouper:
     display-name: "<aqua>Grouper</aqua>"
     material: SALMON
@@ -88,6 +199,10 @@ fishes:
     base-speed: 1.5
     fight-strength: 1.5
     xp-reward: 25
+    min-weight: 2.0
+    max-weight: 8.0
+    biomes: []
+    price: 20.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A large and strong prey"
@@ -104,6 +219,10 @@ fishes:
     base-speed: 1.8
     fight-strength: 1.4
     xp-reward: 20
+    min-weight: 1.5
+    max-weight: 6.0
+    biomes: []
+    price: 18.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A very strong swimmer,"
@@ -120,6 +239,10 @@ fishes:
     base-speed: 2.0
     fight-strength: 1.0
     xp-reward: 18
+    min-weight: 0.2
+    max-weight: 1.0
+    biomes: []
+    price: 25.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A colorful and agile fish"
@@ -127,9 +250,90 @@ fishes:
       - ""
       - "<dark_gray>Tier: <white>2"
 
+  tuna:
+    display-name: "<aqua>Tuna</aqua>"
+    material: COD
+    custom-model-data: 10020
+    weight: 18
+    rarity: 2
+    base-speed: 2.0
+    fight-strength: 2.0
+    xp-reward: 35
+    min-weight: 5.0
+    max-weight: 25.0
+    biomes: []
+    price: 35.0
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A powerful open-water swimmer"
+      - "<gray>with incredible endurance."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  pike:
+    display-name: "<aqua>Pike</aqua>"
+    material: SALMON
+    custom-model-data: 10021
+    weight: 16
+    rarity: 2
+    base-speed: 2.3
+    fight-strength: 2.2
+    xp-reward: 40
+    min-weight: 1.0
+    max-weight: 12.0
+    biomes: []
+    price: 30.0
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A fierce freshwater predator"
+      - "<gray>with razor-sharp teeth."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  catfish:
+    display-name: "<aqua>Catfish</aqua>"
+    material: SALMON
+    custom-model-data: 10022
+    weight: 20
+    rarity: 2
+    base-speed: 0.8
+    fight-strength: 2.5
+    xp-reward: 45
+    min-weight: 2.0
+    max-weight: 20.0
+    biomes: []
+    price: 28.0
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A heavy bottom-dwelling fish"
+      - "<gray>with surprising strength."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
+  swordfish:
+    display-name: "<aqua>Swordfish</aqua>"
+    material: COD
+    custom-model-data: 10023
+    weight: 10
+    rarity: 2
+    base-speed: 2.8
+    fight-strength: 2.5
+    xp-reward: 55
+    min-weight: 8.0
+    max-weight: 45.0
+    biomes: []
+    price: 45.0
+    lore:
+      - "<dark_gray>» <aqua>Uncommon"
+      - "<gray>A dangerous predator armed"
+      - "<gray>with a razor-sharp bill."
+      - ""
+      - "<dark_gray>Tier: <white>2"
+
   # ==========================================
-  # RARE FISH (Rarity 3)
+  # RARE FISH - RARITY 3
   # ==========================================
+
   shark:
     display-name: "<red>Shark</red>"
     material: COD
@@ -139,6 +343,10 @@ fishes:
     base-speed: 2.5
     fight-strength: 3.0
     xp-reward: 100
+    min-weight: 15.0
+    max-weight: 85.0
+    biomes: []
+    price: 80.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>The ruthless predator of the seas."
@@ -155,6 +363,10 @@ fishes:
     base-speed: 3.0
     fight-strength: 2.5
     xp-reward: 85
+    min-weight: 10.0
+    max-weight: 40.0
+    biomes: []
+    price: 65.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>An aggressive and very fast"
@@ -171,6 +383,10 @@ fishes:
     base-speed: 1.8
     fight-strength: 4.0
     xp-reward: 120
+    min-weight: 20.0
+    max-weight: 150.0
+    biomes: []
+    price: 100.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>A gentle giant that pulls"
@@ -178,9 +394,90 @@ fishes:
       - ""
       - "<dark_gray>Tier: <white>3"
 
+  barracuda:
+    display-name: "<red>Barracuda</red>"
+    material: COD
+    custom-model-data: 10024
+    weight: 7
+    rarity: 3
+    base-speed: 3.2
+    fight-strength: 3.0
+    xp-reward: 90
+    min-weight: 4.0
+    max-weight: 20.0
+    biomes: []
+    price: 75.0
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>A lightning-fast predator"
+      - "<gray>with terrifying jaws."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  anglerfish:
+    display-name: "<red>Anglerfish</red>"
+    material: TROPICAL_FISH
+    custom-model-data: 10025
+    weight: 5
+    rarity: 3
+    base-speed: 1.5
+    fight-strength: 3.5
+    xp-reward: 110
+    min-weight: 2.0
+    max-weight: 15.0
+    biomes: []
+    price: 90.0
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>A terrifying deep-sea predator"
+      - "<gray>with a glowing lure."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  sailfish:
+    display-name: "<red>Sailfish</red>"
+    material: SALMON
+    custom-model-data: 10026
+    weight: 4
+    rarity: 3
+    base-speed: 3.8
+    fight-strength: 3.2
+    xp-reward: 130
+    min-weight: 10.0
+    max-weight: 60.0
+    biomes: []
+    price: 110.0
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>One of the fastest fish"
+      - "<gray>ever seen in the ocean."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
+  electric_eel:
+    display-name: "<red>Electric Eel</red>"
+    material: SALMON
+    custom-model-data: 10027
+    weight: 3
+    rarity: 3
+    base-speed: 2.5
+    fight-strength: 4.5
+    xp-reward: 150
+    min-weight: 5.0
+    max-weight: 25.0
+    biomes: []
+    price: 120.0
+    lore:
+      - "<dark_gray>» <red>Rare"
+      - "<gray>A strange creature capable"
+      - "<gray>of powerful electric shocks."
+      - ""
+      - "<dark_gray>Tier: <white>3"
+
   # ==========================================
-  # EPIC FISH (Rarity 4)
+  # EPIC FISH - RARITY 4
   # ==========================================
+
   sea_god:
     display-name: "<#9D00FF><bold>Sea God</bold></#9D00FF>"
     material: COD
@@ -190,6 +487,10 @@ fishes:
     base-speed: 5.0
     fight-strength: 8.0
     xp-reward: 2500
+    min-weight: 500.0
+    max-weight: 2000.0
+    biomes: []
+    price: 2000.0
     lore:
       - "<dark_gray>» <#9D00FF><bold>Epic</bold></#9D00FF>"
       - "<#9D00FF>The legendary god of the deep."
@@ -199,24 +500,69 @@ fishes:
       - "<dark_gray>Tier: <white>4"
 
   kraken:
-    display-name: "<dark_purple><bold>Kraken Spawn</bold></dark_purple>"
+    display-name: "<dark_purple><bold>Kraken</bold></dark_purple>"
     material: INK_SAC
     custom-model-data: 10013
-    weight: 0.5
+    weight: 0.35
     rarity: 4
-    base-speed: 4.5
-    fight-strength: 7.5
-    xp-reward: 2000
+    base-speed: 4.8
+    fight-strength: 8.0
+    xp-reward: 2500
+    min-weight: 250.0
+    max-weight: 1200.0
+    biomes: []
+    price: 1500.0
     lore:
       - "<dark_gray>» <dark_purple><bold>Epic</bold></dark_purple>"
-      - "<gray>An infant sea monster with"
-      - "<dark_purple>terrifying tentacles.</dark_purple>"
+      - "<gray>An enormous monster with"
+      - "<dark_purple>countless terrifying tentacles.</dark_purple>"
+      - ""
+      - "<dark_gray>Tier: <white>4"
+
+  giant_tuna:
+    display-name: "<#9D00FF><bold>Giant Tuna</bold></#9D00FF>"
+    material: COD
+    custom-model-data: 10028
+    weight: 1.5
+    rarity: 4
+    base-speed: 3.5
+    fight-strength: 5.5
+    xp-reward: 500
+    min-weight: 50.0
+    max-weight: 300.0
+    biomes: []
+    price: 800.0
+    lore:
+      - "<dark_gray>» <#9D00FF><bold>Epic</bold></#9D00FF>"
+      - "<#9D00FF>A massive tuna capable of"
+      - "<gray>pulling even strong anglers."
+      - ""
+      - "<dark_gray>Tier: <white>4"
+
+  deep_sea_serpent:
+    display-name: "<dark_purple><bold>Deep Sea Serpent</bold></dark_purple>"
+    material: COD
+    custom-model-data: 10029
+    weight: 0.8
+    rarity: 4
+    base-speed: 4.0
+    fight-strength: 6.5
+    xp-reward: 1000
+    min-weight: 100.0
+    max-weight: 600.0
+    biomes: []
+    price: 1200.0
+    lore:
+      - "<dark_gray>» <dark_purple><bold>Epic</bold></dark_purple>"
+      - "<gray>A massive serpent from"
+      - "<dark_purple>the darkest depths.</dark_purple>"
       - ""
       - "<dark_gray>Tier: <white>4"
 
   # ==========================================
-  # LEGENDARY FISH (Rarity 5)
+  # LEGENDARY FISH - RARITY 5
   # ==========================================
+
   golden_fish:
     display-name: "<gold><bold>Legendary Golden Fish</bold></gold>"
     material: SALMON
@@ -226,6 +572,10 @@ fishes:
     base-speed: 6.0
     fight-strength: 10.0
     xp-reward: 5000
+    min-weight: 1.0
+    max-weight: 50.0
+    biomes: []
+    price: 5000.0
     lore:
       - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
       - "<gold>It doesn't look like an ordinary fish..."
@@ -242,6 +592,10 @@ fishes:
     base-speed: 7.0
     fight-strength: 12.0
     xp-reward: 7500
+    min-weight: 1000.0
+    max-weight: 5000.0
+    biomes: []
+    price: 10000.0
     lore:
       - "<dark_gray>» <light_purple><bold>Legendary</bold></light_purple>"
       - "<light_purple>The ancient titan of the abyss."
@@ -259,9 +613,73 @@ fishes:
     base-speed: 8.0
     fight-strength: 15.0
     xp-reward: 10000
+    min-weight: 5000.0
+    max-weight: 50000.0
+    biomes: []
+    price: 25000.0
     lore:
       - "<dark_gray>» <black><bold>Legendary</bold></black>"
       - "<gray>A creature that swims between"
       - "<black>the fabric of reality.</black>"
+      - ""
+      - "<dark_gray>Tier: <white>5"
+
+  ancient_shark:
+    display-name: "<gold><bold>Ancient Shark</bold></gold>"
+    material: COD
+    custom-model-data: 10030
+    weight: 0.08
+    rarity: 5
+    base-speed: 6.5
+    fight-strength: 11.0
+    xp-reward: 6000
+    min-weight: 300.0
+    max-weight: 2500.0
+    biomes: []
+    price: 8000.0
+    lore:
+      - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
+      - "<gold>A prehistoric predator that"
+      - "<gray>should have gone extinct."
+      - ""
+      - "<dark_gray>Tier: <white>5"
+
+  abyssal_dragonfish:
+    display-name: "<light_purple><bold>Abyssal Dragonfish</bold></light_purple>"
+    material: TROPICAL_FISH
+    custom-model-data: 10031
+    weight: 0.04
+    rarity: 5
+    base-speed: 7.0
+    fight-strength: 13.0
+    xp-reward: 8500
+    min-weight: 500.0
+    max-weight: 4000.0
+    biomes: []
+    price: 12000.0
+    lore:
+      - "<dark_gray>» <light_purple><bold>Legendary</bold></light_purple>"
+      - "<light_purple>A creature born in the"
+      - "<gray>darkness beneath the world."
+      - ""
+      - "<dark_gray>Tier: <white>5"
+
+  world_eater:
+    display-name: "<black><bold>World Eater</bold></black>"
+    material: COD
+    custom-model-data: 10032
+    weight: 0.005
+    rarity: 5
+    base-speed: 9.0
+    fight-strength: 18.0
+    xp-reward: 15000
+    min-weight: 10000.0
+    max-weight: 75000.0
+    biomes: []
+    price: 50000.0
+    lore:
+      - "<dark_gray>» <black><bold>Legendary</bold></black>"
+      - "<gray>A monstrous entity said to"
+      - "<black>consume entire oceans.</black>"
       - ""
       - "<dark_gray>Tier: <white>5"

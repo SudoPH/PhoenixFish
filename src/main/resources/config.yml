@@ -6,30 +6,62 @@
 
 settings:
   # Set the plugin language (tr / en)
-  language: "tr"
+  language: "en"
   # Enable the interactive fishing minigame
   minigame-enabled: true
   discovery-enabled: true
+  # Fix legacy items when opening chests/barrels
+  fix-items-on-chest-open: true
+
+# ==========================================
+# Weather & Environment System
+# ==========================================
+# Increases luck based on weather conditions.
+weather:
+  # Luck bonus when it's raining (0.2 = +20% luck)
+  rain-luck-bonus: 0.2
+  # Luck bonus when it's thundering (0.5 = +50% luck). Greatly increases rare fish chances.
+  storm-luck-bonus: 0.5
+
+# ==========================================
+# Sound System
+# ==========================================
+# Configure sounds for various events.
+# Use valid Minecraft sound names (e.g., ENTITY_PLAYER_LEVELUP)
+sounds:
+  # Sound played when bait is consumed
+  bait_consume: "ENTITY_ITEM_PICKUP"
+  # Sound played when a new fish is discovered
+  discover: "UI_TOAST_CHALLENGE_COMPLETE"
+  # Sound played when items are fixed
+  fix: "BLOCK_ANVIL_USE"
+  # Sound played when items are sold successfully
+  sell_success: "ENTITY_PLAYER_LEVELUP"
 
 # ==========================================
 # Minigame Settings
 # ==========================================
 # These values control the difficulty and mechanics of the fishing minigame.
 # Note: The minigame updates every 2 ticks (10 times per second).
+#
+# --- DIFFICULTY GUIDE ---
+# EASY:   rod-width: 3, progress-rate: 2.5, tension-increase-rate: 1.0
+# MEDIUM: rod-width: 2, progress-rate: 1.5, tension-increase-rate: 1.5
+# HARD:   rod-width: 1, progress-rate: 1.0, tension-increase-rate: 2.0
 minigame:
-  # The total width of the minigame area.
-  area-width: 20
-  # The half-width of the player's catching bar. (2 means 5 characters wide total)
+  # The total width of the minigame area. (Lower = Easier to track the fish)
+  area-width: 30
+  # The half-width of the player's catching bar. (3 means 7 characters wide total. Higher = Easier)
   rod-width: 2
-  # Chance for the fish to change direction (0.0 to 1.0)
-  fish-move-chance: 0.4
-  # How far the fish moves when it changes direction
+  # Chance for the fish to change direction (0.0 to 1.0. Lower = Easier)
+  fish-move-chance: 0.6
+  # How far the fish moves when it changes direction (Lower = Easier to follow)
   fish-move-distance: 2
-  # How much progress is gained when the fish is inside the bar. (10 seconds to win at 2.0)
-  progress-rate: 1.5
-  # How much tension increases when the fish is outside the bar.
-  tension-increase-rate: 1.5
-  # How much tension decreases when the fish is inside the bar.
+  # How much progress is gained when the fish is inside the bar. (Higher = Easier. 10 seconds to win at 2.0)
+  progress-rate: 2.0
+  # How much tension increases when the fish is outside the bar. (Lower = Easier, line snaps slower)
+  tension-increase-rate: 1.2
+  # How much tension decreases when the fish is inside the bar. (Higher = Easier, recovers faster)
   tension-decrease-rate: 3.0
 
 # ==========================================
@@ -37,7 +69,7 @@ minigame:
 # ==========================================
 # If disabled, the plugin will run in fishing-only mode without levels or databases.
 xp-system:
-  enabled: false
+  enabled: true
 
   database:
     # Database type: sqlite or mysql
@@ -55,17 +87,38 @@ xp-system:
   # Note: High values can break the late-game economy by making rare fish too common.
   level-luck-bonus: 0.02
 
-  # ==========================================
-  # Multi-Catch System
-  # ==========================================
-  # Allows players to catch multiple fish at once based on their level.
-  multi-catch:
-    enabled: true
+# ==========================================
+# Economy System (Internal)
+# ==========================================
+# Sells custom fish for internal balance.
+# Final price = fish_price (from fish.yml) * fish_weight
+economy:
+  enabled: true
 
-    # Level 50+ players have a 30% chance to catch 2 fish
-    level-2x: 50
-    chance-2x: 0.30
+# ==========================================
+# Tournament System
+# ==========================================
+# If disabled, admins cannot start tournaments via commands.
+tournament:
+  enabled: true
 
-    # Level 100+ players have a 15% chance to catch 3 fish
-    level-3x: 100
-    chance-3x: 0.15
+  # Rewards for the top 3 players.
+  # %player% is replaced with the player's name.
+  # Commands are executed by the console.
+  rewards:
+    1:
+      # If an admin uses the "/phoenixfish tournament addreward 1" command while holding an item,
+      # the plugin will automatically save a long encrypted string (Base64) here. Leave it empty ("") normally.
+      item: ""
+      # You can run console commands here (e.g., give money, permission, or items from other plugins).
+      # You can use both 'item' and 'commands' at the same time!
+      commands:
+        - "eco give %player% 1000"
+    2:
+      item: ""
+      commands:
+        - "eco give %player% 500"
+    3:
+      item: ""
+      commands:
+        - "eco give %player% 250"

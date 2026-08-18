@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Biome;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,9 +16,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FishManager {
@@ -26,6 +26,8 @@ public class FishManager {
     private final MiniMessage miniMessage;
 
     private volatile List<CustomFish> fishList = Collections.emptyList();
+    private volatile Map<String, CustomFish> fishMap = Collections.emptyMap();
+
     private final NamespacedKey fishKey;
 
     public FishManager(PhoenixFish plugin) {
@@ -47,18 +49,29 @@ public class FishManager {
     }
 
     public CustomFish getFishById(String id) {
-        for (CustomFish fish : fishList) {
-            if (fish.id().equalsIgnoreCase(id))
-                return fish;
-        }
-        return null;
+        if (id == null)
+            return null;
+        return fishMap.get(id.toLowerCase());
     }
 
     public void loadFish() {
-        File fishFile = new File(plugin.getDataFolder(), "fish.yml");
+        String lang = plugin.getMessageManager().getLanguage();
+        String fileName = "fish.yml";
+        if ("tr".equalsIgnoreCase(lang)) {
+            fileName = "fish_tr.yml";
+        }
+
+        File fishFile = new File(plugin.getDataFolder(), fileName);
         if (!fishFile.exists()) {
-            plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("fish_file_not_found"));
-            return;
+            if ("tr".equalsIgnoreCase(lang)) {
+                plugin.getLogger().warning("fish_tr.yml bulunamadı! Varsayılan fish.yml kullanılıyor.");
+                fileName = "fish.yml";
+                fishFile = new File(plugin.getDataFolder(), "fish.yml");
+            }
+            if (!fishFile.exists()) {
+                plugin.saveResource(fileName, false);
+                fishFile = new File(plugin.getDataFolder(), fileName);
+            }
         }
 
         FileConfiguration fishConfig = YamlConfiguration.loadConfiguration(fishFile);
@@ -69,6 +82,7 @@ public class FishManager {
         }
 
         List<CustomFish> newList = new ArrayList<>();
+        Map<String, CustomFish> newMap = new ConcurrentHashMap<>();
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection fishSec = section.getConfigurationSection(key);
@@ -97,6 +111,10 @@ public class FishManager {
                 double speed = fishSec.getDouble("base-speed", 1.0);
                 double strength = fishSec.getDouble("fight-strength", 1.0);
                 int xp = fishSec.getInt("xp-reward", 0);
+                double minWeight = fishSec.getDouble("min-weight", 0.5);
+                double maxWeight = fishSec.getDouble("max-weight", 5.0);
+                List<String> biomes = fishSec.getStringList("biomes");
+                double price = fishSec.getDouble("price", 1.0);
 
                 ItemStack item = new ItemStack(material);
                 ItemMeta meta = item.getItemMeta();
@@ -106,8 +124,6 @@ public class FishManager {
                     ItemUtils.applyCustomModelData(meta, fishSec);
 
                     List<Component> loreComponents = new ArrayList<>();
-
-                    // Dil dosyasından nadirlik lore'unu al
                     String rarityLoreStr = plugin.getMessageManager().getPlainMessage("fish_lore_rarity");
                     rarityLoreStr = rarityLoreStr.replace("%rarity%", rarityName);
                     loreComponents.add(miniMessage.deserialize(rarityColor + rarityLoreStr));
@@ -121,13 +137,19 @@ public class FishManager {
                     item.setItemMeta(meta);
                 }
 
-                newList.add(new CustomFish(key, finalName, rarity, weight, speed, strength, xp, item));
+                CustomFish fish = new CustomFish(key, finalName, rarity, weight, speed, strength, xp, minWeight,
+                        maxWeight, biomes, price, item);
+                newList.add(fish);
+                newMap.put(key.toLowerCase(), fish);
+
             } catch (Exception e) {
                 String msg = plugin.getMessageManager().getPlainMessage("fish_load_error");
                 plugin.getLogger().warning(msg.replace("%fish%", key).replace("%error%", e.getMessage()));
             }
         }
+
         this.fishList = Collections.unmodifiableList(newList);
+        this.fishMap = Collections.unmodifiableMap(newMap);
 
         String loadedMsg = plugin.getMessageManager().getPlainMessage("fish_loaded_success");
         plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(fishList.size())));
@@ -144,37 +166,60 @@ public class FishManager {
         };
     }
 
-    public CustomFish rollRandomFish(double luckMultiplier, BaitManager.Bait bait) {
-        List<CustomFish> currentFish = this.fishList;
-        if (currentFish.isEmpty())
+    public CustomFish rollRandomFish(double luckMultiplier, BaitManager.Bait bait, Biome playerBiome) {
+        if (fishList.isEmpty())
             return null;
 
-        double[] dynamicWeights = new double[currentFish.size()];
+        String biomeName = playerBiome.toString();
+        List<CustomFish> availableFish = new ArrayList<>();
+
+        for (CustomFish fish : fishList) {
+            List<String> biomes = fish.biomes();
+            if (biomes == null || biomes.isEmpty()) {
+                availableFish.add(fish);
+            } else {
+                for (String biome : biomes) {
+                    if (biome.equalsIgnoreCase(biomeName)) {
+                        availableFish.add(fish);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (availableFish.isEmpty())
+            return null;
+
+        double[] dynamicWeights = new double[availableFish.size()];
         double totalDynamicWeight = 0.0;
 
-        for (int i = 0; i < currentFish.size(); i++) {
-            CustomFish fish = currentFish.get(i);
-            double baseLuckMultiplier = Math.pow(luckMultiplier, fish.rarity() - 1);
-            double baitMultiplier = (bait != null && bait.targetRarity() == fish.rarity()) ? bait.modifier() : 1.0;
-
+        for (int i = 0; i < availableFish.size(); i++) {
+            CustomFish fish = availableFish.get(i);
+            double baseLuckMultiplier = Math.pow(Math.max(0.1, luckMultiplier), fish.rarity() - 1);
+            double baitMultiplier = 1.0;
+            if (bait != null && bait.targetRarity() == fish.rarity()) {
+                baitMultiplier = bait.modifier();
+            }
             double weight = fish.weight() * baseLuckMultiplier * baitMultiplier;
+            if (weight <= 0)
+                weight = 0.001;
             dynamicWeights[i] = weight;
             totalDynamicWeight += weight;
         }
 
-        if (totalDynamicWeight <= 0.0)
-            return currentFish.get(0);
+        if (totalDynamicWeight <= 0.0) {
+            return availableFish.get(0);
+        }
 
         double roll = ThreadLocalRandom.current().nextDouble() * totalDynamicWeight;
         double currentWeight = 0.0;
-
         for (int i = 0; i < dynamicWeights.length; i++) {
             currentWeight += dynamicWeights[i];
             if (roll <= currentWeight) {
-                return currentFish.get(i);
+                return availableFish.get(i);
             }
         }
 
-        return currentFish.get(currentFish.size() - 1);
+        return availableFish.get(availableFish.size() - 1);
     }
 }

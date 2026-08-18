@@ -1,24 +1,24 @@
 package com.phoenix.fish.command;
 
 import com.phoenix.fish.PhoenixFish;
+import com.phoenix.fish.data.FishingData;
 import com.phoenix.fish.manager.ItemFixer;
 import com.phoenix.fish.manager.ItemUtils;
+import com.phoenix.fish.manager.TournamentManager;
 import com.phoenix.fish.task.ContainerFixTask;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,20 +56,130 @@ public class FishCommand implements CommandExecutor {
                 handleGiveRod(player, args[1]);
             }
             case "catalog" -> plugin.getCatalogManager().openMainMenu(player);
+            case "skills" -> plugin.getSkillManager().openMenu(player);
+            case "tournament" -> handleTournament(player, args);
+            case "sell" -> handleSell(player, args);
+            case "addlevel" -> handleAddLevel(player, args, false);
+            case "addcraft" -> handleAddLevel(player, args, true);
             default -> sendHelp(player);
         }
         return true;
+    }
+
+    private void handleSell(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_sell", true));
+            return;
+        }
+
+        if (args[1].equalsIgnoreCase("hand")) {
+            plugin.getEconomyManager().sellHand(player);
+        } else if (args[1].equalsIgnoreCase("menu") || args[1].equalsIgnoreCase("gui")) {
+            plugin.getEconomyManager().openSellGUI(player);
+        } else {
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_sell", true));
+        }
+    }
+
+    private void handleTournament(Player player, String[] args) {
+        if (!player.hasPermission("phoenixfish.tournament.admin")) {
+            player.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+            return;
+        }
+
+        if (args.length < 2) {
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_tournament", true));
+            return;
+        }
+
+        TournamentManager manager = plugin.getTournamentManager();
+
+        switch (args[1].toLowerCase()) {
+            case "start" -> {
+                if (!manager.isEnabled()) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("tournament_disabled", true));
+                    return;
+                }
+                if (manager.isActive()) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("tournament_already_active", true));
+                    return;
+                }
+                int minutes = 30;
+                if (args.length >= 3) {
+                    try {
+                        minutes = Integer.parseInt(args[2]);
+                        if (minutes <= 0) {
+                            player.sendMessage(plugin.getMessageManager().getMessage("usage_tournament", true));
+                            return;
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+                manager.start(minutes);
+
+                Map<String, String> ph = Map.of("%minutes%", String.valueOf(minutes));
+                Bukkit.broadcast(plugin.getMessageManager().getMessage("tournament_start", true, ph));
+            }
+            case "stop" -> {
+                if (!manager.isActive()) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("tournament_no_active", true));
+                    return;
+                }
+                manager.stop(false);
+                Bukkit.broadcast(plugin.getMessageManager().getMessage("tournament_stopped", true));
+            }
+            case "addreward" -> handleAddReward(player, args);
+            default -> player.sendMessage(plugin.getMessageManager().getMessage("usage_tournament", true));
+        }
+    }
+
+    private void handleAddReward(Player player, String[] args) {
+        if (args.length < 3) {
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_addreward", true));
+            return;
+        }
+
+        int rank;
+        try {
+            rank = Integer.parseInt(args[2]);
+            if (rank <= 0) {
+                player.sendMessage(plugin.getMessageManager().getMessage("usage_addreward", true));
+                return;
+            }
+        } catch (NumberFormatException e) {
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_addreward", true));
+            return;
+        }
+
+        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+        if (itemInHand == null || itemInHand.getType().isAir()) {
+            player.sendMessage(plugin.getMessageManager().getMessage("addreward_no_item", true));
+            return;
+        }
+
+        String base64 = ItemUtils.itemToBase64(itemInHand);
+        if (base64 == null) {
+            player.sendMessage(plugin.getMessageManager().getMessage("addreward_error", true));
+            return;
+        }
+
+        plugin.getConfig().set("tournament.rewards." + rank + ".item", base64);
+        Bukkit.getScheduler().runTask(plugin, plugin::saveConfig);
+
+        Map<String, String> ph = Map.of("%rank%", String.valueOf(rank));
+        player.sendMessage(plugin.getMessageManager().getMessage("addreward_success", true, ph));
     }
 
     private void handleFix(Player player) {
         ItemFixer fixer = plugin.getFishingListener().getItemFixer();
         int[] result = fixer.fixInventory(player.getInventory());
 
-        Map<String, String> fixPh = new HashMap<>();
-        fixPh.put("%rods%", String.valueOf(result[0]));
-        fixPh.put("%baits%", String.valueOf(result[1]));
+        Map<String, String> fixPh = Map.of(
+                "%rods%", String.valueOf(result[0]),
+                "%baits%", String.valueOf(result[1]));
         player.sendMessage(plugin.getMessageManager().getMessage("fix_inventory", true, fixPh));
-        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ANVIL_USE, 0.5f, 1.2f);
+
+        playSoundFromConfig(player, "sounds.fix", Sound.BLOCK_ANVIL_USE, 0.5f, 1.2f);
     }
 
     private void handleFixAll(Player player) {
@@ -81,8 +191,7 @@ public class FishCommand implements CommandExecutor {
         ItemFixer fixer = plugin.getFishingListener().getItemFixer();
 
         ContainerFixTask task = new ContainerFixTask(plugin, fixer, player);
-        Map<String, String> startPh = new HashMap<>();
-        startPh.put("%chunks%", String.valueOf(task.getTotalChunks()));
+        Map<String, String> startPh = Map.of("%chunks%", String.valueOf(task.getTotalChunks()));
         player.sendMessage(plugin.getMessageManager().getMessage("fixall_start", true, startPh));
         player.sendMessage(plugin.getMessageManager().getMessage("fixall_offline_note", true));
 
@@ -107,10 +216,10 @@ public class FishCommand implements CommandExecutor {
 
                 if (index >= players.size()) {
                     cancel();
-                    Map<String, String> onlinePh = new HashMap<>();
-                    onlinePh.put("%players%", String.valueOf(playerCount));
-                    onlinePh.put("%rods%", String.valueOf(totalRods));
-                    onlinePh.put("%baits%", String.valueOf(totalBaits));
+                    Map<String, String> onlinePh = Map.of(
+                            "%players%", String.valueOf(playerCount),
+                            "%rods%", String.valueOf(totalRods),
+                            "%baits%", String.valueOf(totalBaits));
                     player.sendMessage(plugin.getMessageManager().getMessage("fixall_done_online", true, onlinePh));
 
                     task.runTaskTimer(plugin, 0L, 1L);
@@ -133,11 +242,9 @@ public class FishCommand implements CommandExecutor {
             return;
         }
 
-        ItemStack rod = createRodItem(rodSec);
+        ItemStack rod = plugin.getFishingListener().getItemFixer().createRodItem(rodSec);
         if (rod == null) {
-            Map<String, String> matPh = new HashMap<>();
-            matPh.put("%material%", rodSec.getString("material", "FISHING_ROD"));
-            player.sendMessage(plugin.getMessageManager().getMessage("invalid_material", true, matPh));
+            player.sendMessage(plugin.getMessageManager().getMessage("invalid_material", true));
             return;
         }
 
@@ -149,43 +256,70 @@ public class FishCommand implements CommandExecutor {
         player.sendMessage(plugin.getMessageManager().getMessage("rod_given", true));
     }
 
-    private ItemStack createRodItem(ConfigurationSection rodSec) {
-        String matStr = rodSec.getString("material", "FISHING_ROD").toUpperCase();
-        Material mat = Material.matchMaterial(matStr);
-        if (mat == null)
-            return null;
-
-        ItemStack rod = new ItemStack(mat);
-        ItemMeta meta = rod.getItemMeta();
-        if (meta == null)
-            return rod;
-
-        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", "<white>Fishing Rod</white>")));
-
-        ItemUtils.applyCustomModelData(meta, rodSec);
-
-        if (rodSec.contains("lore")) {
-            List<String> loreLines = rodSec.getStringList("lore");
-            List<net.kyori.adventure.text.Component> loreComponents = new ArrayList<>();
-            for (String line : loreLines) {
-                loreComponents.add(miniMessage.deserialize(line));
-            }
-            meta.lore(loreComponents);
+    private void handleAddLevel(Player player, String[] args, boolean isCrafting) {
+        if (!player.isOp()) {
+            player.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+            return;
         }
 
-        double luck = rodSec.getDouble("luck-multiplier", 1.0);
-        meta.getPersistentDataContainer().set(plugin.getFishingListener().getRodKey(), PersistentDataType.DOUBLE, luck);
+        if (args.length < 2) {
+            player.sendMessage("§cKullanım: /phoenixfish " + args[0] + " <miktar>");
+            return;
+        }
 
-        rod.setItemMeta(meta);
-        return rod;
+        try {
+            int levelsToAdd = Integer.parseInt(args[1]);
+            FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+            if (data == null) {
+                player.sendMessage("§cVerilerin yüklenemedi, tekrar deneyin.");
+                return;
+            }
+
+            if (isCrafting) {
+                int newLevel = Math.max(1, data.getCraftingLevel() + levelsToAdd);
+                data.setCraftingLevel(newLevel);
+                player.sendMessage("§aBaşarıyla " + levelsToAdd + " Zanaat(Crafting) seviyesi eklendi! Yeni seviye: §e"
+                        + newLevel);
+            } else {
+                int newLevel = Math.max(1, data.getCurrentLevel() + levelsToAdd);
+                data.setCurrentLevel(newLevel);
+                player.sendMessage(
+                        "§aBaşarıyla " + levelsToAdd + " Balıkçılık seviyesi eklendi! Yeni seviye: §e" + newLevel);
+            }
+        } catch (NumberFormatException e) {
+            player.sendMessage("§cLütfen geçerli bir sayı girin!");
+        }
     }
 
     private void sendHelp(Player player) {
         player.sendMessage(plugin.getMessageManager().getMessage("usage_giverod", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_fix", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_catalog", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_skills", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_sell", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_tournament", true));
         if (player.hasPermission("phoenixfish.admin")) {
             player.sendMessage(plugin.getMessageManager().getMessage("usage_fixall", true));
         }
+        if (player.isOp()) {
+            player.sendMessage("§7/phoenixfish addlevel <miktar> §8- §7Balıkçılık seviyesi ekle");
+            player.sendMessage("§7/phoenixfish addcraft <miktar> §8- §7Zanaat seviyesi ekle");
+        }
+    }
+
+    @SuppressWarnings({ "removal" })
+    private void playSoundFromConfig(Player player, String path, Sound defaultSound, float volume, float pitch) {
+        String soundName = plugin.getConfig().getString(path);
+        Sound soundToPlay = defaultSound;
+
+        if (soundName != null && !soundName.isEmpty()) {
+            try {
+                soundToPlay = Sound.valueOf(soundName.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid sound in config: " + soundName + " at path: " + path);
+            }
+        }
+
+        player.playSound(player, soundToPlay, volume, pitch);
     }
 }

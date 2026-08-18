@@ -14,14 +14,12 @@ libraries:
   - com.zaxxer:HikariCP:5.1.0
   - org.slf4j:slf4j-jdk14:2.0.9
 
-# Command Registrations
 commands:
   phoenixfish:
     description: Main command for PhoenixFish (give custom rods, fix items).
-    usage: /phoenixfish <fix | fixall | giverod>
+    usage: /phoenixfish <fix | fixall | giverod | catalog | tournament>
     aliases: [pfish, pf]
 
-# Permission Registrations
 permissions:
   phoenixfish.admin:
     description: Allows giving custom rods and using fixall command.
@@ -29,3 +27,6 @@ permissions:
   phoenixfish.use:
     description: Allows using the /phoenixfish fix command to fix own inventory.
     default: true
+  phoenixfish.tournament.admin:
+    description: Allows starting and stopping fishing tournaments.
+    default: op

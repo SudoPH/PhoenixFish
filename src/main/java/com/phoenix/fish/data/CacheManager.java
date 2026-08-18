@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +22,7 @@ public class CacheManager implements Listener {
     private final ConcurrentHashMap<UUID, FishingData> playerCache;
     private final AtomicLong sessionIdCounter = new AtomicLong(0);
     private final Map<UUID, Long> sessionGenerations = new ConcurrentHashMap<>();
+    private BukkitRunnable autoSaveTask;
 
     public CacheManager(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -33,24 +34,36 @@ public class CacheManager implements Listener {
         return playerCache.get(uuid);
     }
 
-    public java.util.Collection<FishingData> getAllCachedData() {
+    public Collection<FishingData> getAllCachedData() {
         return playerCache.values();
     }
 
     private void startAutoSave() {
-        new BukkitRunnable() {
+        if (autoSaveTask != null) {
+            autoSaveTask.cancel();
+        }
+
+        autoSaveTask = new BukkitRunnable() {
             @Override
             public void run() {
                 if (playerCache.isEmpty())
                     return;
+
                 plugin.getDatabase().batchSave(playerCache.values());
 
-                // Konsol mesajını dil dosyasından çekiyoruz
                 String message = plugin.getMessageManager().getPlainMessage("console_autosave");
                 message = message.replace("%players%", String.valueOf(playerCache.size()));
                 plugin.getLogger().info(message);
             }
-        }.runTaskTimerAsynchronously(plugin, 6000L, 6000L);
+        };
+        autoSaveTask.runTaskTimerAsynchronously(plugin, 6000L, 6000L);
+    }
+
+    public void shutdown() {
+        if (autoSaveTask != null) {
+            autoSaveTask.cancel();
+            autoSaveTask = null;
+        }
     }
 
     @EventHandler
@@ -62,18 +75,28 @@ public class CacheManager implements Listener {
         long gen = sessionIdCounter.incrementAndGet();
         sessionGenerations.put(uuid, gen);
 
-        FishingData tempData = new FishingData(uuid, 0, 1, 0);
+        FishingData tempData = new FishingData(uuid, 0, 1, 0, null, 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
         playerCache.put(uuid, tempData);
 
         plugin.getDatabase().loadData(uuid).thenAccept(loadedData -> {
+            if (loadedData == null) {
+                plugin.getLogger().warning("Could not load data for " + uuid + ", using temp data.");
+                return;
+            }
+
             playerCache.compute(uuid, (key, currentTempData) -> {
-                if (sessionGenerations.getOrDefault(uuid, -1L) != gen || currentTempData == null) {
+                Long currentGen = sessionGenerations.get(uuid);
+                if (currentGen == null || currentGen != gen || currentTempData == null) {
                     return currentTempData;
                 }
 
                 if (currentTempData.getCurrentXp() > 0) {
                     loadedData.addXp(currentTempData.getCurrentXp());
                 }
+                if (currentTempData.getCraftingXp() > 0) {
+                    loadedData.addCraftingXp(currentTempData.getCraftingXp());
+                }
+
                 return loadedData;
             });
         });
@@ -89,7 +112,9 @@ public class CacheManager implements Listener {
 
         FishingData data = playerCache.remove(uuid);
         if (data != null) {
-            plugin.getDatabase().saveData(uuid, data);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                plugin.getDatabase().saveData(uuid, data);
+            });
         }
     }
 
@@ -106,10 +131,42 @@ public class CacheManager implements Listener {
 
         data.addXp(xpReward);
 
+        int leveled = 0;
         while (data.checkLevelUp()) {
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%level%", String.valueOf(data.getCurrentLevel()));
+            leveled++;
+        }
+
+        if (leveled > 0) {
+            Map<String, String> placeholders = Map.of(
+                    "%level%", String.valueOf(data.getCurrentLevel()),
+                    "%levels%", String.valueOf(leveled));
             player.sendMessage(plugin.getMessageManager().getMessage("level_up", true, placeholders));
         }
+    }
+
+    public void addCraftingXpAndCheckLevel(Player player, int xpReward) {
+        FishingData data = playerCache.get(player.getUniqueId());
+        if (data == null)
+            return;
+
+        data.addCraftingXp(xpReward);
+
+        int leveled = 0;
+        while (data.checkCraftingLevelUp()) {
+            leveled++;
+        }
+
+        if (leveled > 0) {
+            Map<String, String> placeholders = Map.of(
+                    "%level%", String.valueOf(data.getCraftingLevel()),
+                    "%levels%", String.valueOf(leveled));
+            player.sendMessage(plugin.getMessageManager().getMessage("crafting_level_up", true, placeholders));
+        }
+    }
+
+    public void saveAll() {
+        if (playerCache.isEmpty())
+            return;
+        plugin.getDatabase().batchSave(playerCache.values());
     }
 }

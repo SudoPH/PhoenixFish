@@ -7,10 +7,13 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -39,6 +42,13 @@ public class MinigameTask {
     private static final TextColor GAME_BG = TextColor.color(0x4B5563);
 
     public MinigameTask(PhoenixFish plugin, Player player, CustomFish fish) {
+        if (plugin == null)
+            throw new IllegalArgumentException("Plugin cannot be null");
+        if (player == null)
+            throw new IllegalArgumentException("Player cannot be null");
+        if (fish == null)
+            throw new IllegalArgumentException("Fish cannot be null");
+
         this.plugin = plugin;
         this.player = player;
         this.fish = fish;
@@ -87,12 +97,23 @@ public class MinigameTask {
         int distance = Math.abs(playerBarCenter - fishPos);
         boolean isHitting = distance <= rodWidth;
 
+        double actualProgressRate = progressRate;
+        if (plugin.isXpSystemEnabled()) {
+            FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+            if (data != null && data.getFastCatcher() > 0) {
+                actualProgressRate += (data.getFastCatcher() * 0.5);
+            }
+        }
+
         if (isHitting) {
-            progress += progressRate;
+            progress += actualProgressRate;
             tension -= tensionDecreaseRate;
         } else {
             tension += (tensionIncreaseRate * fish.fightStrength());
         }
+
+        progress = Math.max(0, Math.min(100, progress));
+        tension = Math.max(0, Math.min(100, tension));
 
         session.setPlayerBarCenter(playerBarCenter);
         session.setFishPosition(fishPos);
@@ -138,7 +159,6 @@ public class MinigameTask {
             color = TENSION_HIGH;
         else if (tension > 50)
             color = TENSION_MID;
-
         return buildBar(filled, color, PROGRESS_EMPTY);
     }
 
@@ -160,15 +180,38 @@ public class MinigameTask {
         int amountToGive = calculateMultiCatchAmount();
 
         if (amountToGive > 1) {
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%amount%", String.valueOf(amountToGive));
+            Map<String, String> placeholders = Map.of("%amount%", String.valueOf(amountToGive));
             player.sendActionBar(plugin.getMessageManager().getMessage("minigame_win_multiple", false, placeholders));
         } else {
             player.sendActionBar(plugin.getMessageManager().getMessage("minigame_win_single", false));
         }
 
-        ItemStack caughtItem = fish.itemStack().clone();
+        double weight = fish.minWeight()
+                + (ThreadLocalRandom.current().nextDouble() * (fish.maxWeight() - fish.minWeight()));
+        String formattedWeight = String.format("%.1f", weight);
+
+        ItemStack fishItem = fish.itemStack();
+        if (fishItem == null) {
+            plugin.getLogger().warning("Fish itemStack is null for fish: " + fish.id());
+            return;
+        }
+
+        ItemStack caughtItem = fishItem.clone();
         caughtItem.setAmount(amountToGive);
+
+        ItemMeta meta = caughtItem.getItemMeta();
+        if (meta != null) {
+            List<Component> lore = meta.lore();
+            if (lore == null)
+                lore = new ArrayList<>();
+
+            Map<String, String> weightPh = Map.of("%weight%", formattedWeight);
+            Component weightLore = plugin.getMessageManager().getMessage("fish_lore_weight", false, weightPh);
+            lore.add(weightLore);
+
+            meta.lore(lore);
+            caughtItem.setItemMeta(meta);
+        }
 
         Map<Integer, ItemStack> overflow = player.getInventory().addItem(caughtItem);
         if (!overflow.isEmpty()) {
@@ -179,37 +222,47 @@ public class MinigameTask {
 
         plugin.playCatchEffects(player, fish);
 
+        plugin.getRecordManager().checkRecords(player, fish, weight, formattedWeight);
+
         if (plugin.isDiscoveryEnabled()) {
             FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
             if (data != null && data.discoverFish(fish.id())) {
-                player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                playSoundFromConfig(player, "sounds.discover", Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
             }
         }
 
         if (plugin.isXpSystemEnabled() && fish.xpReward() > 0) {
             plugin.getCacheManager().addXpAndCheckLevel(player, fish.xpReward() * amountToGive);
         }
+
+        if (plugin.getTournamentManager().isActive()) {
+            int points = (fish.rarity() >= 3) ? 5 : 1;
+            plugin.getTournamentManager().addScore(player, points * amountToGive);
+        }
+
+        if (plugin.getApi() != null) {
+            try {
+                plugin.getApi().triggerFishCaught(player, fish, weight);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error triggering FishCaughtEvent: " + e.getMessage());
+            }
+        }
     }
 
     private int calculateMultiCatchAmount() {
-        if (!plugin.isXpSystemEnabled() || !plugin.getConfig().getBoolean("xp-system.multi-catch.enabled", false)) {
+        if (!plugin.isXpSystemEnabled()) {
             return 1;
         }
 
         FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
-        if (data == null)
+        if (data == null || data.getDoubleCatch() == 0) {
             return 1;
+        }
 
-        int level = data.getCurrentLevel();
-        int level3x = plugin.getConfig().getInt("xp-system.multi-catch.level-3x", 999);
-        int level2x = plugin.getConfig().getInt("xp-system.multi-catch.level-2x", 999);
-        double chance3x = plugin.getConfig().getDouble("xp-system.multi-catch.chance-3x", 0.0);
-        double chance2x = plugin.getConfig().getDouble("xp-system.multi-catch.chance-2x", 0.0);
-
-        if (level >= level3x && ThreadLocalRandom.current().nextDouble() < chance3x)
-            return 3;
-        if (level >= level2x && ThreadLocalRandom.current().nextDouble() < chance2x)
+        double chance = data.getDoubleCatch() * 0.10;
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             return 2;
+        }
 
         return 1;
     }
@@ -219,5 +272,23 @@ public class MinigameTask {
             task.cancel();
         }
         plugin.getFishingListener().removeMinigame(player.getUniqueId());
+    }
+
+    @SuppressWarnings({ "removal" })
+    private void playSoundFromConfig(Player player, String path, Sound defaultSound, float volume, float pitch) {
+        String soundName = plugin.getConfig().getString(path);
+        Sound soundToPlay = defaultSound;
+
+        if (soundName != null && !soundName.isEmpty()) {
+            try {
+                soundToPlay = Sound.valueOf(soundName.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid sound in config: " + soundName + " at path: " + path);
+            }
+        }
+
+        if (player.isOnline()) {
+            player.playSound(player, soundToPlay, volume, pitch);
+        }
     }
 }

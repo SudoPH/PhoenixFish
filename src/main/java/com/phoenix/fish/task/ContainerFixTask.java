@@ -7,21 +7,13 @@ import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
 
-/**
- * A background task that iterates through all loaded chunks in all worlds
- * to scan and fix legacy custom items inside containers (chests, barrels,
- * etc.).
- * Processes a limited number of chunks per tick to prevent server lag.
- */
 public class ContainerFixTask extends BukkitRunnable {
 
     private static final int CHUNKS_PER_TICK = 5;
@@ -51,15 +43,7 @@ public class ContainerFixTask extends BukkitRunnable {
     @Override
     public void run() {
         if (chunkQueue.isEmpty()) {
-            if (notifyTo != null && (!(notifyTo instanceof Player p) || p.isOnline())) {
-                Map<String, String> placeholders = new HashMap<>();
-                placeholders.put("%containers%", String.valueOf(totalContainers));
-                placeholders.put("%rods%", String.valueOf(totalRods));
-                placeholders.put("%baits%", String.valueOf(totalBaits));
-
-                notifyTo.sendMessage(
-                        plugin.getMessageManager().getMessage("fixall_done_containers", true, placeholders));
-            }
+            sendCompletionMessage();
             cancel();
             return;
         }
@@ -84,5 +68,17 @@ public class ContainerFixTask extends BukkitRunnable {
                 totalBaits += result[1];
             }
         }
+    }
+
+    private void sendCompletionMessage() {
+        if (notifyTo == null)
+            return;
+
+        Map<String, String> placeholders = Map.of(
+                "%containers%", String.valueOf(totalContainers),
+                "%rods%", String.valueOf(totalRods),
+                "%baits%", String.valueOf(totalBaits));
+
+        notifyTo.sendMessage(plugin.getMessageManager().getMessage("fixall_done_containers", true, placeholders));
     }
 }

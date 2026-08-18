@@ -6,6 +6,9 @@
 # WARNING: The plugin uses exponential math for rarity chances (luck^(rarity-1)).
 # Do NOT set this value above 3.0, or rare fish will become too common and break the economy!
 # (1.0 = Normal, 1.5 = Good, 2.0 = End-Game)
+#
+# NEW: fishing-level-requirement = Minimum Fishing Level required to USE this rod.
+# (1 = anyone can use, 100 = only max level players)
 
 rods:
   # Default vanilla rod (No custom model data)
@@ -14,11 +17,13 @@ rods:
     material: FISHING_ROD
     custom-model-data: 0
     luck-multiplier: 1.0
+    fishing-level-requirement: 1 # Anyone can use
     lore:
-      - "<dark_gray>» <gray>Standart"
+      - "<dark_gray>» <gray>Standard"
       - "<gray>A basic fishing rod."
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.0"
+      - "<dark_gray>Required Fishing Level: <white>1"
 
   # Tier 1 Rod
   hardwood_rod:
@@ -26,12 +31,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20001
     luck-multiplier: 1.1
+    fishing-level-requirement: 1
     lore:
-      - "<dark_gray>» <gray>Başlangıç"
+      - "<dark_gray>» <gray>Starter"
       - "<gray>Made of compressed wood,"
       - "<gray>a cheap but functional rod."
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.1"
+      - "<dark_gray>Required Fishing Level: <white>1"
 
   # Tier 2 Rod
   iron_rod:
@@ -39,12 +46,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20002
     luck-multiplier: 1.2
+    fishing-level-requirement: 10
     lore:
-      - "<dark_gray>» <gray>Yaygın"
+      - "<dark_gray>» <gray>Common"
       - "<gray>Reinforced with iron bars."
       - "<gray>A sturdy rod that resists line breaks."
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.2"
+      - "<dark_gray>Required Fishing Level: <white>10"
 
   # Tier 3 Rod
   gold_rod:
@@ -52,12 +61,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20003
     luck-multiplier: 1.35
+    fishing-level-requirement: 20
     lore:
-      - "<dark_gray>» <gold>Nadir"
+      - "<dark_gray>» <gold>Rare"
       - "<gold>Gold plating attracts stronger magic."
       - "<gray>Provides high luck but is slightly fragile."
       - ""
       - "<dark_gray>Luck Multiplier: <gold>x1.35"
+      - "<dark_gray>Required Fishing Level: <gold>20"
 
   # Tier 4 Rod
   diamond_rod:
@@ -65,12 +76,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20004
     luck-multiplier: 1.5
+    fishing-level-requirement: 35
     lore:
-      - "<dark_gray>» <aqua>Çok Nadir"
+      - "<dark_gray>» <aqua>Epic"
       - "<aqua>Crafted with flawless cut diamonds."
       - "<gray>Can pull prey even from the deep depths."
       - ""
       - "<dark_gray>Luck Multiplier: <aqua>x1.5"
+      - "<dark_gray>Required Fishing Level: <aqua>35"
 
   # Tier 5 Rod
   netherite_rod:
@@ -78,12 +91,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20005
     luck-multiplier: 1.7
+    fishing-level-requirement: 50
     lore:
-      - "<dark_gray>» <dark_red>Üstün"
+      - "<dark_gray>» <dark_red>Superior"
       - "<dark_red>Forged in hellfire."
       - "<gray>Easily subdues even legendary fish."
       - ""
       - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
+      - "<dark_gray>Required Fishing Level: <dark_red>50"
 
   # Tier 6 Rod
   ocean_rod:
@@ -91,12 +106,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20006
     luck-multiplier: 1.85
+    fishing-level-requirement: 65
     lore:
-      - "<dark_gray>» <dark_aqua>Mistik"
+      - "<dark_gray>» <dark_aqua>Mystic"
       - "<#00CED1>Adorned with tentacles and nautilus shells."
       - "<gray>Attracts even the masters of the sea."
       - ""
       - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
+      - "<dark_gray>Required Fishing Level: <dark_aqua>65"
 
   # Tier 7 Rod
   legendary_rod:
@@ -104,12 +121,14 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20007
     luck-multiplier: 2.0
+    fishing-level-requirement: 80
     lore:
-      - "<dark_gray>» <gold><bold>Efsanevi</bold></gold>"
+      - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
       - "<gold>Woven with pure magic derived from legends."
       - "<gray>Bestows the luck of the ocean upon the wielder."
       - ""
       - "<dark_gray>Luck Multiplier: <gold>x2.0"
+      - "<dark_gray>Required Fishing Level: <gold>80"
 
   # Tier 8 Rod
   cosmic_rod:
@@ -117,9 +136,11 @@ rods:
     material: FISHING_ROD
     custom-model-data: 20008
     luck-multiplier: 2.5
+    fishing-level-requirement: 100
     lore:
-      - "<dark_gray>» <#9D00FF><bold>İlahi</bold></#9D00FF>"
+      - "<dark_gray>» <#9D00FF><bold>Divine</bold></#9D00FF>"
       - "<#9D00FF>Forged with stardust and dragon's breath."
       - "<gray>The tip of this rod can fish in the void."
       - ""
       - "<dark_gray>Luck Multiplier: <#9D00FF>x2.5"
+      - "<dark_gray>Required Fishing Level: <#9D00FF>100"

@@ -3,6 +3,7 @@ package com.phoenix.fish.manager;
 import com.phoenix.fish.PhoenixFish;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -21,8 +23,9 @@ public class CraftingManager {
 
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
-    private boolean craftAPIExists;
+
     private Method cachedRegisterMethod;
+    private Object craftAPIInstance;
 
     private final NamespacedKey LUCK_KEY;
     private final NamespacedKey BAIT_KEY;
@@ -30,37 +33,53 @@ public class CraftingManager {
     public CraftingManager(PhoenixFish plugin) {
         this.plugin = plugin;
         this.miniMessage = MiniMessage.miniMessage();
-        this.craftAPIExists = plugin.getServer().getPluginManager().getPlugin("PhoenixCraft") != null;
-
         this.LUCK_KEY = new NamespacedKey(plugin, "luck_multiplier");
         this.BAIT_KEY = new NamespacedKey(plugin, "bait_id");
     }
 
     public void loadRecipes() {
-        if (!craftAPIExists) {
+        Plugin phoenixCraft = Bukkit.getPluginManager().getPlugin("PhoenixCraft");
+        if (phoenixCraft == null) {
             plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("craft_api_not_found"));
             return;
         }
 
         try {
             Class<?> craftAPIClass = Class.forName("com.phoenix.craft.CraftAPI");
-            this.cachedRegisterMethod = craftAPIClass.getMethod("registerRecipe", ItemStack[].class, ItemStack.class);
+            if (craftAPIClass.isAssignableFrom(phoenixCraft.getClass())) {
+                this.craftAPIInstance = phoenixCraft;
+                try {
+                    this.cachedRegisterMethod = craftAPIClass.getMethod("registerRecipe", ItemStack[].class,
+                            ItemStack.class, int.class, int.class);
+                } catch (NoSuchMethodException e) {
+                    plugin.getLogger().warning("CraftAPI 4 parametreli metod bulunamadı! PhoenixCraft güncel mi?");
+                    return;
+                }
+                plugin.getLogger().info("CraftAPI hooked successfully via Reflection!");
+            } else {
+                plugin.getLogger().warning("PhoenixCraft does not implement CraftAPI!");
+                return;
+            }
+        } catch (ClassNotFoundException e) {
+            plugin.getLogger().warning("CraftAPI class not found! Is PhoenixCraft installed?");
+            return;
         } catch (Exception e) {
-            String msg = plugin.getMessageManager().getPlainMessage("craft_api_hook_failed");
-            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
-            this.craftAPIExists = false;
+            plugin.getLogger().warning("Failed to hook CraftAPI: " + e.getMessage());
             return;
         }
 
         File file = new File(plugin.getDataFolder(), "custom_recipes.yml");
         if (!file.exists()) {
             plugin.saveResource("custom_recipes.yml", false);
+            file = new File(plugin.getDataFolder(), "custom_recipes.yml");
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection recipes = config.getConfigurationSection("recipes");
-        if (recipes == null || cachedRegisterMethod == null)
+        if (recipes == null) {
+            plugin.getLogger().warning(plugin.getMessageManager().getPlainMessage("craft_recipes_section_not_found"));
             return;
+        }
 
         int count = 0;
         for (String recipeId : recipes.getKeys(false)) {
@@ -70,24 +89,34 @@ public class CraftingManager {
 
             try {
                 ConfigurationSection resultSec = recipeSec.getConfigurationSection("result");
-                if (resultSec == null)
+                if (resultSec == null) {
+                    plugin.getLogger().warning("Recipe " + recipeId + " missing result section");
                     continue;
+                }
 
                 ItemStack resultItem = createItem(resultSec);
-                ItemStack[] matrix = parseShape(recipeSec);
+                if (resultItem == null) {
+                    plugin.getLogger().warning("Recipe " + recipeId + " result item creation failed");
+                    continue;
+                }
 
+                ItemStack[] matrix = parseShape(recipeSec);
                 if (matrix != null) {
-                    cachedRegisterMethod.invoke(null, matrix, resultItem);
+                    int craftingLevelReq = recipeSec.getInt("crafting-level-requirement", 0);
+                    int xpReward = recipeSec.getInt("xp-reward", 10);
+
+                    cachedRegisterMethod.invoke(craftAPIInstance, matrix, resultItem, craftingLevelReq, xpReward);
                     count++;
+                } else {
+                    plugin.getLogger().warning("Recipe " + recipeId + " has invalid shape");
                 }
             } catch (Exception e) {
-                String msg = plugin.getMessageManager().getPlainMessage("craft_recipe_load_error");
-                plugin.getLogger().warning(msg.replace("%recipe%", recipeId).replace("%error%", e.getMessage()));
+                plugin.getLogger().warning("Error loading recipe " + recipeId + ": " + e.getMessage());
             }
         }
 
-        String loadedMsg = plugin.getMessageManager().getPlainMessage("craft_recipes_loaded");
-        plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(count)));
+        plugin.getLogger().info(plugin.getMessageManager().getPlainMessage("craft_recipes_loaded")
+                .replace("%amount%", String.valueOf(count)));
     }
 
     private ItemStack[] parseShape(ConfigurationSection recipeSec) {
@@ -98,15 +127,25 @@ public class CraftingManager {
             return null;
 
         ItemStack[] matrix = new ItemStack[9];
+        ItemStack airItem = new ItemStack(Material.AIR);
+
         for (int row = 0; row < 3; row++) {
             String rowStr = shapeList.get(row);
             for (int col = 0; col < 3; col++) {
                 if (col < rowStr.length()) {
                     char letter = rowStr.charAt(col);
-                    ConfigurationSection ingSec = ings.getConfigurationSection(String.valueOf(letter));
-                    if (ingSec != null) {
-                        matrix[row * 3 + col] = createItem(ingSec);
+                    if (letter == ' ') {
+                        matrix[row * 3 + col] = airItem;
+                    } else {
+                        ConfigurationSection ingSec = ings.getConfigurationSection(String.valueOf(letter));
+                        if (ingSec != null) {
+                            matrix[row * 3 + col] = createItem(ingSec);
+                        } else {
+                            matrix[row * 3 + col] = airItem;
+                        }
                     }
+                } else {
+                    matrix[row * 3 + col] = airItem;
                 }
             }
         }
@@ -117,8 +156,7 @@ public class CraftingManager {
         String matStr = sec.getString("material", "STONE").toUpperCase();
         Material mat = Material.matchMaterial(matStr);
         if (mat == null) {
-            String msg = plugin.getMessageManager().getPlainMessage("craft_invalid_material");
-            plugin.getLogger().warning(msg.replace("%material%", matStr));
+            plugin.getLogger().warning("Invalid material: " + matStr);
             mat = Material.STONE;
         }
 

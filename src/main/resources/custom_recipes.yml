@@ -4,12 +4,14 @@
 # Recipe IDs must be unique.
 # Ingredients can be vanilla materials or custom items.
 # For custom items, only 'material' and 'custom-model-data' are required to match.
+#
+# YENİ: crafting-level-requirement = Bu tarifi CRAFT ETMEK için gereken minimum Zanaat Seviyesi.
+# YENİ: xp-reward = Bu tarifi yapınca verilecek Olta Craft XP'si.
 
 recipes:
   # ==========================================
   # FISHING RODS (Tiered Progression)
   # ==========================================
-  # WARNING: Do not set luck-multiplier above 3.0. Math is exponential!
 
   # 1. Hardwood Rod (Starter Rod)
   hardwood_rod:
@@ -24,6 +26,8 @@ recipes:
         - "<gray>a cheap but functional rod."
         - ""
         - "<dark_gray>Luck Multiplier: <white>x1.1"
+    crafting-level-requirement: 1
+    xp-reward: 5
     shape:
       - "  S"
       - " ST"
@@ -47,6 +51,8 @@ recipes:
         - "<gray>A sturdy rod that resists line breaks."
         - ""
         - "<dark_gray>Luck Multiplier: <white>x1.2"
+    crafting-level-requirement: 10
+    xp-reward: 15
     shape:
       - "  I"
       - " IR"
@@ -71,6 +77,8 @@ recipes:
         - "<gray>Provides high luck but is slightly fragile."
         - ""
         - "<dark_gray>Luck Multiplier: <gold>x1.35"
+    crafting-level-requirement: 20
+    xp-reward: 30
     shape:
       - "  G"
       - " GR"
@@ -95,6 +103,8 @@ recipes:
         - "<gray>Can pull prey even from the deep depths."
         - ""
         - "<dark_gray>Luck Multiplier: <aqua>x1.5"
+    crafting-level-requirement: 35
+    xp-reward: 60
     shape:
       - "  D"
       - " DR"
@@ -119,6 +129,8 @@ recipes:
         - "<gray>Easily subdues even legendary fish."
         - ""
         - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
+    crafting-level-requirement: 50
+    xp-reward: 100
     shape:
       - "  N"
       - " NR"
@@ -143,6 +155,8 @@ recipes:
         - "<gray>Attracts even the masters of the sea."
         - ""
         - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
+    crafting-level-requirement: 65
+    xp-reward: 150
     shape:
       - "NSN"
       - "SRP"
@@ -171,6 +185,8 @@ recipes:
         - "<gray>Bestows the luck of the ocean upon the wielder."
         - ""
         - "<dark_gray>Luck Multiplier: <gold>x2.0"
+    crafting-level-requirement: 80
+    xp-reward: 250
     shape:
       - " C "
       - "CRC"
@@ -195,6 +211,8 @@ recipes:
         - "<gray>The tip of this rod can fish in the void."
         - ""
         - "<dark_gray>Luck Multiplier: <#9D00FF>x2.5"
+    crafting-level-requirement: 100
+    xp-reward: 500
     shape:
       - " E "
       - "ERE"
@@ -207,9 +225,8 @@ recipes:
         custom-model-data: 20007
 
   # ==========================================
-  # BAITS
+  # BAITS (Yemler için crafting seviyesi yok, herkes yapabilir)
   # ==========================================
-  # Note: 'bait-id' must match the ID defined in baits.yml
 
   worm:
     result:
@@ -220,6 +237,8 @@ recipes:
       lore:
         - "<gray>A simple worm found in the dirt."
         - "<dark_gray>» <white>Slightly attracts common fish."
+    crafting-level-requirement: 1
+    xp-reward: 2
     shape:
       - " D "
       - "DDD"
@@ -237,6 +256,8 @@ recipes:
       lore:
         - "<gray>A leftover piece of bread."
         - "<dark_gray>» <white>Cheap bait for desperate fish."
+    crafting-level-requirement: 1
+    xp-reward: 2
     shape:
       - " B "
       - "BBB"
@@ -254,6 +275,8 @@ recipes:
       lore:
         - "<gray>An iridescent glow mesmerizes fish."
         - "<dark_gray>» <aqua>Attracts uncommon fish."
+    crafting-level-requirement: 5
+    xp-reward: 5
     shape:
       - " S "
       - "SGS"
@@ -273,6 +296,8 @@ recipes:
       lore:
         - "<gray>Dough baked with a touch of magic."
         - "<dark_gray>» <aqua>A reliable choice for uncommon fish."
+    crafting-level-requirement: 10
+    xp-reward: 10
     shape:
       - " W "
       - "WHW"
@@ -292,6 +317,8 @@ recipes:
       lore:
         - "<gray>A pungent smell that drives predators crazy."
         - "<dark_gray>» <red>Attracts rare fish."
+    crafting-level-requirement: 20
+    xp-reward: 15
     shape:
       - " R "
       - "RFR"
@@ -311,6 +338,8 @@ recipes:
       lore:
         - "<gray>Woven silk that entangles rare prey."
         - "<dark_gray>» <red>A premium bait for rare fish."
+    crafting-level-requirement: 30
+    xp-reward: 25
     shape:
       - " C "
       - "CSC"
@@ -330,6 +359,8 @@ recipes:
       lore:
         - "<#00CED1>The pure magic of the seas."
         - "<dark_gray>» <gold>Attracts epic fish."
+    crafting-level-requirement: 50
+    xp-reward: 40
     shape:
       - " P "
       - "PCP"
@@ -349,6 +380,8 @@ recipes:
       lore:
         - "<gold>Rare fish eggs shimmering with gold."
         - "<dark_gray>» <gold>Highly attractive to epic fish."
+    crafting-level-requirement: 65
+    xp-reward: 60
     shape:
       - " E "
       - "EGE"
@@ -368,6 +401,8 @@ recipes:
       lore:
         - "<dark_purple>A parasitic creature from the deep void."
         - "<dark_gray>» <light_purple>Attracts legendary fish."
+    crafting-level-requirement: 80
+    xp-reward: 100
     shape:
       - " N "
       - "NSN"
@@ -387,6 +422,8 @@ recipes:
       lore:
         - "<#C0C0C0>Draws energy from the moonlight."
         - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
+    crafting-level-requirement: 100
+    xp-reward: 150
     shape:
       - " P "
       - "PCP"

@@ -15,9 +15,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CatalogManager {
 
@@ -27,7 +27,8 @@ public class CatalogManager {
     private final NamespacedKey valueKey;
 
     private Inventory mainMenu;
-    private final Map<String, List<ItemStack>> baseItems = new HashMap<>();
+    private ItemStack undiscoveredItem;
+    private final Map<String, List<ItemStack>> baseItems = new ConcurrentHashMap<>();
 
     public CatalogManager(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -38,9 +39,29 @@ public class CatalogManager {
 
     public void init() {
         createMainMenu();
-        baseItems.put("fish", plugin.getFishManager().getFishList().stream().map(CustomFish::itemStack).toList());
-        baseItems.put("bait",
-                plugin.getBaitManager().getBaits().values().stream().map(BaitManager.Bait::item).toList());
+        loadBaseItems();
+        createUndiscoveredItem();
+    }
+
+    private void loadBaseItems() {
+        if (plugin.getFishManager() != null) {
+            baseItems.put("fish", plugin.getFishManager().getFishList().stream()
+                    .map(CustomFish::itemStack)
+                    .filter(item -> item != null)
+                    .toList());
+        } else {
+            baseItems.put("fish", List.of());
+        }
+
+        if (plugin.getBaitManager() != null) {
+            baseItems.put("bait", plugin.getBaitManager().getBaits().values().stream()
+                    .map(BaitManager.Bait::item)
+                    .filter(item -> item != null)
+                    .toList());
+        } else {
+            baseItems.put("bait", List.of());
+        }
+
         baseItems.put("rod", getAllRodItems());
     }
 
@@ -54,22 +75,29 @@ public class CatalogManager {
                 plugin.getMessageManager().getPlainMessage("catalog_button_rod"), "category", "rod"));
         mainMenu.setItem(15, createButton(Material.STICK,
                 plugin.getMessageManager().getPlainMessage("catalog_button_bait"), "category", "bait"));
+        mainMenu.setItem(22, createButton(Material.GOLD_INGOT,
+                plugin.getMessageManager().getPlainMessage("catalog_button_sell"), "sell", "all"));
     }
 
     public void openMainMenu(Player player) {
+        if (mainMenu == null) {
+            player.sendMessage(plugin.getMessageManager().getMessage("catalog_not_ready", true));
+            return;
+        }
         player.openInventory(mainMenu);
     }
 
     public void openPage(Player player, String category, int page) {
         List<ItemStack> items = baseItems.get(category);
-        if (items == null)
+        if (items == null || items.isEmpty()) {
+            player.sendMessage(plugin.getMessageManager().getMessage("catalog_category_empty", true));
             return;
+        }
 
         int totalPages = (int) Math.ceil((double) items.size() / 45);
         if (totalPages == 0)
             totalPages = 1;
 
-        // Dinamik başlık oluşturma
         String titleTemplate = plugin.getMessageManager().getPlainMessage("catalog_page_title");
         String title = titleTemplate
                 .replace("%color%", getCategoryColor(category))
@@ -79,21 +107,32 @@ public class CatalogManager {
 
         Inventory pageInv = Bukkit.createInventory(null, 54, miniMessage.deserialize(title));
 
-        // DEĞİŞTİRİLDİ: isXpSystemEnabled yerine isDiscoveryEnabled
-        FishingData data = plugin.isDiscoveryEnabled() ? plugin.getCacheManager().getData(player.getUniqueId()) : null;
+        FishingData data = null;
+        if (plugin.isDiscoveryEnabled() && plugin.getCacheManager() != null) {
+            data = plugin.getCacheManager().getData(player.getUniqueId());
+        }
+
+        // Döngü dışında fishKey'i alarak performansı artırıyoruz
+        NamespacedKey fishKey = (category.equals("fish") && plugin.getFishManager() != null)
+                ? plugin.getFishManager().getFishKey()
+                : null;
 
         int startIndex = page * 45;
         int endIndex = Math.min(startIndex + 45, items.size());
 
         for (int i = startIndex; i < endIndex; i++) {
             ItemStack item = items.get(i);
+            if (item == null)
+                continue;
 
-            // Keşif Sistemi Mantığı
-            if (category.equals("fish") && data != null) {
-                String fishId = getFishIdFromItem(item);
-                if (fishId != null && !data.hasDiscovered(fishId)) {
-                    pageInv.setItem(i - startIndex, createUndiscoveredItem());
-                    continue;
+            if (category.equals("fish") && data != null && fishKey != null && item.hasItemMeta()) {
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    String fishId = meta.getPersistentDataContainer().get(fishKey, PersistentDataType.STRING);
+                    if (fishId != null && !data.hasDiscovered(fishId)) {
+                        pageInv.setItem(i - startIndex, undiscoveredItem);
+                        continue;
+                    }
                 }
             }
 
@@ -101,29 +140,22 @@ public class CatalogManager {
         }
 
         if (page > 0) {
-            pageInv.setItem(45,
-                    createButton(Material.ARROW, plugin.getMessageManager().getPlainMessage("catalog_button_prev_page"),
-                            "page_" + category, String.valueOf(page - 1)));
+            pageInv.setItem(45, createButton(Material.ARROW,
+                    plugin.getMessageManager().getPlainMessage("catalog_button_prev_page"),
+                    "page_" + category, String.valueOf(page - 1)));
         }
         pageInv.setItem(49, createButton(Material.BARRIER,
                 plugin.getMessageManager().getPlainMessage("catalog_button_back"), "main", "none"));
         if (page < totalPages - 1) {
-            pageInv.setItem(53,
-                    createButton(Material.ARROW, plugin.getMessageManager().getPlainMessage("catalog_button_next_page"),
-                            "page_" + category, String.valueOf(page + 1)));
+            pageInv.setItem(53, createButton(Material.ARROW,
+                    plugin.getMessageManager().getPlainMessage("catalog_button_next_page"),
+                    "page_" + category, String.valueOf(page + 1)));
         }
 
         player.openInventory(pageInv);
     }
 
-    private String getFishIdFromItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta())
-            return null;
-        return item.getItemMeta().getPersistentDataContainer().get(plugin.getFishManager().getFishKey(),
-                PersistentDataType.STRING);
-    }
-
-    private ItemStack createUndiscoveredItem() {
+    private void createUndiscoveredItem() {
         ItemStack unknown = new ItemStack(Material.PAPER);
         ItemMeta meta = unknown.getItemMeta();
         if (meta != null) {
@@ -135,7 +167,7 @@ public class CatalogManager {
                             .deserialize(plugin.getMessageManager().getPlainMessage("catalog_undiscovered_lore_2"))));
             unknown.setItemMeta(meta);
         }
-        return unknown;
+        this.undiscoveredItem = unknown;
     }
 
     private String getCategoryColor(String category) {
@@ -156,13 +188,24 @@ public class CatalogManager {
     }
 
     private List<ItemStack> getAllRodItems() {
+        if (plugin.getFishingListener() == null)
+            return List.of();
+
+        ItemFixer itemFixer = plugin.getFishingListener().getItemFixer();
+        if (itemFixer == null)
+            return List.of();
+
+        Map<String, ConfigurationSection> rodConfigs = itemFixer.getRodConfigs();
+        if (rodConfigs == null || rodConfigs.isEmpty())
+            return List.of();
+
         List<ItemStack> rods = new ArrayList<>();
-        for (String rodId : plugin.getFishingListener().getItemFixer().getRodConfigs().keySet()) {
-            ConfigurationSection rodSec = plugin.getFishingListener().getItemFixer().getRodConfig(rodId);
+        for (ConfigurationSection rodSec : rodConfigs.values()) {
             if (rodSec != null) {
-                ItemStack rod = plugin.getFishingListener().getItemFixer().createRodItem(rodSec);
-                if (rod != null)
+                ItemStack rod = itemFixer.createRodItem(rodSec);
+                if (rod != null) {
                     rods.add(rod);
+                }
             }
         }
         return rods;

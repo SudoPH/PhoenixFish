@@ -44,8 +44,10 @@ public class BaitManager {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection section = config.getConfigurationSection("baits");
-        if (section == null)
+        if (section == null) {
+            plugin.getLogger().warning("No 'baits' section found in baits.yml");
             return;
+        }
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection sec = section.getConfigurationSection(key);
@@ -60,8 +62,7 @@ public class BaitManager {
                 String materialStr = sec.getString("material", "STICK").toUpperCase();
                 Material material = Material.matchMaterial(materialStr);
                 if (material == null) {
-                    String msg = plugin.getMessageManager().getPlainMessage("bait_invalid_material");
-                    plugin.getLogger().warning(msg.replace("%material%", materialStr).replace("%bait%", key));
+                    plugin.getLogger().warning("Invalid material " + materialStr + " for bait " + key);
                     material = Material.STICK;
                 }
 
@@ -84,26 +85,31 @@ public class BaitManager {
 
                 Bait bait = new Bait(key, targetRarity, modifier, item);
                 baits.put(key, bait);
-                baitItemCache.put(new ItemFixer.ItemIdentifier(material, ItemUtils.getCMD(item)), bait);
+
+                int cmd = ItemUtils.getCMD(item);
+                if (cmd > 0) {
+                    baitItemCache.put(new ItemFixer.ItemIdentifier(material, cmd), bait);
+                }
             } catch (Exception e) {
-                String msg = plugin.getMessageManager().getPlainMessage("bait_load_error");
-                plugin.getLogger().warning(msg.replace("%bait%", key).replace("%error%", e.getMessage()));
+                plugin.getLogger().warning("Failed to load bait " + key + ": " + e.getMessage());
             }
         }
 
-        String loadedMsg = plugin.getMessageManager().getPlainMessage("bait_loaded_success");
-        plugin.getLogger().info(loadedMsg.replace("%amount%", String.valueOf(baits.size())));
+        plugin.getLogger().info("Loaded " + baits.size() + " baits.");
     }
 
     public Bait getBaitFromItem(ItemStack item) {
         if (item == null || !item.hasItemMeta())
             return null;
-
-        int itemCmd = ItemUtils.getCMD(item);
-        if (itemCmd == 0)
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
             return null;
 
-        return baitItemCache.get(new ItemFixer.ItemIdentifier(item.getType(), itemCmd));
+        int cmd = ItemUtils.getCMD(item);
+        if (cmd <= 0)
+            return null;
+
+        return baitItemCache.get(new ItemFixer.ItemIdentifier(item.getType(), cmd));
     }
 
     public ItemStack getBaitItem(String id) {

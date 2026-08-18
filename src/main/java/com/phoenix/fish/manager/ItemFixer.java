@@ -139,7 +139,7 @@ public class ItemFixer {
         return FixResult.NONE;
     }
 
-    private ConfigurationSection findRodByItem(ItemStack item) {
+    public ConfigurationSection findRodByItem(ItemStack item) {
         int itemCmd = ItemUtils.getCMD(item);
         ItemIdentifier identifier = new ItemIdentifier(item.getType(), itemCmd);
         return rodCache.get(identifier);
@@ -169,6 +169,7 @@ public class ItemFixer {
         return FixResult.ROD;
     }
 
+    @SuppressWarnings("deprecation")
     private FixResult fixBait(ItemStack itemInHand, ItemMeta meta) {
         String baitId = meta.getPersistentDataContainer().get(baitKey, PersistentDataType.STRING);
         if (baitId == null)
@@ -187,7 +188,7 @@ public class ItemFixer {
 
         int cmd = ItemUtils.getCMD(bait.item());
         if (cmd > 0) {
-            meta.getCustomModelDataComponent().setFloats(List.of((float) cmd));
+            meta.setCustomModelData(cmd);
         }
 
         itemInHand.setItemMeta(meta);
