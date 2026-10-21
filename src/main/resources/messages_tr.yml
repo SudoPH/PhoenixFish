@@ -1,7 +1,7 @@
 prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
 
 # Nadirlik İsimleri
-rarity_1: "Sırdan"
+rarity_1: "Sıradan"
 rarity_2: "Nadir"
 rarity_3: "Çok Nadir"
 rarity_4: "Efsanevi"
@@ -17,7 +17,7 @@ catch_subtitle_legendary: "<white>Bir mucize! %fish_name% tuttun!</white>"
 fish_bite: "<gold>Balık vurdu! Çek!</gold>"
 fish_caught_single: "<aqua>Bir %fish_name% tuttun!</aqua>"
 fish_caught_multiple: "<aqua>Harika! %amount%x %fish_name% tuttun!</aqua>"
-fish_discovered: "<gradient:#9D00FF:#00CED1>Yeni Tür Keşfedildi!</gradient> <white>%fish_name%<white> kataloga eklendi!"
+fish_discovered: "<gradient:#9D00FF:#00CED1>Yeni Tür Keşfedildi!</gradient> <white>%fish_name%</white> kataloga eklendi!"
 
 # Mini-oyun Görevi
 minigame_win_single: "<green><bold>✓ Balığı yakaladın! 🐟</bold></green>"
@@ -147,14 +147,14 @@ skills_hunter_desc: "<gray>Nadir+ balık çıkma şansını artırır."
 skills_double_desc: "<gray>Aynı anda 2 balık tutma şansı."
 skills_bait_desc: "<gray>Yem tüketmeme şansı."
 
-usage_sell: "<yellow>Balıklarını satmak için: /phoenixfish sell <all | hand></yellow>"
+# NOT: Tek tanım - eski dosyada "all | hand" ile mükerrerdi, silindi.
+usage_sell: "<yellow>Balıklarını satmak için: /phoenixfish sell <menu | hand></yellow>"
 economy_disabled: "<red>Ekonomi sistemi devre dışı!</red>"
 sell_all_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
 sell_hand_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
 sell_no_fish: "<red>Satılacak özel balığın yok!</red>"
 catalog_button_sell: "<gold>Tüm Balıkları Sat</gold>"
 
-usage_sell: "<yellow>Balıklarını satmak için: /phoenixfish sell <menu | hand></yellow>"
 sell_gui_title: "<dark_gray>» <gold>Balık Pazarı</gold>"
 sell_gui_confirm: "<green>✔ Hepsini Sat ve Parayı Al</green>"
 sell_gui_cancel: "<red>✖ İptal Et ve Balıkları Geri Al</red>"
@@ -163,3 +163,45 @@ skills_name_fast: "<yellow>Hızlı Tutucu"
 skills_name_hunter: "<red>Usta Avcı"
 skills_name_double: "<aqua>Çift Av"
 skills_name_bait: "<gold>Şanslı Yem"
+
+# ==================== Fishing Mode (Toggle) ====================
+fishing_mode_disabled: "<red>Bu özellik sunucuda kapalı! (config: fishing-mode.enabled)</red>"
+fishing_mode_cooldown: "<red>Çok hızlı geçiş yapıyorsun! <yellow>%seconds%</yellow> saniye bekle.</red>"
+fishing_mode_player_not_found: "<red>Oyuncu bulunamadı veya çevrimdışı: <yellow>%player%</yellow></red>"
+fishing_mode_vanilla_enabled:
+  - "<dark_gray>[<gold>PhoenixFish</gold>]</dark_gray> <green>Vanilla balıkçılık: <dark_green>AÇIK</dark_green></green>"
+  - "<gray>Artık normal Minecraft oltasıyla balık tutuyorsun.</gray>"
+  - "<gray>Büyülü kitler ve vanilla ganimet aynen düşer.</gray>"
+  - "<gray>Geri dönmek için: <yellow>/phoenixfish toggle</yellow></gray>"
+fishing_mode_custom_enabled:
+  - "<dark_gray>[<gold>PhoenixFish</gold>]</dark_gray> <green>PhoenixFish balıkçılığı: <dark_green>AÇIK</dark_green></green>"
+  - "<gray>Özel balıklar, mini oyun ve eklenti ödülleri geri geldi.</gray>"
+  - "<gray>Vanilla moda dönmek için: <yellow>/phoenixfish toggle</yellow></gray>"
+fishing_mode_broadcast: "<dark_gray>[<gold>PhoenixFish</gold>]</dark_gray> <white>%player% artık <yellow>%mode%</yellow> balıkçılığını kullanıyor.</white>"
+fishing_mode_changed_other: "<green>%player% için mod değiştirildi: <yellow>%mode%</yellow></green>"
+fishing_mode_reset: "<green>%player% varsayılan moda döndürüldü: <yellow>%mode%</yellow></green>"
+fishing_mode_status: "<gray>Aktif balıkçılık modu: <yellow>%mode%</yellow> <dark_gray>(%source%)</dark_gray></gray>"
+fishing_mode_status_other: "<gray>%player% adlı oyuncunun aktif modu: <yellow>%mode%</yellow> <dark_gray>(%source%)</dark_gray></gray>"
+fishing_mode_source_choice: "oyuncunun seçimi"
+fishing_mode_source_default: "varsayılan"
+usage_toggle: "<yellow>Vanilla/eklenti balıkçılığı arasında geçiş yap: /phoenixfish toggle</yellow>"
+usage_toggle_status: "<yellow>Aktif balıkçılık modunu göster: /phoenixfish toggle status</yellow>"
+usage_toggle_admin: "<yellow>Oyuncunun modunu değiştir: /phoenixfish toggle [oyuncu]</yellow>"
+usage_toggle_admin_reset: "<yellow>Oyuncuyu varsayılan moda döndür: /phoenixfish toggle reset [oyuncu]</yellow>"
+
+# ==================== AddLevel (admin) ====================
+usage_addlevel: "<red>Kullanım: /phoenixfish addlevel [miktar]</red>"
+addlevel_xp_disabled: "<red>Bu komut için XP sistemi etkin olmalıdır!</red>"
+addlevel_data_error: "<red>Veriler yüklenemedi, tekrar deneyin.</red>"
+addlevel_invalid_number: "<red>Lütfen geçerli bir sayı girin!</red>"
+addlevel_success_fishing: "<green>Başarıyla %amount% Balıkçılık seviyesi eklendi! Yeni seviye: <yellow>%level%</yellow></green>"
+addlevel_success_crafting: "<green>Başarıyla %amount% Zanaat (Crafting) seviyesi eklendi! Yeni seviye: <yellow>%level%</yellow></green>"
+usage_addlevel_help: "<gray>/phoenixfish addlevel [miktar] - Balıkçılık seviyesi ekle</gray>"
+usage_addcraft_help: "<gray>/phoenixfish addcraft [miktar] - Zanaat seviyesi ekle</gray>"
+
+# ==================== Rod ====================
+rod_level_required: "<red>Bu oltayı kullanmak için <yellow>%level%</yellow> balıkçılık seviyesi gerekir! (Mevcut: %current%)</red>"
+
+# ==================== Mod İsimleri ====================
+mode_custom: "PhoenixFish"
+mode_vanilla: "Vanilla"

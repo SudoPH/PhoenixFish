@@ -1,80 +1,131 @@
-# ==========================================
-# PhoenixFish - Main Configuration
-# ==========================================
-# Supports TR and EN languages.
-# Language files (messages_tr.yml, messages_en.yml) are generated automatically.
+# ============================================================
+#  PhoenixFish - Main Configuration
+# ============================================================
+#  Albion-style custom fishing system with optional XP,
+#  discovery, minigame, economy, tournaments and records.
+#
+#  * Language files (messages_tr.yml / messages_en.yml) are
+#    generated automatically on first startup.
+#  * After editing this file, restart the server (or use your
+#    reload method) for changes to take effect.
+#  * Supported languages: "tr" and "en"
+# ============================================================
 
 settings:
-  # Set the plugin language (tr / en)
+  # Plugin language. Affects ALL player-facing messages.
+  # Valid values: "en" (English) or "tr" (Turkish)
   language: "en"
-  # Enable the interactive fishing minigame
+
+  # Enable the interactive fishing minigame (moving bar + tension).
+  # true  = players play the catching minigame (plugin fishing mode)
+  # false = catches resolve instantly, no minigame UI
   minigame-enabled: true
+
+  # Enable the fish discovery system (first-time catches are added
+  # to the player's catalog). Requires the XP/database system.
+  # true  = undiscovered fish show as "???" in the catalog until caught
+  # false = everything is shown as discovered from the start
   discovery-enabled: true
-  # Fix legacy items when opening chests/barrels
+
+  # Automatically fix legacy/outdated rod & bait items in a player's
+  # inventory when they open a chest or barrel.
+  # Keep this true after plugin updates that change item formats.
   fix-items-on-chest-open: true
 
-# ==========================================
-# Weather & Environment System
-# ==========================================
-# Increases luck based on weather conditions.
+# ============================================================
+#  Weather & Environment System
+# ============================================================
+#  These values add BONUS luck on top of the base luck while
+#  fishing. Luck increases the chance of rarer fish.
+#  0.2 = +20%, 0.5 = +50%, 0 = disabled
 weather:
-  # Luck bonus when it's raining (0.2 = +20% luck)
+  # Extra luck while it is raining.
   rain-luck-bonus: 0.2
-  # Luck bonus when it's thundering (0.5 = +50% luck). Greatly increases rare fish chances.
+
+  # Extra luck while there is a thunderstorm.
+  # Storm includes the rain bonus effect and greatly increases
+  # the chance of rare/legendary fish.
   storm-luck-bonus: 0.5
 
-# ==========================================
-# Sound System
-# ==========================================
-# Configure sounds for various events.
-# Use valid Minecraft sound names (e.g., ENTITY_PLAYER_LEVELUP)
+# ============================================================
+#  Sound System
+# ============================================================
+#  Sounds played for various plugin events.
+#  Use valid Bukkit sound enum names (e.g. ENTITY_PLAYER_LEVELUP,
+#  UI_BUTTON_CLICK, BLOCK_NOTE_BLOCK_PLING).
+#  If a name is invalid, the default sound is used and a warning
+#  is printed in the console.
 sounds:
-  # Sound played when bait is consumed
+  # Sound played when a bait is consumed
   bait_consume: "ENTITY_ITEM_PICKUP"
-  # Sound played when a new fish is discovered
+
+  # Sound played when a player discovers a new fish species
   discover: "UI_TOAST_CHALLENGE_COMPLETE"
-  # Sound played when items are fixed
+
+  # Sound played when items are fixed (/phoenixfish fix)
   fix: "BLOCK_ANVIL_USE"
-  # Sound played when items are sold successfully
+
+  # Sound played when fish are sold successfully
   sell_success: "ENTITY_PLAYER_LEVELUP"
 
-# ==========================================
-# Minigame Settings
-# ==========================================
-# These values control the difficulty and mechanics of the fishing minigame.
-# Note: The minigame updates every 2 ticks (10 times per second).
+  # Sound played when a player switches fishing mode
+  # (/phoenixfish toggle)
+  mode_toggle: "UI_BUTTON_CLICK"
+
+# ============================================================
+#  Minigame Settings
+# ============================================================
+#  These values control the difficulty and mechanics of the
+#  fishing minigame.
+#  Note: The minigame updates every 2 ticks (10 times per second).
 #
-# --- DIFFICULTY GUIDE ---
-# EASY:   rod-width: 3, progress-rate: 2.5, tension-increase-rate: 1.0
-# MEDIUM: rod-width: 2, progress-rate: 1.5, tension-increase-rate: 1.5
-# HARD:   rod-width: 1, progress-rate: 1.0, tension-increase-rate: 2.0
+#  --- DIFFICULTY GUIDE ---
+#  EASY:   rod-width: 3, progress-rate: 2.5, tension-increase-rate: 1.0
+#  MEDIUM: rod-width: 2, progress-rate: 1.5, tension-increase-rate: 1.5
+#  HARD:   rod-width: 1, progress-rate: 1.0, tension-increase-rate: 2.0
 minigame:
-  # The total width of the minigame area. (Lower = Easier to track the fish)
+  # The total width of the minigame area.
+  # (Lower = Easier to track the fish)
   area-width: 30
-  # The half-width of the player's catching bar. (3 means 7 characters wide total. Higher = Easier)
+
+  # The half-width of the player's catching bar.
+  # (3 means 7 characters wide total. Higher = Easier)
   rod-width: 2
-  # Chance for the fish to change direction (0.0 to 1.0. Lower = Easier)
+
+  # Chance for the fish to change direction (0.0 to 1.0).
+  # (Lower = Easier)
   fish-move-chance: 0.6
-  # How far the fish moves when it changes direction (Lower = Easier to follow)
+
+  # How far the fish moves when it changes direction.
+  # (Lower = Easier to follow)
   fish-move-distance: 2
-  # How much progress is gained when the fish is inside the bar. (Higher = Easier. 10 seconds to win at 2.0)
+
+  # How much progress is gained while the fish is inside the bar.
+  # (Higher = Easier. 10 seconds to win at 2.0)
   progress-rate: 2.0
-  # How much tension increases when the fish is outside the bar. (Lower = Easier, line snaps slower)
+
+  # How much tension increases while the fish is OUTSIDE the bar.
+  # (Lower = Easier, line snaps slower)
   tension-increase-rate: 1.2
-  # How much tension decreases when the fish is inside the bar. (Higher = Easier, recovers faster)
+
+  # How much tension decreases while the fish is INSIDE the bar.
+  # (Higher = Easier, recovers faster)
   tension-decrease-rate: 3.0
 
-# ==========================================
-# XP & Leveling System
-# ==========================================
-# If disabled, the plugin will run in fishing-only mode without levels or databases.
+# ============================================================
+#  XP & Leveling System
+# ============================================================
+#  If disabled, the plugin runs in fishing-only mode:
+#  no levels, no skills, no database, no discovery progress.
 xp-system:
+  # Master switch for levels, skills and the database.
   enabled: true
 
   database:
-    # Database type: sqlite or mysql
+    # Database type: "sqlite" (single file, no setup) or "mysql"
     type: sqlite
-    # MySQL credentials (ignored if type is sqlite)
+
+    # MySQL credentials (ignored if type is sqlite).
     # WARNING: Do not use default credentials on production servers!
     host: localhost
     port: 3306
@@ -84,33 +135,38 @@ xp-system:
 
   # Adds a 2% (0.02) luck bonus per fishing level.
   # Example: A level 50 player gets +100% (x1.0 extra) luck.
-  # Note: High values can break the late-game economy by making rare fish too common.
+  # Note: High values can break the late-game economy by making
+  # rare fish too common.
   level-luck-bonus: 0.02
 
-# ==========================================
-# Economy System (Internal)
-# ==========================================
-# Sells custom fish for internal balance.
-# Final price = fish_price (from fish.yml) * fish_weight
+# ============================================================
+#  Economy System (Internal)
+# ============================================================
+#  Sells custom fish for the plugin's internal balance.
+#  Final price = fish_price (from fish.yml) * fish_weight
 economy:
+  # If false, fish cannot be sold and /phoenixfish sell is disabled.
   enabled: true
 
-# ==========================================
-# Tournament System
-# ==========================================
-# If disabled, admins cannot start tournaments via commands.
+# ============================================================
+#  Tournament System
+# ============================================================
+#  Timed fishing competitions with rewards for the top players.
+#  If disabled, admins cannot start tournaments via commands.
 tournament:
   enabled: true
 
   # Rewards for the top 3 players.
-  # %player% is replaced with the player's name.
+  # %player% is replaced with the winner's name.
   # Commands are executed by the console.
   rewards:
     1:
-      # If an admin uses the "/phoenixfish tournament addreward 1" command while holding an item,
-      # the plugin will automatically save a long encrypted string (Base64) here. Leave it empty ("") normally.
+      # If an admin uses "/phoenixfish tournament addreward 1"
+      # while holding an item, the plugin automatically saves a
+      # long encrypted string (Base64) here. Leave it ("") normally.
       item: ""
-      # You can run console commands here (e.g., give money, permission, or items from other plugins).
+
+      # Console commands executed for this rank.
       # You can use both 'item' and 'commands' at the same time!
       commands:
         - "eco give %player% 1000"
@@ -122,3 +178,42 @@ tournament:
       item: ""
       commands:
         - "eco give %player% 250"
+
+# ============================================================
+#  Fishing Mode System (Vanilla / PhoenixFish switching)
+# ============================================================
+#  Lets each player choose between the plugin's custom fishing
+#  (minigame, custom fish, weights, records, baits, skills) and
+#  Minecraft's vanilla fishing (loot tables, enchanted books,
+#  name tags, saddles...).
+#
+#  Commands:
+#    /phoenixfish toggle                  -> switch your own mode
+#    /phoenixfish toggle status           -> show your current mode
+#    /phoenixfish toggle status <player>  -> (Admin) view a player
+#    /phoenixfish toggle <player>         -> (Admin) switch a player
+#    /phoenixfish toggle reset <player>   -> (Admin) reset to default
+fishing-mode:
+  # Master switch for the whole feature.
+  # false = nobody can switch, everyone uses the plugin's
+  #         custom fishing (default-mode is ignored).
+  enabled: true
+
+  # Starting mode for players who have NOT made a choice yet:
+  #   custom  = plugin fishing (custom fish, minigame, baits, skills...)
+  #   vanilla = vanilla Minecraft fishing (enchanted books, vanilla
+  #             loot table, no plugin interference at all)
+  default-mode: custom
+
+  # If true, players need the "phoenixfish.toggle" permission to
+  # switch modes. Admins with "phoenixfish.admin" can always switch
+  # and manage other players.
+  require-permission: false
+
+  # Cooldown between mode switches, in seconds (anti-spam).
+  # 0 = disabled.
+  toggle-cooldown: 5
+
+  # If true, a server-wide announcement is sent when a player
+  # switches mode (message key: toggle_broadcast).
+  broadcast-change: false

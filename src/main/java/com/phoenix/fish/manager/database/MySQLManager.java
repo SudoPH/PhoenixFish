@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -147,16 +148,26 @@ public class MySQLManager implements IDatabase {
                         int craftingLevel = rs.getInt("crafting_level");
                         int totalCraftingXp = rs.getInt("total_crafting_xp");
 
-                        return new FishingData(uuid, fishingXp, fishingLevel, totalXp, discoveredFish,
+                        FishingData data = new FishingData(uuid, fishingXp, fishingLevel, totalXp, discoveredFish,
                                 skillPoints, fast, hunter, dbl, bait, balance,
                                 craftingXp, craftingLevel, totalCraftingXp);
+                        data.markLoaded();
+                        return data;
                     }
                 }
             } catch (SQLException e) {
                 String msg = plugin.getMessageManager().getPlainMessage("db_failed_load_data");
                 plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
+                // HATA DURUMUNDA BOŞ DATA DÖNDÜRME! Bu, autosave'in gerçek veriyi
+                // sıfırlarla ezmesine ve OYUNCU VERİSİ KAYBINA yol açar.
+                // Hatayı yukarı taşı ki CacheManager kaydetme yapmasın.
+                throw new CompletionException(e);
             }
-            return new FishingData(uuid, 0, 1, 0, new HashSet<>(), 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
+            // DB'de kayıt yok = yeni oyuncu. Bu geçerli bir durum, hata değil.
+            // Loaded olarak işaretle ki autosave bu oyuncuyu güvenle kaydedebilsin.
+            FishingData newData = new FishingData(uuid, 0, 1, 0, new HashSet<>(), 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
+            newData.markLoaded();
+            return newData;
         }, dbExecutor);
     }
 

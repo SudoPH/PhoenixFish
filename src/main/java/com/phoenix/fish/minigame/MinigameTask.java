@@ -177,6 +177,26 @@ public class MinigameTask {
     }
 
     private void handleWin() {
+        // ------------------------------------------------------------------
+        // FIX: Defensive check — make sure the player is STILL in custom
+        // mode before awarding a custom fish.
+        //
+        // toggle() already cancels the active minigame when switching to
+        // vanilla mode, but this is an extra safety net: if the player's
+        // mode was flipped between the moment handleWin() was scheduled
+        // and the moment it actually runs (race between scheduler ticks),
+        // we must NOT give them a custom fish.
+        //
+        // This is the final guard that ensures "vanilla mod = no custom
+        // fish, ever", regardless of how the player got there.
+        // ------------------------------------------------------------------
+        if (plugin.getFishingModeManager().isVanillaMode(player)) {
+            plugin.getLogger().warning(
+                    "MinigameTask.handleWin() aborted: player " + player.getName()
+                            + " is now in VANILLA fishing mode (cancelled mid-minigame).");
+            return;
+        }
+
         int amountToGive = calculateMultiCatchAmount();
 
         if (amountToGive > 1) {
@@ -212,6 +232,10 @@ public class MinigameTask {
             meta.lore(lore);
             caughtItem.setItemMeta(meta);
         }
+
+        // H2 FIX: Ağırlığı item'ın PDC'sine yaz ki ağırlığa göre satış çalışsın.
+        // (Eskiden weight sadece lore'da gösteriliyordu, veri olarak hiç yazılmıyordu.)
+        plugin.getEconomyManager().setWeight(caughtItem, weight);
 
         Map<Integer, ItemStack> overflow = player.getInventory().addItem(caughtItem);
         if (!overflow.isEmpty()) {

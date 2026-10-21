@@ -3,7 +3,7 @@ version: "${project.version}"
 main: com.phoenix.fish.PhoenixFish
 api-version: "1.21"
 author: Sudo
-description: Albion-style custom fishing system with optional XP and minigame.
+description: Custom fishing system with optional XP and minigame.
 
 # Ensures PhoenixCraft loads first if installed (required for custom recipe API hook)
 softdepend:
@@ -16,17 +16,25 @@ libraries:
 
 commands:
   phoenixfish:
-    description: Main command for PhoenixFish (give custom rods, fix items).
-    usage: /phoenixfish <fix | fixall | giverod | catalog | tournament>
+    description: Main command for PhoenixFish (toggle fishing mode, catalog, skills, sell, tournaments and admin tools).
+    usage: /phoenixfish <toggle | status | catalog | skills | sell | fix | tournament | giverod | addlevel>
     aliases: [pfish, pf]
 
 permissions:
-  phoenixfish.admin:
-    description: Allows giving custom rods and using fixall command.
-    default: op
+  # ---------- Player permissions ----------
   phoenixfish.use:
     description: Allows using the /phoenixfish fix command to fix own inventory.
     default: true
+  phoenixfish.toggle:
+    description: Allows switching between vanilla and PhoenixFish fishing modes (/phoenixfish toggle).
+    # Only enforced when "fishing-mode.require-permission" is true in config.yml.
+    # Admins with phoenixfish.admin can always toggle and manage other players.
+    default: true
   phoenixfish.tournament.admin:
-    description: Allows starting and stopping fishing tournaments.
+    description: Allows starting/stopping tournaments and setting tournament rewards.
+    default: op
+
+  # ---------- Admin permissions ----------
+  phoenixfish.admin:
+    description: Admin tools - fixall, giverod, viewing/switching/resetting other players' fishing mode.
     default: op

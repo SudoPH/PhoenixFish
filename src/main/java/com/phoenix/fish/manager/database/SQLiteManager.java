@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,19 @@ public class SQLiteManager implements IDatabase {
         } catch (Exception e) {
             String msg = plugin.getMessageManager().getPlainMessage("db_failed_connect_sqlite");
             plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
+
+            // DUZELTME: Hatayi yutma! Init basarisiz olursa PhoenixFish.setupDatabaseSystem
+            // bu exception'i yakalayip database = null yapar (DB'siz mod).
+            // Eskiden hata yutuluyordu, dbExecutor null kaliyordu ve sonrasinda
+            // loadData/saveData icinde NPE olusuyordu.
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ignored) {
+                }
+                this.connection = null;
+            }
+            throw new IllegalStateException("SQLite init failed", e);
         }
     }
 
@@ -114,7 +128,9 @@ public class SQLiteManager implements IDatabase {
                             discoveredFish.addAll(Arrays.asList(discoveredStr.split(",")));
                         }
 
-                        return new FishingData(uuid,
+                        // DUZELTME: DB'den yuklenen veri markLoaded() ile isaretlenir.
+                        // isLoaded=false olan veriler CacheManager tarafindan ASLA kaydedilmez.
+                        FishingData data = new FishingData(uuid,
                                 rs.getInt("fishing_xp"),
                                 rs.getInt("fishing_level"),
                                 rs.getInt("total_xp"),
@@ -128,13 +144,28 @@ public class SQLiteManager implements IDatabase {
                                 rs.getInt("crafting_xp"),
                                 rs.getInt("crafting_level"),
                                 rs.getInt("total_crafting_xp"));
+                        data.markLoaded();
+                        return data;
                     }
                 }
             } catch (SQLException e) {
                 String msg = plugin.getMessageManager().getPlainMessage("db_failed_load_data_sqlite");
                 plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
+
+                // DUZELTME (VERI KAYBI FIX'I): Hata durumunda bos data DONDURME!
+                // Eskiden burada "return new FishingData(uuid, 0, 1, ...)" vardi:
+                // DB gecici hata verince oyuncunun gercek verisi bos veriyle degistiriliyor
+                // ve autosave bu bos veriyi DB'ye yazip tum ilerlemeyi sifirliyordu.
+                // Simdi future exception ile tamamlaniyor; CacheManager.exceptionally()
+                // bunu yakalayip temp veriyi hicbir zaman kaydetmiyor.
+                throw new CompletionException(e);
             }
-            return new FishingData(uuid, 0, 1, 0, new HashSet<>(), 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
+
+            // Yeni oyuncu (DB'de kayit yok) — gecerli durum, hata degil.
+            // Kaydedilebilmesi icin isaretlenir.
+            FishingData fresh = new FishingData(uuid, 0, 1, 0, new HashSet<>(), 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
+            fresh.markLoaded();
+            return fresh;
         }, dbExecutor);
     }
 

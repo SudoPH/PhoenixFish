@@ -115,6 +115,21 @@ public class FishingListener implements Listener {
     public void onFish(PlayerFishEvent event) {
         Player player = event.getPlayer();
 
+        // ------------------------------------------------------------------
+        // FIX 1: Vanilla mode MUST be checked FIRST in onFish.
+        //
+        // Vanilla players never have their fishing event cancelled.
+        // Also clean up any stale minigame just in case.
+        // ------------------------------------------------------------------
+        if (plugin.getFishingModeManager().isVanillaMode(player)) {
+            MinigameTask staleTask = activeMinigames.remove(player.getUniqueId());
+            if (staleTask != null) {
+                staleTask.cancel();
+            }
+            return;
+        }
+
+        // Safety: never interrupt a minigame that is already running.
         if (activeMinigames.containsKey(player.getUniqueId())) {
             event.setCancelled(true);
             return;
@@ -130,6 +145,11 @@ public class FishingListener implements Listener {
     }
 
     private void handleFishCatch(PlayerFishEvent event, Player player) {
+        // Defensive: should never be reached for vanilla players.
+        if (plugin.getFishingModeManager().isVanillaMode(player)) {
+            return;
+        }
+
         boolean minigameEnabled = plugin.getConfig().getBoolean("settings.minigame-enabled", true);
         ItemStack rod = player.getInventory().getItemInMainHand();
 
@@ -305,6 +325,27 @@ public class FishingListener implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
+        // ------------------------------------------------------------------
+        // FIX 2: Vanilla mode — never cancel interact events.
+        //
+        // This is the fix for the "ikinci sefer attım çekemedim, suda kaldı
+        // olta" bug. Previously, if activeMinigames had a stale entry for
+        // the player (e.g. from a previous custom-mode minigame that
+        // wasn't cleaned up perfectly), the right-click to reel in the
+        // bobber would be cancelled, and the bobber would be stuck in the
+        // water.
+        //
+        // Now: vanilla players ALWAYS pass through, and any stale minigame
+        // entry is cleaned up defensively.
+        // ------------------------------------------------------------------
+        if (plugin.getFishingModeManager().isVanillaMode(player)) {
+            MinigameTask staleTask = activeMinigames.remove(player.getUniqueId());
+            if (staleTask != null) {
+                staleTask.cancel();
+            }
+            return;
+        }
+
         MinigameTask task = activeMinigames.get(player.getUniqueId());
         if (task != null) {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -325,9 +366,10 @@ public class FishingListener implements Listener {
                     FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
                     if (data == null || data.getCurrentLevel() < requiredLevel) {
                         event.setCancelled(true);
-                        player.sendMessage("§cBu oltayı kullanmak için " + requiredLevel
-                                + " balıkçılık seviyesi gerekir! (Mevcut: " +
-                                (data != null ? data.getCurrentLevel() : 0) + ")");
+                        Map<String, String> rodPh = Map.of(
+                                "%level%", String.valueOf(requiredLevel),
+                                "%current%", String.valueOf(data != null ? data.getCurrentLevel() : 0));
+                        player.sendMessage(plugin.getMessageManager().getMessage("rod_level_required", true, rodPh));
                         player.updateInventory();
                     }
                 }

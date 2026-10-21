@@ -38,6 +38,16 @@ public class CacheManager implements Listener {
         return playerCache.values();
     }
 
+    /**
+     * Yalnızca DB'den başarıyla yüklenmiş (loaded == true) verileri döndürür.
+     * DB hatası durumunda oluşturulan boş temp datanın kaydedilmesini engeller.
+     */
+    public Collection<FishingData> getSavableData() {
+        return playerCache.values().stream()
+                .filter(FishingData::isLoaded)
+                .toList();
+    }
+
     private void startAutoSave() {
         if (autoSaveTask != null) {
             autoSaveTask.cancel();
@@ -46,13 +56,14 @@ public class CacheManager implements Listener {
         autoSaveTask = new BukkitRunnable() {
             @Override
             public void run() {
-                if (playerCache.isEmpty())
+                Collection<FishingData> savable = getSavableData();
+                if (savable.isEmpty())
                     return;
 
-                plugin.getDatabase().batchSave(playerCache.values());
+                plugin.getDatabase().batchSave(savable);
 
                 String message = plugin.getMessageManager().getPlainMessage("console_autosave");
-                message = message.replace("%players%", String.valueOf(playerCache.size()));
+                message = message.replace("%players%", String.valueOf(savable.size()));
                 plugin.getLogger().info(message);
             }
         };
@@ -75,6 +86,8 @@ public class CacheManager implements Listener {
         long gen = sessionIdCounter.incrementAndGet();
         sessionGenerations.put(uuid, gen);
 
+        // Temp data: loaded = false başlar. DB yüklemesi başarılı olana kadar
+        // autosave/quit-save bu veriyi YAZMAZ (veri kaybı koruması).
         FishingData tempData = new FishingData(uuid, 0, 1, 0, null, 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
         playerCache.put(uuid, tempData);
 
@@ -83,6 +96,9 @@ public class CacheManager implements Listener {
                 plugin.getLogger().warning("Could not load data for " + uuid + ", using temp data.");
                 return;
             }
+
+            // Savunmacı katman: IDatabase implementasyonu markLoaded()'ı unutsa bile garanti.
+            loadedData.markLoaded();
 
             playerCache.compute(uuid, (key, currentTempData) -> {
                 Long currentGen = sessionGenerations.get(uuid);
@@ -99,6 +115,13 @@ public class CacheManager implements Listener {
 
                 return loadedData;
             });
+        }).exceptionally(ex -> {
+            // DB yüklemesi BAŞARISIZ: CompletionException buraya düşer.
+            // Temp data (loaded=false) cache'te kalır; oyuncu o tur oynayabilir
+            // ama verisi KAYDEDİLMEZ -> gerçek DB verisi asla boş veriyle ezilmez.
+            plugin.getLogger().severe("Failed to load data for " + uuid
+                    + ", session will NOT be saved: " + ex.getMessage());
+            return null;
         });
     }
 
@@ -111,10 +134,9 @@ public class CacheManager implements Listener {
         sessionGenerations.remove(uuid);
 
         FishingData data = playerCache.remove(uuid);
-        if (data != null) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                plugin.getDatabase().saveData(uuid, data);
-            });
+        if (data != null && data.isLoaded()) {
+            // saveData zaten dbExecutor üzerinde async çalışıyor -> çift async sarmaya gerek yok
+            plugin.getDatabase().saveData(uuid, data);
         }
     }
 
@@ -165,8 +187,9 @@ public class CacheManager implements Listener {
     }
 
     public void saveAll() {
-        if (playerCache.isEmpty())
+        Collection<FishingData> savable = getSavableData();
+        if (savable.isEmpty())
             return;
-        plugin.getDatabase().batchSave(playerCache.values());
+        plugin.getDatabase().batchSave(savable);
     }
 }

@@ -44,6 +44,7 @@ public final class PhoenixFish extends JavaPlugin {
     private RecordManager recordManager;
     private SkillManager skillManager;
     private EconomyManager economyManager;
+    private FishingModeManager fishingModeManager;
 
     private PhoenixFishAPI api;
 
@@ -77,6 +78,10 @@ public final class PhoenixFish extends JavaPlugin {
         this.tournamentManager = new TournamentManager(this);
         this.economyManager = new EconomyManager(this);
         this.skillManager = new SkillManager(this);
+
+        // Modular fishing mode system (vanilla/custom toggle).
+        // Must be initialized BEFORE FishingListener and FishCommand use it.
+        this.fishingModeManager = new FishingModeManager(this);
 
         setupDatabaseSystem();
 
@@ -115,7 +120,9 @@ public final class PhoenixFish extends JavaPlugin {
                     : "Saving cache...";
             getLogger().info(logPrefix);
 
-            Collection<FishingData> allData = cacheManager.getAllCachedData();
+            // SADECE güvenli (DB'den başarıyla yüklenmiş) verileri kaydet.
+            // Yüklemesi bitmemiş / hata almış temp datalar gerçek DB verisini ezmesin.
+            Collection<FishingData> allData = cacheManager.getSavableData();
             if (!allData.isEmpty()) {
                 try {
                     database.batchSave(allData).get(5, TimeUnit.SECONDS);
@@ -297,6 +304,10 @@ public final class PhoenixFish extends JavaPlugin {
 
     public EconomyManager getEconomyManager() {
         return economyManager;
+    }
+
+    public FishingModeManager getFishingModeManager() {
+        return fishingModeManager;
     }
 
     public boolean isXpSystemEnabled() {

@@ -26,6 +26,13 @@ public class FishingData {
 
     private double balance;
 
+    /**
+     * Bu verinin DB'den başarıyla yüklenip yüklenmediğini gösterir.
+     * loadData() hatası durumunda boş data ile kaybetmeyi önlemek için
+     * autosave yalnızca loaded == true olan verileri kaydeder.
+     */
+    private volatile boolean loaded = false;
+
     public FishingData() {
         this(null, 0, 1, 0, null, 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
     }
@@ -57,6 +64,14 @@ public class FishingData {
 
     private int clampSkill(int level) {
         return Math.min(5, Math.max(0, level));
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void markLoaded() {
+        this.loaded = true;
     }
 
     public UUID getUuid() {

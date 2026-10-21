@@ -2,11 +2,13 @@ package com.phoenix.fish.command;
 
 import com.phoenix.fish.PhoenixFish;
 import com.phoenix.fish.data.FishingData;
+import com.phoenix.fish.manager.FishingModeManager;
 import com.phoenix.fish.manager.ItemFixer;
 import com.phoenix.fish.manager.ItemUtils;
+import com.phoenix.fish.manager.MessageManager;
 import com.phoenix.fish.manager.TournamentManager;
 import com.phoenix.fish.task.ContainerFixTask;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -25,11 +27,9 @@ import java.util.Map;
 public class FishCommand implements CommandExecutor {
 
     private final PhoenixFish plugin;
-    private final MiniMessage miniMessage;
 
     public FishCommand(PhoenixFish plugin) {
         this.plugin = plugin;
-        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
@@ -59,6 +59,7 @@ public class FishCommand implements CommandExecutor {
             case "skills" -> plugin.getSkillManager().openMenu(player);
             case "tournament" -> handleTournament(player, args);
             case "sell" -> handleSell(player, args);
+            case "toggle" -> handleToggle(player, args);
             case "addlevel" -> handleAddLevel(player, args, false);
             case "addcraft" -> handleAddLevel(player, args, true);
             default -> sendHelp(player);
@@ -263,7 +264,13 @@ public class FishCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            player.sendMessage("§cKullanım: /phoenixfish " + args[0] + " <miktar>");
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_addlevel", true));
+            return;
+        }
+
+        // H3 FIX: cacheManager is null when the XP system is disabled -> NPE.
+        if (!plugin.isXpSystemEnabled() || plugin.getCacheManager() == null) {
+            player.sendMessage(plugin.getMessageManager().getMessage("addlevel_xp_disabled", true));
             return;
         }
 
@@ -271,23 +278,178 @@ public class FishCommand implements CommandExecutor {
             int levelsToAdd = Integer.parseInt(args[1]);
             FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
             if (data == null) {
-                player.sendMessage("§cVerilerin yüklenemedi, tekrar deneyin.");
+                player.sendMessage(plugin.getMessageManager().getMessage("addlevel_data_error", true));
                 return;
             }
 
             if (isCrafting) {
                 int newLevel = Math.max(1, data.getCraftingLevel() + levelsToAdd);
                 data.setCraftingLevel(newLevel);
-                player.sendMessage("§aBaşarıyla " + levelsToAdd + " Zanaat(Crafting) seviyesi eklendi! Yeni seviye: §e"
-                        + newLevel);
+                player.sendMessage(plugin.getMessageManager().getMessage("addlevel_success_crafting", true,
+                        Map.of("%amount%", String.valueOf(levelsToAdd),
+                                "%level%", String.valueOf(newLevel))));
             } else {
                 int newLevel = Math.max(1, data.getCurrentLevel() + levelsToAdd);
                 data.setCurrentLevel(newLevel);
-                player.sendMessage(
-                        "§aBaşarıyla " + levelsToAdd + " Balıkçılık seviyesi eklendi! Yeni seviye: §e" + newLevel);
+                player.sendMessage(plugin.getMessageManager().getMessage("addlevel_success_fishing", true,
+                        Map.of("%amount%", String.valueOf(levelsToAdd),
+                                "%level%", String.valueOf(newLevel))));
             }
         } catch (NumberFormatException e) {
-            player.sendMessage("§cLütfen geçerli bir sayı girin!");
+            player.sendMessage(plugin.getMessageManager().getMessage("addlevel_invalid_number", true));
+        }
+    }
+
+    // ==================================================================
+    // FISHING MODE TOGGLE
+    //   /phoenixfish toggle                  -> switch your own mode
+    //   /phoenixfish toggle status           -> show your current mode
+    //   /phoenixfish toggle status <player>  -> (Admin) view a player
+    //   /phoenixfish toggle <player>         -> (Admin) switch a player
+    //   /phoenixfish toggle reset <player>   -> (Admin) reset to default
+    // All text comes from messages_tr.yml / messages_en.yml keys.
+    // ==================================================================
+    private void handleToggle(Player player, String[] args) {
+        FishingModeManager modeManager = plugin.getFishingModeManager();
+
+        // /phoenixfish toggle -> self toggle
+        if (args.length == 1) {
+            handleToggleResult(player, player, modeManager.toggle(player), true);
+            return;
+        }
+
+        String sub = args[1].toLowerCase();
+        switch (sub) {
+            case "status" -> {
+                if (args.length >= 3) {
+                    if (!player.hasPermission("phoenixfish.admin")) {
+                        player.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+                        return;
+                    }
+                    Player target = Bukkit.getPlayerExact(args[2]);
+                    if (target == null) {
+                        player.sendMessage(plugin.getMessageManager().getMessage("fishing_mode_player_not_found",
+                                true, Map.of("%player%", args[2])));
+                        return;
+                    }
+                    sendToggleStatus(player, target, false);
+                } else {
+                    sendToggleStatus(player, player, true);
+                }
+            }
+            case "reset" -> {
+                if (args.length < 3) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("usage_toggle_admin_reset", true));
+                    return;
+                }
+                if (!player.hasPermission("phoenixfish.admin")) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+                    return;
+                }
+                Player target = Bukkit.getPlayerExact(args[2]);
+                if (target == null) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("fishing_mode_player_not_found",
+                            true, Map.of("%player%", args[2])));
+                    return;
+                }
+
+                modeManager.resetPlayer(target.getUniqueId());
+
+                // Resulting mode is now the server default
+                boolean vanilla = modeManager.isVanillaMode(target);
+                String modeName = plugin.getMessageManager()
+                        .getPlainMessage(vanilla ? "mode_vanilla" : "mode_custom");
+
+                player.sendMessage(plugin.getMessageManager().getMessage("fishing_mode_reset", true,
+                        Map.of("%player%", target.getName(), "%mode%", modeName)));
+                sendModeInfo(target, vanilla);
+                playSoundFromConfig(target, "sounds.mode_toggle", Sound.UI_BUTTON_CLICK, 0.6f, 1.5f);
+            }
+            default -> {
+                // /phoenixfish toggle <player> -> (Admin) switch another player
+                if (!player.hasPermission("phoenixfish.admin")) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+                    return;
+                }
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null) {
+                    player.sendMessage(plugin.getMessageManager().getMessage("fishing_mode_player_not_found",
+                            true, Map.of("%player%", args[1])));
+                    return;
+                }
+                handleToggleResult(player, target, modeManager.toggle(target), false);
+            }
+        }
+    }
+
+    private void handleToggleResult(CommandSender actor, Player target,
+            FishingModeManager.ToggleResult result, boolean self) {
+        MessageManager messages = plugin.getMessageManager();
+
+        switch (result) {
+            case SUCCESS -> notifyModeChange(actor, target, self);
+            case NO_PERMISSION ->
+                    actor.sendMessage(messages.getMessage("no_permission", true));
+            case FEATURE_DISABLED ->
+                    actor.sendMessage(messages.getMessage("fishing_mode_disabled", true));
+            case COOLDOWN -> {
+                long seconds = plugin.getFishingModeManager().getRemainingCooldown(target);
+                actor.sendMessage(messages.getMessage("fishing_mode_cooldown", true,
+                        Map.of("%seconds%", String.valueOf(seconds))));
+            }
+        }
+    }
+
+    private void sendToggleStatus(Player viewer, Player target, boolean self) {
+        MessageManager messages = plugin.getMessageManager();
+        FishingModeManager modeManager = plugin.getFishingModeManager();
+
+        boolean vanilla = modeManager.isVanillaMode(target);
+        String modeName = messages.getPlainMessage(vanilla ? "mode_vanilla" : "mode_custom");
+
+        boolean hasChoice = modeManager.hasPlayerChoice(target);
+        String source = messages.getPlainMessage(
+                hasChoice ? "fishing_mode_source_choice" : "fishing_mode_source_default");
+
+        if (self) {
+            viewer.sendMessage(messages.getMessage("fishing_mode_status", true,
+                    Map.of("%mode%", modeName, "%source%", source)));
+        } else {
+            viewer.sendMessage(messages.getMessage("fishing_mode_status_other", true,
+                    Map.of("%player%", target.getName(), "%mode%", modeName, "%source%", source)));
+        }
+    }
+
+    private void notifyModeChange(CommandSender actor, Player target, boolean self) {
+        MessageManager messages = plugin.getMessageManager();
+
+        boolean vanilla = plugin.getFishingModeManager().isVanillaMode(target);
+        String modeName = messages.getPlainMessage(vanilla ? "mode_vanilla" : "mode_custom");
+
+        // The affected player always gets the multi-line info list
+        // (self-toggle: this list is also the confirmation message)
+        sendModeInfo(target, vanilla);
+
+        // Admin forced the change -> also confirm to the admin
+        if (!self) {
+            actor.sendMessage(messages.getMessage("fishing_mode_changed_other", true,
+                    Map.of("%player%", target.getName(), "%mode%", modeName)));
+        }
+
+        // Optional server-wide broadcast (config: fishing-mode.broadcast-change)
+        if (plugin.getConfig().getBoolean("fishing-mode.broadcast-change", false)) {
+            Bukkit.broadcast(messages.getMessage("fishing_mode_broadcast", true,
+                    Map.of("%player%", target.getName(), "%mode%", modeName)));
+        }
+
+        playSoundFromConfig(target, "sounds.mode_toggle", Sound.UI_BUTTON_CLICK, 0.6f, 1.5f);
+    }
+
+    /** Sends the multi-line "mode enabled" info list to a player (no prefix - it is built into the list). */
+    private void sendModeInfo(Player target, boolean vanilla) {
+        String infoKey = vanilla ? "fishing_mode_vanilla_enabled" : "fishing_mode_custom_enabled";
+        for (Component line : plugin.getMessageManager().getMessageList(infoKey, null)) {
+            target.sendMessage(line);
         }
     }
 
@@ -297,13 +459,17 @@ public class FishCommand implements CommandExecutor {
         player.sendMessage(plugin.getMessageManager().getMessage("usage_catalog", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_skills", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_sell", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_toggle", true));
+        player.sendMessage(plugin.getMessageManager().getMessage("usage_toggle_status", true));
         player.sendMessage(plugin.getMessageManager().getMessage("usage_tournament", true));
         if (player.hasPermission("phoenixfish.admin")) {
             player.sendMessage(plugin.getMessageManager().getMessage("usage_fixall", true));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_toggle_admin", true));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_toggle_admin_reset", true));
         }
         if (player.isOp()) {
-            player.sendMessage("§7/phoenixfish addlevel <miktar> §8- §7Balıkçılık seviyesi ekle");
-            player.sendMessage("§7/phoenixfish addcraft <miktar> §8- §7Zanaat seviyesi ekle");
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_addlevel_help", true));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage_addcraft_help", true));
         }
     }
 
@@ -316,7 +482,9 @@ public class FishCommand implements CommandExecutor {
             try {
                 soundToPlay = Sound.valueOf(soundName.toUpperCase());
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid sound in config: " + soundName + " at path: " + path);
+                // Console-only diagnostic (intentionally not a language key)
+                plugin.getLogger().warning("Invalid sound in config: " + soundName
+                        + " (path: " + path + "). Using the default sound.");
             }
         }
 

@@ -54,6 +54,22 @@ public class EconomyManager {
         return meta.getPersistentDataContainer().getOrDefault(weightKey, PersistentDataType.DOUBLE, 0.0);
     }
 
+    /**
+     * H2 FIX: Balık item'ının ağırlığını PDC'ye yazar.
+     * Eklentide getWeight() vardı ama yazan kod hiç yoktu -> ağırlığa göre
+     * satış sistemi hiçbir zaman çalışmıyordu. MinigameTask.handleWin() ve
+     * FishingListener.giveFishDirectly() bu metodu çağırır.
+     */
+    public void setWeight(ItemStack item, double weight) {
+        if (item == null || !item.hasItemMeta())
+            return;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
+            return;
+        meta.getPersistentDataContainer().set(weightKey, PersistentDataType.DOUBLE, weight);
+        item.setItemMeta(meta);
+    }
+
     public double calculatePrice(ItemStack item, CustomFish fish) {
         if (fish == null)
             return 0.0;
@@ -145,7 +161,14 @@ public class EconomyManager {
                     inv.setItem(i, null);
                 }
             } else {
-                player.getInventory().addItem(item);
+                // FIX 7: Envanter doluysa addItem kalan item'ı sessizce kaybediyordu.
+                // Sığmayan item'lar oyuncunun ayaklarına atılır.
+                Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+                if (!leftover.isEmpty()) {
+                    for (ItemStack rest : leftover.values()) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                    }
+                }
                 inv.setItem(i, null);
             }
         }

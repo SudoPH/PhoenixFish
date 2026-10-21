@@ -105,6 +105,14 @@ public class BaitManager {
         if (meta == null)
             return null;
 
+        // H4 FIX: Önce PDC'den bait_id oku. Tüm yemlere loadBaits() sırasında
+        // bait_id yazılıyor -> CMD'siz yemler de artık algılanır.
+        String baitId = meta.getPersistentDataContainer().get(baitKey, PersistentDataType.STRING);
+        if (baitId != null) {
+            return baits.get(baitId);
+        }
+
+        // Son çare: CMD cache'ine bak (PDC'siz eski/elle verilmiş item'lar için).
         int cmd = ItemUtils.getCMD(item);
         if (cmd <= 0)
             return null;

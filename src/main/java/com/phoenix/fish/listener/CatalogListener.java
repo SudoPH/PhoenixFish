@@ -7,9 +7,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Map;
 
 public class CatalogListener implements Listener {
 
@@ -37,12 +41,12 @@ public class CatalogListener implements Listener {
         if (!isMainMenu && !isPageMenu)
             return;
 
+        event.setCancelled(true);
+
         if (event.getClickedInventory() == null
                 || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
             return;
         }
-
-        event.setCancelled(true);
 
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta())
@@ -79,6 +83,42 @@ public class CatalogListener implements Listener {
                 }
             }
             plugin.getCatalogManager().openPage(player, category, page);
+        }
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player player))
+            return;
+
+        Inventory top = event.getInventory();
+        if (top == null)
+            return;
+
+        boolean isMainMenu = top.equals(plugin.getCatalogManager().getMainMenu());
+        String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        boolean isPageMenu = title.contains(pageWord);
+
+        if (!isMainMenu && !isPageMenu)
+            return;
+
+        // H5 FIX (güvenlik ağı): Her türlü yoluyla GUI'ye sızmış yabancı item
+        // varsa (eski sürümden kalan vb.) oyuncuya iade et, butonları dokunma.
+        for (int i = 0; i < top.getSize(); i++) {
+            ItemStack item = top.getItem(i);
+            if (item == null || item.getType().isAir())
+                continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null && meta.getPersistentDataContainer().has(actionKey, PersistentDataType.STRING)) {
+                continue; // GUI butonu, yerinde kalabilir
+            }
+
+            top.setItem(i, null);
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+            for (ItemStack rest : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            }
         }
     }
 }
