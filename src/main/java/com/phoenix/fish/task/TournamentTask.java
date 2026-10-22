@@ -38,4 +38,20 @@ public class TournamentTask extends BukkitRunnable {
             }
         }
     }
+
+    // =========================================================================
+    // FEATURE #11: PAPI için kalan süre getter'ı.
+    //
+    // %phoenixfish_tournament_time_left% placeholder'ı TournamentManager'ın
+    // getTimeLeftSeconds() metodundan geliyor, o da bu metodu çağırıyor.
+    //
+    // Volatile olarak işaretli çünkü:
+    //   - TournamentTask.run() main thread'de çalışır (BukkitRunnable)
+    //   - getSecondsLeft() PAPI üzerinden herhangi bir thread'den çağrılabilir
+    //   - Volatile, bir thread'in yazdığı değerin diğer thread'ler tarafından
+    //     görülmesini garanti eder (visibility)
+    // =========================================================================
+    public int getSecondsLeft() {
+        return secondsLeft;
+    }
 }

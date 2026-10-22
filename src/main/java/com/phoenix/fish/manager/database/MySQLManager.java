@@ -39,9 +39,7 @@ public class MySQLManager implements IDatabase {
         String user = plugin.getConfig().getString("xp-system.database.username", "root");
         String pass = plugin.getConfig().getString("xp-system.database.password", "");
 
-        String jdbcUrl = String.format(
-                "jdbc:mysql://%s:%d/%s?useSSL=true&requireSSL=false&serverTimezone=UTC&characterEncoding=utf8",
-                host, port, name);
+        String jdbcUrl = buildJdbcUrl(host, port, name);
         config.setJdbcUrl(jdbcUrl);
         config.setUsername(user);
         config.setPassword(pass);
@@ -52,7 +50,13 @@ public class MySQLManager implements IDatabase {
         config.setMaxLifetime(1800000);
         config.setLeakDetectionThreshold(5000);
 
-        this.dataSource = new HikariDataSource(config);
+        try {
+            this.dataSource = new HikariDataSource(config);
+        } catch (RuntimeException e) {
+            String msg = plugin.getMessageManager().getPlainMessage("db_failed_connect_mysql");
+            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
+            throw new IllegalStateException("MySQL HikariCP init failed", e);
+        }
 
         this.dbExecutor = Executors.newFixedThreadPool(10, r -> {
             Thread t = new Thread(r, "PhoenixFish-MySQL-Worker");
@@ -60,12 +64,58 @@ public class MySQLManager implements IDatabase {
             return t;
         });
 
-        createTable();
-        addMissingColumns();
+        // H-4 FIX: throw on critical init errors so plugin enable fails fast instead of starting "active" with a broken DB.
+        try {
+            createTable();
+            addMissingColumns();
+        } catch (SQLException e) {
+            String msg = plugin.getMessageManager().getPlainMessage("db_failed_create_table");
+            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
+            try {
+                this.dataSource.close();
+            } catch (RuntimeException ignored) {
+            }
+            throw new IllegalStateException("MySQL schema init failed", e);
+        }
+
         plugin.getLogger().info(plugin.getMessageManager().getPlainMessage("db_connected_mysql"));
     }
 
-    private void createTable() {
+    private String buildJdbcUrl(String host, int port, String name) {
+        boolean useSSL = plugin.getConfig().getBoolean("xp-system.database.use-ssl", true);
+        boolean verifyCert = plugin.getConfig().getBoolean("xp-system.database.verify-server-certificate", true);
+
+        StringBuilder url = new StringBuilder();
+        url.append("jdbc:mysql://").append(host).append(":").append(port).append("/").append(name);
+        url.append("?serverTimezone=UTC&characterEncoding=utf8");
+
+        if (useSSL) {
+            url.append("&useSSL=true&requireSSL=true");
+            if (verifyCert) {
+                url.append("&verifyServerCertificate=true");
+            } else {
+                url.append("&verifyServerCertificate=false");
+                url.append("&allowPublicKeyRetrieval=true");
+            }
+        } else {
+            url.append("&useSSL=false");
+            url.append("&allowPublicKeyRetrieval=true");
+        }
+
+        String mode;
+        if (useSSL && verifyCert)
+            mode = "production (SSL + cert verify)";
+        else if (useSSL)
+            mode = "self-signed dev (SSL, no cert verify)";
+        else
+            mode = "plaintext dev (NO SSL)";
+        plugin.getLogger().info("MySQL connection mode: " + mode);
+        plugin.getLogger().info("MySQL JDBC URL: " + url);
+
+        return url.toString();
+    }
+
+    private void createTable() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS player_professions (" +
                 "uuid VARCHAR(36) PRIMARY KEY, " +
                 "total_xp BIGINT DEFAULT 0, " +
@@ -84,13 +134,10 @@ public class MySQLManager implements IDatabase {
                 ");";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.execute();
-        } catch (SQLException e) {
-            String msg = plugin.getMessageManager().getPlainMessage("db_failed_create_table");
-            plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
         }
     }
 
-    private void addMissingColumns() {
+    private void addMissingColumns() throws SQLException {
         String[] intColumns = {
                 "skill_points", "skill_fast", "skill_hunter", "skill_double", "skill_bait",
                 "crafting_xp", "crafting_level", "total_crafting_xp"
@@ -99,23 +146,50 @@ public class MySQLManager implements IDatabase {
 
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String col : intColumns) {
-                try {
-                    stmt.execute("ALTER TABLE player_professions ADD COLUMN " + col + " INT DEFAULT 0;");
-                } catch (SQLException ignored) {
-                }
+                addColumnIfMissing(stmt, col, "INT DEFAULT 0");
             }
             for (String col : doubleColumns) {
-                try {
-                    stmt.execute("ALTER TABLE player_professions ADD COLUMN " + col + " DOUBLE DEFAULT 0.0;");
-                } catch (SQLException ignored) {
-                }
+                addColumnIfMissing(stmt, col, "DOUBLE DEFAULT 0.0");
             }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("Could not check/add missing columns to MySQL: " + e.getMessage());
         }
     }
 
-    @SuppressWarnings("null")
+    private void addColumnIfMissing(Statement stmt, String col, String type) throws SQLException {
+        String sql = "ALTER TABLE player_professions ADD COLUMN " + col + " " + type + ";";
+        try {
+            stmt.execute(sql);
+            plugin.getLogger().info("MySQL migration: added column '" + col + "' to player_professions.");
+        } catch (SQLException e) {
+            if (isColumnAlreadyExistsError(e)) {
+                // expected — silent
+                return;
+            }
+            plugin.getLogger().warning(
+                    "MySQL: could not add column '" + col + "' to player_professions: "
+                            + e.getMessage() + " (SQL state: " + e.getSQLState()
+                            + ", error code: " + e.getErrorCode() + ")");
+            throw e;
+        }
+    }
+
+    private static boolean isColumnAlreadyExistsError(SQLException e) {
+        if (e == null)
+            return false;
+        if (e.getErrorCode() == 1060)
+            return true;
+        if ("42S21".equals(e.getSQLState()))
+            return true;
+        String msg = e.getMessage();
+        String lowerMsg = msg != null ? msg.toLowerCase() : "";
+        if (lowerMsg.contains("duplicate column name"))
+            return true;
+        if (lowerMsg.contains("already exists"))
+            return true;
+        if ("X014".equals(e.getSQLState()))
+            return true;
+        return false;
+    }
+
     @Override
     public CompletableFuture<FishingData> loadData(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
@@ -158,13 +232,8 @@ public class MySQLManager implements IDatabase {
             } catch (SQLException e) {
                 String msg = plugin.getMessageManager().getPlainMessage("db_failed_load_data");
                 plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
-                // HATA DURUMUNDA BOŞ DATA DÖNDÜRME! Bu, autosave'in gerçek veriyi
-                // sıfırlarla ezmesine ve OYUNCU VERİSİ KAYBINA yol açar.
-                // Hatayı yukarı taşı ki CacheManager kaydetme yapmasın.
                 throw new CompletionException(e);
             }
-            // DB'de kayıt yok = yeni oyuncu. Bu geçerli bir durum, hata değil.
-            // Loaded olarak işaretle ki autosave bu oyuncuyu güvenle kaydedebilsin.
             FishingData newData = new FishingData(uuid, 0, 1, 0, new HashSet<>(), 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
             newData.markLoaded();
             return newData;
@@ -194,6 +263,7 @@ public class MySQLManager implements IDatabase {
                     "crafting_level = VALUES(crafting_level), " +
                     "total_crafting_xp = VALUES(total_crafting_xp);";
 
+            // C-7 FIX: rethrow so exceptionally completes — caller can detect save failure.
             try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, uuid.toString());
                 ps.setInt(2, data.getTotalXp());
@@ -213,6 +283,7 @@ public class MySQLManager implements IDatabase {
             } catch (SQLException e) {
                 String msg = plugin.getMessageManager().getPlainMessage("db_failed_save_data");
                 plugin.getLogger().severe(msg.replace("%uuid%", uuid.toString()).replace("%error%", e.getMessage()));
+                throw new CompletionException(e);
             }
         }, dbExecutor);
     }
@@ -240,6 +311,7 @@ public class MySQLManager implements IDatabase {
                     "crafting_level = VALUES(crafting_level), " +
                     "total_crafting_xp = VALUES(total_crafting_xp);";
 
+            // C-7 FIX: rethrow on failure so exceptionally completes.
             try (Connection conn = dataSource.getConnection()) {
                 conn.setAutoCommit(false);
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -265,14 +337,23 @@ public class MySQLManager implements IDatabase {
                     ps.executeBatch();
                     conn.commit();
                 } catch (SQLException batchEx) {
-                    conn.rollback();
+                    try {
+                        conn.rollback();
+                    } catch (SQLException rollbackEx) {
+                        plugin.getLogger().severe("MySQL: rollback failed during batchSave: "
+                                + rollbackEx.getMessage());
+                    }
                     throw batchEx;
                 } finally {
-                    conn.setAutoCommit(true);
+                    try {
+                        conn.setAutoCommit(true);
+                    } catch (SQLException ignored) {
+                    }
                 }
             } catch (SQLException e) {
                 String msg = plugin.getMessageManager().getPlainMessage("db_failed_batch_save");
                 plugin.getLogger().severe(msg.replace("%error%", e.getMessage()));
+                throw new CompletionException(e);
             }
         }, dbExecutor);
     }

@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class CacheManager implements Listener {
 
+    private static final int MAX_LEVEL_UP_ITERATIONS = 1000;
+
     private final PhoenixFish plugin;
     private final ConcurrentHashMap<UUID, FishingData> playerCache;
     private final AtomicLong sessionIdCounter = new AtomicLong(0);
@@ -28,6 +30,7 @@ public class CacheManager implements Listener {
         this.plugin = plugin;
         this.playerCache = new ConcurrentHashMap<>();
         startAutoSave();
+        loadOnlinePlayers();
     }
 
     public FishingData getData(UUID uuid) {
@@ -38,10 +41,6 @@ public class CacheManager implements Listener {
         return playerCache.values();
     }
 
-    /**
-     * Yalnızca DB'den başarıyla yüklenmiş (loaded == true) verileri döndürür.
-     * DB hatası durumunda oluşturulan boş temp datanın kaydedilmesini engeller.
-     */
     public Collection<FishingData> getSavableData() {
         return playerCache.values().stream()
                 .filter(FishingData::isLoaded)
@@ -67,7 +66,7 @@ public class CacheManager implements Listener {
                 plugin.getLogger().info(message);
             }
         };
-        autoSaveTask.runTaskTimerAsynchronously(plugin, 6000L, 6000L);
+        autoSaveTask.runTaskTimerAsynchronously(plugin, 1200L, 6000L);
     }
 
     public void shutdown() {
@@ -77,52 +76,68 @@ public class CacheManager implements Listener {
         }
     }
 
+    private void loadOnlinePlayers() {
+        if (!plugin.isXpSystemEnabled())
+            return;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            initiateLoad(player.getUniqueId());
+        }
+    }
+
+    private void initiateLoad(UUID uuid) {
+        long gen = sessionIdCounter.incrementAndGet();
+        sessionGenerations.put(uuid, gen);
+
+        FishingData tempData = new FishingData(uuid, 0, 1, 0, null, 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
+        playerCache.put(uuid, tempData);
+
+        final long expectedGen = gen;
+        plugin.getDatabase().loadData(uuid).thenAccept(loadedData -> {
+            playerCache.compute(uuid, (key, currentTemp) -> {
+                if (loadedData == null) {
+                    if (currentTemp != null)
+                        currentTemp.markLoaded();
+                    return currentTemp;
+                }
+
+                loadedData.markLoaded();
+
+                Long currentGen = sessionGenerations.get(uuid);
+                if (currentGen == null) {
+                    if (currentTemp != null) {
+                        loadedData.mergeTransientFrom(currentTemp);
+                        loadedData.checkAllLevelUps();
+                        loadedData.checkAllCraftingLevelUps();
+                    }
+                    plugin.getDatabase().saveData(uuid, loadedData);
+                    return null;
+                }
+                if (currentGen != expectedGen || currentTemp == null) {
+                    return currentTemp;
+                }
+
+                loadedData.mergeTransientFrom(currentTemp);
+                loadedData.checkAllLevelUps();
+                loadedData.checkAllCraftingLevelUps();
+                return loadedData;
+            });
+        }).exceptionally(ex -> {
+            plugin.getLogger().severe("Failed to load data for " + uuid
+                    + ", session will NOT be saved: " + ex.getMessage());
+            playerCache.compute(uuid, (key, currentTemp) -> {
+                if (currentTemp != null)
+                    currentTemp.markLoaded();
+                return currentTemp;
+            });
+            return null;
+        });
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if (!plugin.isXpSystemEnabled())
             return;
-
-        UUID uuid = event.getPlayer().getUniqueId();
-        long gen = sessionIdCounter.incrementAndGet();
-        sessionGenerations.put(uuid, gen);
-
-        // Temp data: loaded = false başlar. DB yüklemesi başarılı olana kadar
-        // autosave/quit-save bu veriyi YAZMAZ (veri kaybı koruması).
-        FishingData tempData = new FishingData(uuid, 0, 1, 0, null, 0, 0, 0, 0, 0, 0.0, 0, 1, 0);
-        playerCache.put(uuid, tempData);
-
-        plugin.getDatabase().loadData(uuid).thenAccept(loadedData -> {
-            if (loadedData == null) {
-                plugin.getLogger().warning("Could not load data for " + uuid + ", using temp data.");
-                return;
-            }
-
-            // Savunmacı katman: IDatabase implementasyonu markLoaded()'ı unutsa bile garanti.
-            loadedData.markLoaded();
-
-            playerCache.compute(uuid, (key, currentTempData) -> {
-                Long currentGen = sessionGenerations.get(uuid);
-                if (currentGen == null || currentGen != gen || currentTempData == null) {
-                    return currentTempData;
-                }
-
-                if (currentTempData.getCurrentXp() > 0) {
-                    loadedData.addXp(currentTempData.getCurrentXp());
-                }
-                if (currentTempData.getCraftingXp() > 0) {
-                    loadedData.addCraftingXp(currentTempData.getCraftingXp());
-                }
-
-                return loadedData;
-            });
-        }).exceptionally(ex -> {
-            // DB yüklemesi BAŞARISIZ: CompletionException buraya düşer.
-            // Temp data (loaded=false) cache'te kalır; oyuncu o tur oynayabilir
-            // ama verisi KAYDEDİLMEZ -> gerçek DB verisi asla boş veriyle ezilmez.
-            plugin.getLogger().severe("Failed to load data for " + uuid
-                    + ", session will NOT be saved: " + ex.getMessage());
-            return null;
-        });
+        initiateLoad(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -131,13 +146,16 @@ public class CacheManager implements Listener {
             return;
 
         UUID uuid = event.getPlayer().getUniqueId();
-        sessionGenerations.remove(uuid);
+        FishingData data = playerCache.get(uuid);
 
-        FishingData data = playerCache.remove(uuid);
         if (data != null && data.isLoaded()) {
-            // saveData zaten dbExecutor üzerinde async çalışıyor -> çift async sarmaya gerek yok
+            playerCache.remove(uuid);
+            sessionGenerations.remove(uuid);
             plugin.getDatabase().saveData(uuid, data);
+            return;
         }
+
+        sessionGenerations.remove(uuid);
     }
 
     public void addXpAndCheckLevel(Player player, int xpReward) {
@@ -154,7 +172,7 @@ public class CacheManager implements Listener {
         data.addXp(xpReward);
 
         int leveled = 0;
-        while (data.checkLevelUp()) {
+        while (data.checkLevelUp() && leveled < MAX_LEVEL_UP_ITERATIONS) {
             leveled++;
         }
 
@@ -173,8 +191,9 @@ public class CacheManager implements Listener {
 
         data.addCraftingXp(xpReward);
 
+        // H-7 FIX: bounded loop for crafting level-ups too.
         int leveled = 0;
-        while (data.checkCraftingLevelUp()) {
+        while (data.checkCraftingLevelUp() && leveled < MAX_LEVEL_UP_ITERATIONS) {
             leveled++;
         }
 

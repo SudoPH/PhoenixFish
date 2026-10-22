@@ -6,9 +6,11 @@ import com.phoenix.fish.manager.BaitManager;
 import com.phoenix.fish.manager.ItemFixer;
 import com.phoenix.fish.minigame.MinigameTask;
 import com.phoenix.fish.model.CustomFish;
+import com.phoenix.fish.util.FishRewardHelper;
+import com.phoenix.fish.util.SoundUtils;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -115,12 +117,6 @@ public class FishingListener implements Listener {
     public void onFish(PlayerFishEvent event) {
         Player player = event.getPlayer();
 
-        // ------------------------------------------------------------------
-        // FIX 1: Vanilla mode MUST be checked FIRST in onFish.
-        //
-        // Vanilla players never have their fishing event cancelled.
-        // Also clean up any stale minigame just in case.
-        // ------------------------------------------------------------------
         if (plugin.getFishingModeManager().isVanillaMode(player)) {
             MinigameTask staleTask = activeMinigames.remove(player.getUniqueId());
             if (staleTask != null) {
@@ -129,7 +125,6 @@ public class FishingListener implements Listener {
             return;
         }
 
-        // Safety: never interrupt a minigame that is already running.
         if (activeMinigames.containsKey(player.getUniqueId())) {
             event.setCancelled(true);
             return;
@@ -145,7 +140,6 @@ public class FishingListener implements Listener {
     }
 
     private void handleFishCatch(PlayerFishEvent event, Player player) {
-        // Defensive: should never be reached for vanilla players.
         if (plugin.getFishingModeManager().isVanillaMode(player)) {
             return;
         }
@@ -198,8 +192,10 @@ public class FishingListener implements Listener {
         if (plugin.isXpSystemEnabled()) {
             FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
             if (data != null) {
+                // C-18 FIX: code default was 0.05 but config.yml ships 0.02. A user deleting the key
+                // would silently get a 2.5× stronger luck bonus than the documented value.
                 luckMultiplier += data.getCurrentLevel()
-                        * plugin.getConfig().getDouble("xp-system.level-luck-bonus", 0.05);
+                        * plugin.getConfig().getDouble("xp-system.level-luck-bonus", 0.02);
 
                 if (data.getMasterHunter() > 0) {
                     luckMultiplier += (data.getMasterHunter() * 0.02);
@@ -241,7 +237,8 @@ public class FishingListener implements Listener {
             player.getInventory().setItemInOffHand(null);
         }
 
-        playSoundFromConfig(player, "sounds.bait_consume", Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.5f);
+        SoundUtils.playFromConfig(plugin, player, "sounds.bait_consume",
+                Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.5f);
     }
 
     private void startMinigame(Player player, CustomFish fish) {
@@ -251,93 +248,13 @@ public class FishingListener implements Listener {
     }
 
     private void giveFishDirectly(Player player, CustomFish fish) {
-        int amountToGive = calculateMultiCatchAmount(player);
-
-        ItemStack caughtItem = fish.itemStack();
-        if (caughtItem == null) {
-            plugin.getLogger().warning("Fish itemStack is null for fish: " + fish.id());
-            return;
-        }
-
-        caughtItem = caughtItem.clone();
-        caughtItem.setAmount(amountToGive);
-
-        Map<Integer, ItemStack> overflow = player.getInventory().addItem(caughtItem);
-        if (!overflow.isEmpty()) {
-            Location location = player.getLocation();
-            if (location != null) {
-                for (ItemStack drop : overflow.values()) {
-                    player.getWorld().dropItemNaturally(location, drop);
-                }
-            }
-        }
-
-        String fishName = PlainTextComponentSerializer.plainText().serialize(fish.name());
-        Map<String, String> placeholders = Map.of(
-                "%amount%", String.valueOf(amountToGive),
-                "%fish_name%", fishName);
-
-        String messageKey = amountToGive > 1 ? "fish_caught_multiple" : "fish_caught_single";
-        player.sendActionBar(plugin.getMessageManager().getMessage(messageKey, false, placeholders));
-
-        plugin.playCatchEffects(player, fish);
-
-        double minW = fish.minWeight();
-        double maxW = fish.maxWeight();
-        double weight = ThreadLocalRandom.current().nextDouble(minW, maxW);
-        String formattedWeight = String.format("%.2f", weight);
-
-        plugin.getRecordManager().checkRecords(player, fish, weight, formattedWeight);
-
-        if (plugin.getTournamentManager().isActive()) {
-            int points = (fish.rarity() >= 3) ? 5 : 1;
-            plugin.getTournamentManager().addScore(player, points * amountToGive);
-        }
-
-        if (plugin.isDiscoveryEnabled()) {
-            FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
-            if (data != null && data.discoverFish(fish.id())) {
-                playSoundFromConfig(player, "sounds.discover", Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-            }
-        }
-
-        if (plugin.isXpSystemEnabled() && fish.xpReward() > 0) {
-            plugin.getCacheManager().addXpAndCheckLevel(player, fish.xpReward() * amountToGive);
-        }
-    }
-
-    private int calculateMultiCatchAmount(Player player) {
-        if (!plugin.isXpSystemEnabled())
-            return 1;
-
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
-        if (data == null || data.getDoubleCatch() == 0)
-            return 1;
-
-        double chance = data.getDoubleCatch() * 0.10;
-        if (ThreadLocalRandom.current().nextDouble() < chance)
-            return 2;
-
-        return 1;
+        FishRewardHelper.awardCatch(plugin, player, fish, FishRewardHelper.CatchSource.DIRECT);
     }
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        // ------------------------------------------------------------------
-        // FIX 2: Vanilla mode — never cancel interact events.
-        //
-        // This is the fix for the "ikinci sefer attım çekemedim, suda kaldı
-        // olta" bug. Previously, if activeMinigames had a stale entry for
-        // the player (e.g. from a previous custom-mode minigame that
-        // wasn't cleaned up perfectly), the right-click to reel in the
-        // bobber would be cancelled, and the bobber would be stuck in the
-        // water.
-        //
-        // Now: vanilla players ALWAYS pass through, and any stale minigame
-        // entry is cleaned up defensively.
-        // ------------------------------------------------------------------
         if (plugin.getFishingModeManager().isVanillaMode(player)) {
             MinigameTask staleTask = activeMinigames.remove(player.getUniqueId());
             if (staleTask != null) {
@@ -370,7 +287,10 @@ public class FishingListener implements Listener {
                                 "%level%", String.valueOf(requiredLevel),
                                 "%current%", String.valueOf(data != null ? data.getCurrentLevel() : 0));
                         player.sendMessage(plugin.getMessageManager().getMessage("rod_level_required", true, rodPh));
-                        player.updateInventory();
+                        // H-18 FIX: calling updateInventory() inside PlayerInteractEvent is a known
+                        // client/server desync source per Paper docs. Schedule it one tick later
+                        // so the event completes first, then refresh.
+                        Bukkit.getScheduler().runTask(plugin, player::updateInventory);
                     }
                 }
             }
@@ -379,21 +299,5 @@ public class FishingListener implements Listener {
 
     public NamespacedKey getRodKey() {
         return rodKey;
-    }
-
-    @SuppressWarnings("removal")
-    private void playSoundFromConfig(Player player, String path, Sound defaultSound, float volume, float pitch) {
-        String soundName = plugin.getConfig().getString(path);
-        Sound soundToPlay = defaultSound;
-
-        if (soundName != null && !soundName.isEmpty()) {
-            try {
-                soundToPlay = Sound.valueOf(soundName.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid sound in config: " + soundName + " at path: " + path);
-            }
-        }
-
-        player.playSound(player, soundToPlay, volume, pitch);
     }
 }

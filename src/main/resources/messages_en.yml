@@ -23,25 +23,45 @@ fish_discovered: "<gradient:#9D00FF:#00CED1>New Species Discovered!</gradient> <
 minigame_win_single: "<green><bold>✓ You caught the fish! 🐟</bold></green>"
 minigame_win_multiple: "<green><bold>✓ Amazing! You caught %amount% fish at once! 🐟</bold></green>"
 minigame_lose: "<red><bold>✖ The line snapped! The fish escaped.</bold></red>"
+minigame_aborted: "<gray>Minigame aborted - fishing mode was switched mid-catch.</gray>"
 
 # Cache Manager (XP System)
 level_up: "<gold>Your fishing level increased! New Level: %level%</gold>"
+crafting_level_up: "<gold>Your crafting level increased! New Level: %level%</gold>"
 console_autosave: "Auto-saved fishing data for %players% online players."
 
 # Commands
 no_permission: "<red>You don't have permission to use this command!</red>"
 player_only: "<red>This command can only be run by a player!</red>"
 usage_giverod: "<yellow>Usage: /phoenixfish giverod <rod-name></yellow>"
+usage_givebait: "<yellow>Usage: /phoenixfish givebait <bait-name></yellow>"
 usage_fix: "<yellow>Update your items: /phoenixfish fix</yellow>"
 usage_fixall: "<yellow>Update the whole server: /phoenixfish fixall</yellow>"
 usage_catalog: "<yellow>To open the catalog: /phoenixfish catalog</yellow>"
+usage_skills: "<yellow>To open skill tree: /phoenixfish skills</yellow>"
+usage_sell: "<yellow>Sell your fish: /phoenixfish sell <all | hand | menu></yellow>"
+usage_toggle: "<yellow>Switch between vanilla/plugin fishing: /phoenixfish toggle</yellow>"
+usage_toggle_status: "<yellow>Show your active fishing mode: /phoenixfish toggle status</yellow>"
+usage_toggle_admin: "<yellow>Switch a player's mode: /phoenixfish toggle [player]</yellow>"
+usage_toggle_admin_reset: "<yellow>Reset a player to the default mode: /phoenixfish toggle reset [player]</yellow>"
+usage_tournament: "<yellow>Usage: /phoenixfish tournament <start [minutes] | stop></yellow>"
+usage_addreward: "<yellow>Usage: /phoenixfish tournament addreward <rank></yellow>"
+usage_addlevel: "<red>Usage: /phoenixfish addlevel [amount]</red>"
+usage_addlevel_help: "<gray>/phoenixfish addlevel [amount] - Add fishing levels</gray>"
+usage_addcraft_help: "<gray>/phoenixfish addcraft [amount] - Add crafting levels</gray>"
+usage_reload: "<yellow>Reload all config files without restart: /phoenixfish reload</yellow>"
+
 fix_inventory: "<green>Inventory scanned: updated %rods% rods and %baits% baits.</green>"
 fixall_start: "<yellow>Container scan started (%chunks% loaded chunks)... this may take a while.</yellow>"
 fixall_done_online: "<green>Scanned %players% online players: updated %rods% rods and %baits% baits.</green>"
 fixall_done_containers: "<green>Container scan completed! Scanned %containers% containers, updated %rods% rods and %baits% baits.</green>"
 fixall_offline_note: "<gray>Note: Items of offline players will be automatically fixed on their next login.</gray>"
+fixall_container_error: "<red>Container scan failed to start - check console for details.</red>"
+
 rod_not_found: "<red>Rod not found!</red>"
 rod_given: "<green>You have received a custom rod!</green>"
+bait_not_found: "<red>Bait not found!</red>"
+bait_given: "<green>You have received a custom bait: <yellow>%bait_id%</yellow></green>"
 invalid_material: "<red>Invalid material in rods.yml: %material%</red>"
 rods_not_found: "<red>rods.yml not found!</red>"
 word_page: "Page"
@@ -59,9 +79,12 @@ catalog_button_bait: "<gold>Baits"
 catalog_button_prev_page: "<yellow>« Previous Page"
 catalog_button_next_page: "<yellow>Next Page »"
 catalog_button_back: "<red>Back to Menu"
+catalog_button_sell: "<gold>Sell All Fish</gold>"
 catalog_undiscovered_name: "<dark_gray>??? <gray>Unknown Fish"
 catalog_undiscovered_lore_1: "<gray>You haven't caught this fish before."
 catalog_undiscovered_lore_2: "<dark_gray>Keep fishing to discover it!"
+catalog_not_ready: "<red>The catalog is still loading. Please try again in a moment.</red>"
+catalog_category_empty: "<gray>There are no items in this category yet.</gray>"
 item_default_rod_name: "<white>Fishing Rod</white>"
 
 # Fish Console Messages
@@ -71,6 +94,7 @@ fish_invalid_material: "Invalid material '%material%' for fish: %fish%. Defaulti
 fish_load_error: "Error while loading fish '%fish%': %error%"
 fish_loaded_success: "Loaded %amount% custom fish successfully."
 fish_lore_rarity: "<bold>Rarity: %rarity%</bold>"
+fish_lore_weight: "<gray>Weight: <aqua>%weight% kg</aqua></gray>"
 
 # Bait Console Messages
 bait_invalid_material: "Invalid material '%material%' for bait: %bait%. Defaulting to STICK."
@@ -83,9 +107,11 @@ craft_api_hook_failed: "Failed to hook into PhoenixCraft API: %error%"
 craft_recipe_load_error: "Error while loading recipe '%recipe%': %error%"
 craft_recipes_loaded: "%amount% custom recipes have been sent to PhoenixCraft successfully."
 craft_invalid_material: "Invalid material '%material%' in recipe. Defaulting to STONE."
+craft_recipes_section_not_found: "No 'recipes' section found in custom_recipes.yml."
 
 # Database Console Messages (MySQL)
 db_connected_mysql: "Successfully connected to MySQL database using HikariCP."
+db_failed_connect_mysql: "Failed to connect to MySQL database: %error%"
 db_failed_create_table: "Failed to create MySQL table: %error%"
 db_failed_load_data: "Failed to load data from MySQL for %uuid%: %error%"
 db_failed_save_data: "Failed to save data to MySQL for %uuid%: %error%"
@@ -111,31 +137,38 @@ plugin_db_init_failed: "Failed to initialize the database! Systems disabled. Rea
 plugin_systems_disabled: "XP and Discovery systems are disabled. Operating in fishing-only mode."
 plugin_cmd_not_defined: "Command 'phoenixfish' is not defined in plugin.yml! The /phoenixfish command will not work."
 
+# Reload Messages
+reload_started: "<yellow>Reloading PhoenixFish configuration...</yellow>"
+plugin_reloaded: "<green>PhoenixFish configuration reloaded successfully!</green>"
+reload_failed: "<red>Reload failed - check console for details.</red>"
+
 # Tournament System
-usage_tournament: "<yellow>Usage: /phoenixfish tournament <start [minutes] | stop></yellow>"
 tournament_disabled: "<red>Tournament system is disabled in config.yml!</red>"
 tournament_already_active: "<red>A tournament is already active!</red>"
 tournament_no_active: "<red>There is no active tournament right now.</red>"
+tournament_invalid_duration: "<red>Invalid duration! Must be between 1 and 1440 minutes.</red>"
 tournament_start: "<gold>🎣 A Fishing Tournament has started! Catch as many fish as possible for %minutes% minutes!</gold>"
 tournament_stopped: "<red>The tournament was force-stopped by an admin.</red>"
 tournament_bossbar_start: "🎣 Fishing Tournament"
 tournament_bossbar_progress: "🎣 Tournament | Leader: %leader% (%score% pts)"
 tournament_end_announcement: "<gold>🎣 The Fishing Tournament has ended! Here are the winners:"
 tournament_winner_line: "<yellow>%rank%. %player% - %score% points"
+tournament_unknown_player: "Unknown Player"
 tournament_no_winners: "<gray>No one caught a fish during the tournament."
 
 # Tournament Reward Setup
-usage_addreward: "<yellow>Usage: /phoenixfish tournament addreward <rank></yellow>"
 addreward_no_item: "<red>You must hold an item in your hand to set it as a reward!</red>"
 addreward_error: "<red>An error occurred while saving the item. Check console!</red>"
 addreward_success: "<green>Successfully saved the item in your hand as the reward for rank %rank%!</green>"
 
-fish_lore_weight: "<gray>Weight: <aqua>%weight% kg</aqua></gray>"
+# Records
 record_personal_broken: "<gold>★ NEW PERSONAL RECORD! %fish_name% (%weight% kg)</gold>"
 record_server_broken: "<light_purple><bold>★ NEW SERVER RECORD! ★</bold></light_purple> <gold>%player%</gold> <white>caught a %fish_name% weighing %weight% kg!"
 
-usage_skills: "<yellow>To open skill tree: /phoenixfish skills</yellow>"
+# Skills
 skills_disabled: "<red>XP system is disabled! Skills are unavailable.</red>"
+skills_data_error: "<red>Could not load your skill data. Please try again in a moment.</red>"
+skills_invalid: "<red>Invalid skill requested.</red>"
 skills_no_points: "<red>You don't have enough skill points!</red>"
 skills_maxed: "<red>This skill is already at maximum level!</red>"
 skills_bait_saved: "<green>★ Lucky Bait! Your bait was not consumed.</green>"
@@ -146,25 +179,25 @@ skills_fast_desc: "<gray>Increases minigame catch speed."
 skills_hunter_desc: "<gray>Increases chance for Rare+ fish."
 skills_double_desc: "<gray>Chance to catch 2 fish at once."
 skills_bait_desc: "<gray>Chance to not consume bait."
-
-usage_sell: "<yellow>Sell your fish: /phoenixfish sell <all | hand></yellow>"
-economy_disabled: "<red>Economy system is disabled!</red>"
-sell_all_success: "<green>Sold %amount% fish for $%price%!</green>"
-sell_hand_success: "<green>Sold %amount% fish for $%price%!</green>"
-sell_no_fish: "<red>You don't have any custom fish to sell!</red>"
-catalog_button_sell: "<gold>Sell All Fish</gold>"
-
-usage_sell: "<yellow>Sell your fish: /phoenixfish sell <menu | hand></yellow>"
-sell_gui_title: "<dark_gray>» <gold>Fish Market</gold>"
-sell_gui_confirm: "<green>✔ Sell All & Take Money</green>"
-sell_gui_cancel: "<red>✖ Cancel & Return Items</red>"
-
 skills_name_fast: "<yellow>Fast Catcher"
 skills_name_hunter: "<red>Master Hunter"
 skills_name_double: "<aqua>Double Catch"
 skills_name_bait: "<gold>Lucky Bait"
 
-# ==================== Fishing Mode (Toggle) ====================
+# Economy
+economy_disabled: "<red>Economy system is disabled!</red>"
+sell_all_success: "<green>Sold %amount% fish for $%price%!</green>"
+sell_hand_success: "<green>Sold %amount% fish for $%price%!</green>"
+sell_no_fish: "<red>You don't have any custom fish to sell!</red>"
+sell_cancelled: "<red>Fish sale cancelled by another plugin.</red>"
+sell_gui_title: "<dark_gray>» <gold>Fish Market</gold>"
+sell_gui_confirm: "<green>✔ Sell All & Take Money</green>"
+sell_gui_cancel: "<red>✖ Cancel & Return Items</red>"
+
+# Catch & Bug-Fix Messages
+catch_cancelled: "<gray>Fish catch cancelled by another plugin.</gray>"
+
+# Fishing Mode (Toggle)
 fishing_mode_disabled: "<red>This feature is disabled on this server! (config: fishing-mode.enabled)</red>"
 fishing_mode_cooldown: "<red>You are switching too fast! Wait <yellow>%seconds%</yellow> seconds.</red>"
 fishing_mode_player_not_found: "<red>Player not found or offline: <yellow>%player%</yellow></red>"
@@ -184,21 +217,18 @@ fishing_mode_status: "<gray>Active fishing mode: <yellow>%mode%</yellow> <dark_g
 fishing_mode_status_other: "<gray>Active fishing mode of %player%: <yellow>%mode%</yellow> <dark_gray>(%source%)</dark_gray></gray>"
 fishing_mode_source_choice: "player's choice"
 fishing_mode_source_default: "default"
-usage_toggle: "<yellow>Switch between vanilla/plugin fishing: /phoenixfish toggle</yellow>"
-usage_toggle_status: "<yellow>Show your active fishing mode: /phoenixfish toggle status</yellow>"
-usage_toggle_admin: "<yellow>Switch a player's mode: /phoenixfish toggle [player]</yellow>"
-usage_toggle_admin_reset: "<yellow>Reset a player to the default mode: /phoenixfish toggle reset [player]</yellow>"
-# ==================== AddLevel (admin) ====================
-usage_addlevel: "<red>Usage: /phoenixfish addlevel [amount]</red>"
+
+# AddLevel (admin)
 addlevel_xp_disabled: "<red>The XP system must be enabled for this command!</red>"
 addlevel_data_error: "<red>Could not load your data, please try again.</red>"
 addlevel_invalid_number: "<red>Please enter a valid number!</red>"
+addlevel_out_of_range: "<red>Level amount must be between -1000 and 1000.</red>"
 addlevel_success_fishing: "<green>Successfully added %amount% fishing levels! New level: <yellow>%level%</yellow></green>"
 addlevel_success_crafting: "<green>Successfully added %amount% crafting levels! New level: <yellow>%level%</yellow></green>"
-usage_addlevel_help: "<gray>/phoenixfish addlevel [amount] - Add fishing levels</gray>"
-usage_addcraft_help: "<gray>/phoenixfish addcraft [amount] - Add crafting levels</gray>"
-# ==================== Rod ====================
+
+# Rod
 rod_level_required: "<red>This rod requires fishing level <yellow>%level%</yellow>! (Yours: %current%)</red>"
+
 # Mode display names (MUST stay plain text - no MiniMessage tags)
 mode_custom: "PhoenixFish"
 mode_vanilla: "Vanilla"

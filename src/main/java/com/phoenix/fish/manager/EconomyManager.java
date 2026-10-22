@@ -2,7 +2,9 @@ package com.phoenix.fish.manager;
 
 import com.phoenix.fish.PhoenixFish;
 import com.phoenix.fish.data.FishingData;
+import com.phoenix.fish.event.FishSellEvent;
 import com.phoenix.fish.model.CustomFish;
+import com.phoenix.fish.util.SoundUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,12 +17,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class EconomyManager {
 
     private final PhoenixFish plugin;
     private final NamespacedKey weightKey;
+    private final NamespacedKey guiActionKey;
     private final MiniMessage miniMessage;
 
     public static class SellGUIHolder implements InventoryHolder {
@@ -33,6 +37,7 @@ public class EconomyManager {
     public EconomyManager(PhoenixFish plugin) {
         this.plugin = plugin;
         this.weightKey = new NamespacedKey(plugin, "fish_weight");
+        this.guiActionKey = new NamespacedKey(plugin, "gui_action");
         this.miniMessage = MiniMessage.miniMessage();
     }
 
@@ -54,12 +59,6 @@ public class EconomyManager {
         return meta.getPersistentDataContainer().getOrDefault(weightKey, PersistentDataType.DOUBLE, 0.0);
     }
 
-    /**
-     * H2 FIX: Balık item'ının ağırlığını PDC'ye yazar.
-     * Eklentide getWeight() vardı ama yazan kod hiç yoktu -> ağırlığa göre
-     * satış sistemi hiçbir zaman çalışmıyordu. MinigameTask.handleWin() ve
-     * FishingListener.giveFishDirectly() bu metodu çağırır.
-     */
     public void setWeight(ItemStack item, double weight) {
         if (item == null || !item.hasItemMeta())
             return;
@@ -102,7 +101,9 @@ public class EconomyManager {
         double total = 0.0;
         int count = 0;
 
-        for (ItemStack item : player.getInventory().getContents()) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
             if (item == null || item.getType().isAir())
                 continue;
             String fishId = getFishId(item);
@@ -111,7 +112,7 @@ public class EconomyManager {
                 if (fish != null) {
                     total += calculatePrice(item, fish);
                     count += item.getAmount();
-                    item.setAmount(0);
+                    player.getInventory().setItem(i, null);
                 }
             }
         }
@@ -147,9 +148,12 @@ public class EconomyManager {
         double total = 0.0;
         int count = 0;
 
-        for (int i = 0; i < 45; i++) {
+        int size = inv.getSize();
+        for (int i = 0; i < size; i++) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().isAir())
+                continue;
+            if (isGuiButton(item))
                 continue;
 
             String fishId = getFishId(item);
@@ -159,18 +163,14 @@ public class EconomyManager {
                     total += calculatePrice(item, fish);
                     count += item.getAmount();
                     inv.setItem(i, null);
+                    continue;
                 }
-            } else {
-                // FIX 7: Envanter doluysa addItem kalan item'ı sessizce kaybediyordu.
-                // Sığmayan item'lar oyuncunun ayaklarına atılır.
-                Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
-                if (!leftover.isEmpty()) {
-                    for (ItemStack rest : leftover.values()) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), rest);
-                    }
-                }
-                inv.setItem(i, null);
             }
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+            for (ItemStack rest : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            }
+            inv.setItem(i, null);
         }
 
         player.closeInventory();
@@ -207,31 +207,40 @@ public class EconomyManager {
 
         double price = calculatePrice(item, fish);
         int amount = item.getAmount();
-        item.setAmount(0);
+        player.getInventory().setItemInMainHand(null);
 
         processSale(player, data, price, amount);
     }
 
     private void processSale(Player player, FishingData data, double total, int count) {
-        if (total > 0) {
-            data.addBalance(total);
-
-            Map<String, String> ph = Map.of(
-                    "%amount%", String.valueOf(count),
-                    "%price%", String.format("%.2f", total));
-            player.sendMessage(plugin.getMessageManager().getMessage("sell_all_success", true, ph));
-
-            playSoundFromConfig(player, "sounds.sell_success", Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
-
-            if (plugin.getApi() != null) {
-                try {
-                    plugin.getApi().triggerFishSell(player, total, count);
-                } catch (Exception e) {
-                    plugin.getLogger().warning("Error triggering fish sell event via API: " + e.getMessage());
-                }
-            }
-        } else {
+        if (total <= 0) {
             player.sendMessage(plugin.getMessageManager().getMessage("sell_no_fish", true));
+            return;
+        }
+
+        FishSellEvent event = new FishSellEvent(player, total, count);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            player.sendMessage(plugin.getMessageManager().getMessage("sell_cancelled", true));
+            return;
+        }
+
+        data.addBalance(total);
+
+        Map<String, String> ph = Map.of(
+                "%amount%", String.valueOf(count),
+                "%price%", String.format(Locale.US, "%.2f", total));
+        player.sendMessage(plugin.getMessageManager().getMessage("sell_all_success", true, ph));
+
+        SoundUtils.playFromConfig(plugin, player, "sounds.sell_success",
+                Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
+
+        if (plugin.getApi() != null) {
+            try {
+                plugin.getApi().triggerFishSell(player, total, count);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error triggering fish sell event via API: " + e.getMessage());
+            }
         }
     }
 
@@ -240,29 +249,16 @@ public class EconomyManager {
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.displayName(miniMessage.deserialize(name));
-            meta.getPersistentDataContainer().set(
-                    new NamespacedKey(plugin, "gui_action"),
-                    PersistentDataType.STRING,
-                    action);
+            meta.getPersistentDataContainer().set(guiActionKey, PersistentDataType.STRING, action);
             item.setItemMeta(meta);
         }
         return item;
     }
 
-    @SuppressWarnings("removal")
-    private void playSoundFromConfig(Player player, String path, Sound defaultSound, float volume, float pitch) {
-        String soundName = plugin.getConfig().getString(path);
-        Sound soundToPlay = defaultSound;
-
-        if (soundName != null && !soundName.isEmpty()) {
-            try {
-                soundToPlay = Sound.valueOf(soundName.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger()
-                        .warning("Invalid sound in config: " + soundName + " at path: " + path + " - Using default");
-            }
-        }
-
-        player.playSound(player, soundToPlay, volume, pitch);
+    private boolean isGuiButton(ItemStack item) {
+        if (item == null || !item.hasItemMeta())
+            return false;
+        return item.getItemMeta().getPersistentDataContainer()
+                .has(guiActionKey, PersistentDataType.STRING);
     }
 }

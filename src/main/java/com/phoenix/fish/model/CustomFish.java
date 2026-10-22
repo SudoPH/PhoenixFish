@@ -9,7 +9,7 @@ public record CustomFish(
         String id,
         Component name,
         int rarity,
-        int weight,
+        double weight,
         double baseSpeed,
         double fightStrength,
         int xpReward,
@@ -28,7 +28,7 @@ public record CustomFish(
             throw new IllegalArgumentException("Fish itemStack cannot be null");
 
         rarity = Math.max(1, rarity);
-        weight = Math.max(1, weight);
+        weight = Math.max(0.001, weight);
         baseSpeed = Math.max(0.1, baseSpeed);
         fightStrength = Math.max(0.1, fightStrength);
         xpReward = Math.max(0, xpReward);

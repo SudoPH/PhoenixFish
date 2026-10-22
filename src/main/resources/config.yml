@@ -133,11 +133,39 @@ xp-system:
     username: root
     password: ""
 
+    # ============================================================
+    #  SSL ayarları
+    # ============================================================
+    #  Bu flag'ler JDBC URL'yi etkiler. Üç farklı mod mümkün:
+    #
+    #  1. PRODUCTION (use-ssl=true, verify-server-certificate=true)
+    #     SSL zorunlu, sertifika doğrulaması yapılır. En güvenli.
+    #     Üretim sunucuları için bu modu kullanın.
+    #
+    #  2. SELF-SIGNED DEV (use-ssl=true, verify-server-certificate=false)
+    #     SSL zorunlu ama sertifika doğrulanmaz. Self-signed cert'li
+    #     dev/test DB'leri için. Üretimde KULLANMAYIN — MITM riski.
+    #
+    #  3. PLAINTEXT (use-ssl=false)
+    #     SSL yok, trafik plaintext olarak gider. SADECE localhost
+    #     dev için. Üretimde ASLA kullanmayın — SQL trafiği dinlenebilir.
+    #
+    #  NOT: allowPublicKeyRetrieval MySQL 8+ caching_sha2_password
+    #  için gerekli. Mode 2 ve 3'te otomatik eklenir.
+    # ============================================================
+    use-ssl: true
+    verify-server-certificate: true
+
   # Adds a 2% (0.02) luck bonus per fishing level.
   # Example: A level 50 player gets +100% (x1.0 extra) luck.
   # Note: High values can break the late-game economy by making
   # rare fish too common.
   level-luck-bonus: 0.02
+
+  # Maximum level for each fishing skill (1-10, clamped).
+  # Higher values let players spec deeper into one skill.
+  # Skills: Fast Catcher, Master Hunter, Double Catch, Lucky Bait.
+  skill-max-level: 5
 
 # ============================================================
 #  Economy System (Internal)

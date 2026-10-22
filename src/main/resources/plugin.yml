@@ -5,8 +5,10 @@ api-version: "1.21"
 author: Sudo
 description: Custom fishing system with optional XP and minigame.
 
-# Ensures PhoenixCraft loads first if installed (required for custom recipe API hook)
+# PhoenixCraft loads first if installed (required for custom recipe API hook)
+# PlaceholderAPI must load before PhoenixFish so %phoenixfish_*% placeholders register at enable
 softdepend:
+  - PlaceholderAPI
   - PhoenixCraft
 
 # Paper automatically downloads these libraries at startup.
@@ -17,7 +19,7 @@ libraries:
 commands:
   phoenixfish:
     description: Main command for PhoenixFish (toggle fishing mode, catalog, skills, sell, tournaments and admin tools).
-    usage: /phoenixfish <toggle | status | catalog | skills | sell | fix | tournament | giverod | addlevel>
+    usage: /phoenixfish <toggle | status | catalog | skills | sell | fix | tournament | giverod | givebait | addlevel>
     aliases: [pfish, pf]
 
 permissions:
@@ -36,5 +38,5 @@ permissions:
 
   # ---------- Admin permissions ----------
   phoenixfish.admin:
-    description: Admin tools - fixall, giverod, viewing/switching/resetting other players' fishing mode.
+    description: Admin tools - fixall, giverod, givebait, viewing/switching/resetting other players' fishing mode.
     default: op

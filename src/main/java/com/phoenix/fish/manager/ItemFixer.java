@@ -69,9 +69,22 @@ public class ItemFixer {
 
             int cmd = sec.getInt("custom-model-data", 0);
 
-            rodCache.put(new ItemIdentifier(mat, cmd), sec);
+            ItemIdentifier identifier = new ItemIdentifier(mat, cmd);
+            if (rodCache.putIfAbsent(identifier, sec) != null) {
+                plugin.getLogger().warning("Duplicate rod cache key for rod " + key
+                        + " (material=" + mat + ", cmd=" + cmd
+                        + ") — conflicts with an earlier rod. Legacy items may resolve wrong.");
+            }
             rodIdCache.put(key.toLowerCase(), sec);
         }
+    }
+
+    public void reload() {
+        rodCache.clear();
+        rodIdCache.clear();
+        cacheRodConfigurations();
+        plugin.getLogger().info("ItemFixer: rods.yml reloaded ("
+                + rodIdCache.size() + " rods cached).");
     }
 
     public int[] fixInventory(Inventory inv) {

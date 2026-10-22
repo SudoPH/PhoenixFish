@@ -38,17 +38,25 @@ public class SellListener implements Listener {
             return;
         }
 
-        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(topInv)) {
+        Inventory clicked = event.getClickedInventory();
+
+        if (clicked != null && !clicked.equals(topInv) && event.getClick().isShiftClick()) {
+            event.setCancelled(true);
+            manuallyRouteToSellSlots(event, topInv);
+            return;
+        }
+
+        if (clicked == null || !clicked.equals(topInv)) {
             return;
         }
 
         event.setCancelled(true);
 
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || !clicked.hasItemMeta())
+        ItemStack clickedItem = event.getCurrentItem();
+        if (clickedItem == null || !clickedItem.hasItemMeta())
             return;
 
-        ItemMeta meta = clicked.getItemMeta();
+        ItemMeta meta = clickedItem.getItemMeta();
         String action = meta.getPersistentDataContainer().get(guiActionKey, PersistentDataType.STRING);
 
         if (action == null)
@@ -62,6 +70,38 @@ public class SellListener implements Listener {
         } else if (action.equals("sell_cancel")) {
             returnItems(player, topInv);
             player.closeInventory();
+        }
+    }
+
+    private void manuallyRouteToSellSlots(InventoryClickEvent event, Inventory topInv) {
+        ItemStack carried = event.getCurrentItem();
+        if (carried == null || carried.getType().isAir())
+            return;
+
+        ItemStack clone = carried.clone();
+
+        for (int i = 0; i < 45 && clone.getAmount() > 0; i++) {
+            ItemStack existing = topInv.getItem(i);
+            if (existing == null || existing.getType().isAir()) {
+                topInv.setItem(i, clone.clone());
+                clone.setAmount(0);
+                break;
+            }
+            if (existing.isSimilar(clone) && existing.getAmount() < existing.getMaxStackSize()) {
+                int space = existing.getMaxStackSize() - existing.getAmount();
+                int transfer = Math.min(space, clone.getAmount());
+                ItemStack merged = existing.clone();
+                merged.setAmount(existing.getAmount() + transfer);
+                topInv.setItem(i, merged);
+                clone.setAmount(clone.getAmount() - transfer);
+            }
+        }
+
+        if (clone.getAmount() <= 0) {
+            event.setCurrentItem(null);
+        } else {
+            // Could not fit in 0-44: leave the original stack in player inv (event already cancelled).
+            // No item lands in border slots.
         }
     }
 
@@ -88,12 +128,15 @@ public class SellListener implements Listener {
         Player player = (Player) event.getPlayer();
 
         boolean hasItems = false;
-        for (int i = 0; i < 45; i++) {
+        int size = topInv.getSize();
+        for (int i = 0; i < size; i++) {
             ItemStack item = topInv.getItem(i);
-            if (item != null && !item.getType().isAir()) {
-                hasItems = true;
-                break;
-            }
+            if (item == null || item.getType().isAir())
+                continue;
+            if (isGuiButton(item))
+                continue;
+            hasItems = true;
+            break;
         }
 
         if (hasItems) {
@@ -105,9 +148,12 @@ public class SellListener implements Listener {
         if (inv == null)
             return;
 
-        for (int i = 0; i < 45; i++) {
+        int size = inv.getSize();
+        for (int i = 0; i < size; i++) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().isAir())
+                continue;
+            if (isGuiButton(item))
                 continue;
 
             Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
@@ -116,5 +162,12 @@ public class SellListener implements Listener {
             }
             inv.setItem(i, null);
         }
+    }
+
+    private boolean isGuiButton(ItemStack item) {
+        if (item == null || !item.hasItemMeta())
+            return false;
+        return item.getItemMeta().getPersistentDataContainer()
+                .has(guiActionKey, PersistentDataType.STRING);
     }
 }

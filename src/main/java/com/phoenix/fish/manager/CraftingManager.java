@@ -23,9 +23,10 @@ public class CraftingManager {
 
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
-
-    private Method cachedRegisterMethod;
-    private Object craftAPIInstance;
+    
+    private volatile Method cachedRegisterMethod;
+    private volatile Object craftAPIInstance;
+    private volatile Method cachedUnregisterMethod;
 
     private final NamespacedKey LUCK_KEY;
     private final NamespacedKey BAIT_KEY;
@@ -55,7 +56,23 @@ public class CraftingManager {
                     plugin.getLogger().warning("CraftAPI 4 parametreli metod bulunamadı! PhoenixCraft güncel mi?");
                     return;
                 }
-                plugin.getLogger().info("CraftAPI hooked successfully via Reflection!");
+
+                this.cachedUnregisterMethod = null;
+                for (String methodName : new String[] { "unregisterAllRecipes", "clearRecipes", "unregisterRecipes" }) {
+                    try {
+                        this.cachedUnregisterMethod = craftAPIClass.getMethod(methodName);
+                        break;
+                    } catch (NoSuchMethodException ignored) {
+                    }
+                }
+                if (this.cachedUnregisterMethod == null) {
+                    plugin.getLogger().warning("CraftAPI has no recipe-unregister method — "
+                            + "reloading custom_recipes.yml may accumulate duplicate recipes. "
+                            + "Restart the server for a clean reload.");
+                } else {
+                    plugin.getLogger().info("CraftAPI hooked successfully via Reflection! "
+                            + "(unregister method: " + this.cachedUnregisterMethod.getName() + ")");
+                }
             } else {
                 plugin.getLogger().warning("PhoenixCraft does not implement CraftAPI!");
                 return;
@@ -66,6 +83,15 @@ public class CraftingManager {
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to hook CraftAPI: " + e.getMessage());
             return;
+        }
+
+        if (this.cachedUnregisterMethod != null && this.craftAPIInstance != null) {
+            try {
+                this.cachedUnregisterMethod.invoke(this.craftAPIInstance);
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to unregister old recipes before reload: "
+                        + e.getMessage());
+            }
         }
 
         File file = new File(plugin.getDataFolder(), "custom_recipes.yml");
@@ -123,8 +149,12 @@ public class CraftingManager {
         List<String> shapeList = recipeSec.getStringList("shape");
         ConfigurationSection ings = recipeSec.getConfigurationSection("ingredients");
 
-        if (ings == null || shapeList.size() != 3)
+        if (ings == null || shapeList.isEmpty() || shapeList.size() > 3)
             return null;
+
+        while (shapeList.size() < 3) {
+            shapeList.add("   ");
+        }
 
         ItemStack[] matrix = new ItemStack[9];
         ItemStack airItem = new ItemStack(Material.AIR);
@@ -166,7 +196,13 @@ public class CraftingManager {
             return item;
 
         if (sec.contains("display-name")) {
-            meta.displayName(miniMessage.deserialize(sec.getString("display-name")));
+            String displayNameStr = sec.getString("display-name");
+            if (displayNameStr != null) {
+                meta.displayName(miniMessage.deserialize(displayNameStr));
+            } else {
+                plugin.getLogger().warning("Recipe " + sec.getCurrentPath()
+                        + " has display-name key but it is not a string — skipping display name.");
+            }
         }
 
         if (sec.contains("lore")) {
@@ -185,7 +221,10 @@ public class CraftingManager {
         }
 
         if (sec.contains("bait-id")) {
-            meta.getPersistentDataContainer().set(BAIT_KEY, PersistentDataType.STRING, sec.getString("bait-id"));
+            String baitId = sec.getString("bait-id");
+            if (baitId != null) {
+                meta.getPersistentDataContainer().set(BAIT_KEY, PersistentDataType.STRING, baitId);
+            }
         }
 
         item.setItemMeta(meta);

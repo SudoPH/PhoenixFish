@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BaitManager {
 
+    private static final double MIN_MODIFIER = 0.1;
+    private static final double MAX_MODIFIER = 10.0;
+
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
     private final Map<String, Bait> baits = new ConcurrentHashMap<>();
@@ -57,7 +60,17 @@ public class BaitManager {
             try {
                 Component name = miniMessage.deserialize(sec.getString("display-name", "<white>Bait</white>"));
                 int targetRarity = Math.max(1, sec.getInt("target-rarity", 1));
+
                 double modifier = sec.getDouble("chance-modifier", 1.0);
+                if (modifier < MIN_MODIFIER) {
+                    plugin.getLogger().warning("Bait " + key + " chance-modifier " + modifier
+                            + " too low, clamping to " + MIN_MODIFIER);
+                    modifier = MIN_MODIFIER;
+                } else if (modifier > MAX_MODIFIER) {
+                    plugin.getLogger().warning("Bait " + key + " chance-modifier " + modifier
+                            + " too high, clamping to " + MAX_MODIFIER);
+                    modifier = MAX_MODIFIER;
+                }
 
                 String materialStr = sec.getString("material", "STICK").toUpperCase();
                 Material material = Material.matchMaterial(materialStr);
@@ -88,7 +101,14 @@ public class BaitManager {
 
                 int cmd = ItemUtils.getCMD(item);
                 if (cmd > 0) {
-                    baitItemCache.put(new ItemFixer.ItemIdentifier(material, cmd), bait);
+                    ItemFixer.ItemIdentifier identifier = new ItemFixer.ItemIdentifier(material, cmd);
+                    // H-9 FIX: detect duplicate (material, cmd) keys and warn — previously the second
+                    // entry silently overwrote the first, leaving legacy items resolving to the wrong bait.
+                    if (baitItemCache.putIfAbsent(identifier, bait) != null) {
+                        plugin.getLogger().warning("Duplicate bait cache key for bait " + key
+                                + " (material=" + material + ", cmd=" + cmd
+                                + ") — conflicts with an earlier bait. Legacy items may resolve wrong.");
+                    }
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to load bait " + key + ": " + e.getMessage());
@@ -99,21 +119,18 @@ public class BaitManager {
     }
 
     public Bait getBaitFromItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta())
+        if (item == null)
             return null;
         ItemMeta meta = item.getItemMeta();
         if (meta == null)
             return null;
 
-        // H4 FIX: Önce PDC'den bait_id oku. Tüm yemlere loadBaits() sırasında
-        // bait_id yazılıyor -> CMD'siz yemler de artık algılanır.
         String baitId = meta.getPersistentDataContainer().get(baitKey, PersistentDataType.STRING);
         if (baitId != null) {
             return baits.get(baitId);
         }
 
-        // Son çare: CMD cache'ine bak (PDC'siz eski/elle verilmiş item'lar için).
-        int cmd = ItemUtils.getCMD(item);
+        int cmd = ItemUtils.getCMD(meta);
         if (cmd <= 0)
             return null;
 

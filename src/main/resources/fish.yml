@@ -11,7 +11,7 @@
 #   4 = Epic
 #   5 = Legendary
 #
-# weight = Spawn weight
+# weight = Spawn weight (artık double destekleniyor, ondalık değerler korunur)
 # base-speed = Movement speed
 # fight-strength = Fishing fight difficulty
 # xp-reward = XP reward

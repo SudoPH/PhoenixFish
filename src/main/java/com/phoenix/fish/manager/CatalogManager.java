@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -29,6 +30,13 @@ public class CatalogManager {
     private Inventory mainMenu;
     private ItemStack undiscoveredItem;
     private final Map<String, List<ItemStack>> baseItems = new ConcurrentHashMap<>();
+
+    public static class CatalogGUIHolder implements InventoryHolder {
+        @Override
+        public Inventory getInventory() {
+            return null;
+        }
+    }
 
     public CatalogManager(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -66,7 +74,7 @@ public class CatalogManager {
     }
 
     private void createMainMenu() {
-        this.mainMenu = Bukkit.createInventory(null, 27,
+        this.mainMenu = Bukkit.createInventory(new CatalogGUIHolder(), 27,
                 miniMessage.deserialize(plugin.getMessageManager().getPlainMessage("catalog_main_menu_title")));
 
         mainMenu.setItem(11, createButton(Material.COD,
@@ -105,14 +113,13 @@ public class CatalogManager {
                 .replace("%page%", String.valueOf(page + 1))
                 .replace("%total_pages%", String.valueOf(totalPages));
 
-        Inventory pageInv = Bukkit.createInventory(null, 54, miniMessage.deserialize(title));
+        Inventory pageInv = Bukkit.createInventory(new CatalogGUIHolder(), 54, miniMessage.deserialize(title));
 
         FishingData data = null;
         if (plugin.isDiscoveryEnabled() && plugin.getCacheManager() != null) {
             data = plugin.getCacheManager().getData(player.getUniqueId());
         }
 
-        // Döngü dışında fishKey'i alarak performansı artırıyoruz
         NamespacedKey fishKey = (category.equals("fish") && plugin.getFishManager() != null)
                 ? plugin.getFishManager().getFishKey()
                 : null;

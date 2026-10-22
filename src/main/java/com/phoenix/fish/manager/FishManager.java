@@ -16,7 +16,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -107,7 +110,7 @@ public class FishManager {
                     material = Material.COD;
                 }
 
-                int weight = fishSec.getInt("weight", 10);
+                double weight = fishSec.getDouble("weight", 10.0);
                 double speed = fishSec.getDouble("base-speed", 1.0);
                 double strength = fishSec.getDouble("fight-strength", 1.0);
                 int xp = fishSec.getInt("xp-reward", 0);
@@ -170,10 +173,11 @@ public class FishManager {
         if (fishList.isEmpty())
             return null;
 
+        List<CustomFish> snapshot = fishList;
         String biomeName = playerBiome.toString();
         List<CustomFish> availableFish = new ArrayList<>();
 
-        for (CustomFish fish : fishList) {
+        for (CustomFish fish : snapshot) {
             List<String> biomes = fish.biomes();
             if (biomes == null || biomes.isEmpty()) {
                 availableFish.add(fish);

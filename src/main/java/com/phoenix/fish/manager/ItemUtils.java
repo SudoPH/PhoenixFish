@@ -32,12 +32,16 @@ public final class ItemUtils {
 
     @SuppressWarnings("deprecation")
     public static int getCMD(ItemStack item) {
-        if (item == null || !item.hasItemMeta())
+        if (item == null)
             return 0;
         ItemMeta meta = item.getItemMeta();
+        return getCMD(meta);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static int getCMD(ItemMeta meta) {
         if (meta == null)
             return 0;
-
         if (!meta.hasCustomModelData())
             return 0;
         try {

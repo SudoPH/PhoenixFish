@@ -26,11 +26,6 @@ public class FishingData {
 
     private double balance;
 
-    /**
-     * Bu verinin DB'den başarıyla yüklenip yüklenmediğini gösterir.
-     * loadData() hatası durumunda boş data ile kaybetmeyi önlemek için
-     * autosave yalnızca loaded == true olan verileri kaydeder.
-     */
     private volatile boolean loaded = false;
 
     public FishingData() {
@@ -236,7 +231,7 @@ public class FishingData {
 
     public synchronized int checkAllLevelUps() {
         int leveled = 0;
-        while (this.currentXp >= this.currentLevel * 100) {
+        while (this.currentXp >= this.currentLevel * 100 && leveled < 1000) {
             this.currentXp -= this.currentLevel * 100;
             this.currentLevel++;
             this.skillPoints++;
@@ -247,11 +242,72 @@ public class FishingData {
 
     public synchronized int checkAllCraftingLevelUps() {
         int leveled = 0;
-        while (this.craftingXp >= this.craftingLevel * 100) {
+        while (this.craftingXp >= this.craftingLevel * 100 && leveled < 1000) {
             this.craftingXp -= this.craftingLevel * 100;
             this.craftingLevel++;
             leveled++;
         }
         return leveled;
+    }
+
+    public synchronized void mergeTransientFrom(FishingData temp) {
+        if (temp == null)
+            return;
+
+        if (temp.currentXp > 0) {
+            this.currentXp += temp.currentXp;
+            this.totalXp += temp.totalXp;
+        }
+        if (temp.craftingXp > 0) {
+            this.craftingXp += temp.craftingXp;
+            this.totalCraftingXp += temp.totalCraftingXp;
+        }
+        if (temp.skillPoints > 0) {
+            this.skillPoints = Math.max(0, this.skillPoints + temp.skillPoints);
+        }
+        if (temp.fastCatcher > 0)
+            this.fastCatcher = clampSkill(this.fastCatcher + temp.fastCatcher);
+        if (temp.masterHunter > 0)
+            this.masterHunter = clampSkill(this.masterHunter + temp.masterHunter);
+        if (temp.doubleCatch > 0)
+            this.doubleCatch = clampSkill(this.doubleCatch + temp.doubleCatch);
+        if (temp.luckyBait > 0)
+            this.luckyBait = clampSkill(this.luckyBait + temp.luckyBait);
+        if (temp.balance > 0)
+            this.balance += temp.balance;
+        if (!temp.discoveredFish.isEmpty()) {
+            this.discoveredFish.addAll(temp.discoveredFish);
+        }
+    }
+
+    public synchronized boolean tryUpgradeSkill(String skill, int maxLevel) {
+        if (skill == null || skillPoints <= 0)
+            return false;
+        switch (skill) {
+            case "fast":
+                if (fastCatcher >= maxLevel)
+                    return false;
+                fastCatcher = clampSkill(fastCatcher + 1);
+                break;
+            case "hunter":
+                if (masterHunter >= maxLevel)
+                    return false;
+                masterHunter = clampSkill(masterHunter + 1);
+                break;
+            case "double":
+                if (doubleCatch >= maxLevel)
+                    return false;
+                doubleCatch = clampSkill(doubleCatch + 1);
+                break;
+            case "bait":
+                if (luckyBait >= maxLevel)
+                    return false;
+                luckyBait = clampSkill(luckyBait + 1);
+                break;
+            default:
+                return false;
+        }
+        skillPoints = Math.max(0, skillPoints - 1);
+        return true;
     }
 }

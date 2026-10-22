@@ -3,18 +3,14 @@ package com.phoenix.fish.minigame;
 import com.phoenix.fish.PhoenixFish;
 import com.phoenix.fish.data.FishingData;
 import com.phoenix.fish.model.CustomFish;
+import com.phoenix.fish.util.FishRewardHelper;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MinigameTask {
@@ -75,7 +71,23 @@ public class MinigameTask {
                 cancel();
                 return;
             }
-            updateMinigame();
+            // C-12 FIX: any exception in updateMinigame used to silently kill the scheduled task
+            // without removing the player's entry from activeMinigames. The next PlayerFishEvent
+            // would then hit "activeMinigames.containsKey(uuid) -> setCancelled(true); return"
+            // and the player would be permanently unable to fish until quit.
+            try {
+                updateMinigame();
+            } catch (Throwable ex) {
+                plugin.getLogger().severe("MinigameTask crashed for " + player.getName()
+                        + ": " + ex.getMessage());
+                try {
+                    cancel();
+                } catch (Throwable cleanupEx) {
+                    plugin.getLogger().severe("MinigameTask cleanup also failed for "
+                            + player.getName() + ": " + cleanupEx.getMessage());
+                    plugin.getFishingListener().removeMinigame(player.getUniqueId());
+                }
+            }
         }, null, 1L, 2L);
     }
 
@@ -177,118 +189,17 @@ public class MinigameTask {
     }
 
     private void handleWin() {
-        // ------------------------------------------------------------------
-        // FIX: Defensive check — make sure the player is STILL in custom
-        // mode before awarding a custom fish.
-        //
-        // toggle() already cancels the active minigame when switching to
-        // vanilla mode, but this is an extra safety net: if the player's
-        // mode was flipped between the moment handleWin() was scheduled
-        // and the moment it actually runs (race between scheduler ticks),
-        // we must NOT give them a custom fish.
-        //
-        // This is the final guard that ensures "vanilla mod = no custom
-        // fish, ever", regardless of how the player got there.
-        // ------------------------------------------------------------------
         if (plugin.getFishingModeManager().isVanillaMode(player)) {
+            // M-7 FIX: previously silent. Player finished the minigame and got nothing + no message.
+            // Tell them their catch was aborted because they switched to vanilla mode mid-minigame.
+            player.sendActionBar(plugin.getMessageManager().getMessage("minigame_aborted", false));
             plugin.getLogger().warning(
                     "MinigameTask.handleWin() aborted: player " + player.getName()
                             + " is now in VANILLA fishing mode (cancelled mid-minigame).");
             return;
         }
 
-        int amountToGive = calculateMultiCatchAmount();
-
-        if (amountToGive > 1) {
-            Map<String, String> placeholders = Map.of("%amount%", String.valueOf(amountToGive));
-            player.sendActionBar(plugin.getMessageManager().getMessage("minigame_win_multiple", false, placeholders));
-        } else {
-            player.sendActionBar(plugin.getMessageManager().getMessage("minigame_win_single", false));
-        }
-
-        double weight = fish.minWeight()
-                + (ThreadLocalRandom.current().nextDouble() * (fish.maxWeight() - fish.minWeight()));
-        String formattedWeight = String.format("%.1f", weight);
-
-        ItemStack fishItem = fish.itemStack();
-        if (fishItem == null) {
-            plugin.getLogger().warning("Fish itemStack is null for fish: " + fish.id());
-            return;
-        }
-
-        ItemStack caughtItem = fishItem.clone();
-        caughtItem.setAmount(amountToGive);
-
-        ItemMeta meta = caughtItem.getItemMeta();
-        if (meta != null) {
-            List<Component> lore = meta.lore();
-            if (lore == null)
-                lore = new ArrayList<>();
-
-            Map<String, String> weightPh = Map.of("%weight%", formattedWeight);
-            Component weightLore = plugin.getMessageManager().getMessage("fish_lore_weight", false, weightPh);
-            lore.add(weightLore);
-
-            meta.lore(lore);
-            caughtItem.setItemMeta(meta);
-        }
-
-        // H2 FIX: Ağırlığı item'ın PDC'sine yaz ki ağırlığa göre satış çalışsın.
-        // (Eskiden weight sadece lore'da gösteriliyordu, veri olarak hiç yazılmıyordu.)
-        plugin.getEconomyManager().setWeight(caughtItem, weight);
-
-        Map<Integer, ItemStack> overflow = player.getInventory().addItem(caughtItem);
-        if (!overflow.isEmpty()) {
-            for (ItemStack drop : overflow.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), drop);
-            }
-        }
-
-        plugin.playCatchEffects(player, fish);
-
-        plugin.getRecordManager().checkRecords(player, fish, weight, formattedWeight);
-
-        if (plugin.isDiscoveryEnabled()) {
-            FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
-            if (data != null && data.discoverFish(fish.id())) {
-                playSoundFromConfig(player, "sounds.discover", Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
-            }
-        }
-
-        if (plugin.isXpSystemEnabled() && fish.xpReward() > 0) {
-            plugin.getCacheManager().addXpAndCheckLevel(player, fish.xpReward() * amountToGive);
-        }
-
-        if (plugin.getTournamentManager().isActive()) {
-            int points = (fish.rarity() >= 3) ? 5 : 1;
-            plugin.getTournamentManager().addScore(player, points * amountToGive);
-        }
-
-        if (plugin.getApi() != null) {
-            try {
-                plugin.getApi().triggerFishCaught(player, fish, weight);
-            } catch (Exception e) {
-                plugin.getLogger().warning("Error triggering FishCaughtEvent: " + e.getMessage());
-            }
-        }
-    }
-
-    private int calculateMultiCatchAmount() {
-        if (!plugin.isXpSystemEnabled()) {
-            return 1;
-        }
-
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
-        if (data == null || data.getDoubleCatch() == 0) {
-            return 1;
-        }
-
-        double chance = data.getDoubleCatch() * 0.10;
-        if (ThreadLocalRandom.current().nextDouble() < chance) {
-            return 2;
-        }
-
-        return 1;
+        FishRewardHelper.awardCatch(plugin, player, fish, FishRewardHelper.CatchSource.MINIGAME);
     }
 
     public void cancel() {
@@ -296,23 +207,5 @@ public class MinigameTask {
             task.cancel();
         }
         plugin.getFishingListener().removeMinigame(player.getUniqueId());
-    }
-
-    @SuppressWarnings({ "removal" })
-    private void playSoundFromConfig(Player player, String path, Sound defaultSound, float volume, float pitch) {
-        String soundName = plugin.getConfig().getString(path);
-        Sound soundToPlay = defaultSound;
-
-        if (soundName != null && !soundName.isEmpty()) {
-            try {
-                soundToPlay = Sound.valueOf(soundName.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid sound in config: " + soundName + " at path: " + path);
-            }
-        }
-
-        if (player.isOnline()) {
-            player.playSound(player, soundToPlay, volume, pitch);
-        }
     }
 }

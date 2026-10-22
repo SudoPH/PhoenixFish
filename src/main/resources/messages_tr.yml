@@ -23,25 +23,45 @@ fish_discovered: "<gradient:#9D00FF:#00CED1>Yeni Tür Keşfedildi!</gradient> <w
 minigame_win_single: "<green><bold>✓ Balığı yakaladın! 🐟</bold></green>"
 minigame_win_multiple: "<green><bold>✓ Harika! Tek seferde %amount% balık yakaladın! 🐟</bold></green>"
 minigame_lose: "<red><bold>✖ Misina koptu! Balık kaçtı.</bold></red>"
+minigame_aborted: "<gray>Mini-oyun iptal edildi - yakalama sırasında balıkçılık modu değiştirildi.</gray>"
 
 # Önbellek Yöneticisi (XP Sistemi)
 level_up: "<gold>Balıkçılık seviyen arttı! Yeni Seviye: %level%</gold>"
+crafting_level_up: "<gold>Zanaat seviyen arttı! Yeni Seviye: %level%</gold>"
 console_autosave: "Çevrimiçi %players% oyuncunun balıkçılık verisi otomatik olarak kaydedildi."
 
 # Komutlar
 no_permission: "<red>Bu komutu kullanma yetkin yok!</red>"
 player_only: "<red>Bu komut sadece oyuncular tarafından kullanılabilir!</red>"
 usage_giverod: "<yellow>Kullanım: /phoenixfish giverod <olta-ismi></yellow>"
+usage_givebait: "<yellow>Kullanım: /phoenixfish givebait <yem-ismi></yellow>"
 usage_fix: "<yellow>Eşyalarını güncellemek için: /phoenixfish fix</yellow>"
 usage_fixall: "<yellow>Tüm sunucuyu güncellemek için: /phoenixfish fixall</yellow>"
 usage_catalog: "<yellow>Katalogu açmak için: /phoenixfish catalog</yellow>"
+usage_skills: "<yellow>Yetenek ağacını açmak için: /phoenixfish skills</yellow>"
+usage_sell: "<yellow>Balıklarını satmak için: /phoenixfish sell <all | hand | menu></yellow>"
+usage_toggle: "<yellow>Vanilla/eklenti balıkçılığı arasında geçiş yap: /phoenixfish toggle</yellow>"
+usage_toggle_status: "<yellow>Aktif balıkçılık modunu göster: /phoenixfish toggle status</yellow>"
+usage_toggle_admin: "<yellow>Oyuncunun modunu değiştir: /phoenixfish toggle [oyuncu]</yellow>"
+usage_toggle_admin_reset: "<yellow>Oyuncuyu varsayılan moda döndür: /phoenixfish toggle reset [oyuncu]</yellow>"
+usage_tournament: "<yellow>Kullanım: /phoenixfish tournament <start [dakika] | stop></yellow>"
+usage_addreward: "<yellow>Kullanım: /phoenixfish tournament addreward <sıralama></yellow>"
+usage_addlevel: "<red>Kullanım: /phoenixfish addlevel [miktar]</red>"
+usage_addlevel_help: "<gray>/phoenixfish addlevel [miktar] - Balıkçılık seviyesi ekle</gray>"
+usage_addcraft_help: "<gray>/phoenixfish addcraft [miktar] - Zanaat seviyesi ekle</gray>"
+usage_reload: "<yellow>Tüm config dosyalarını restart olmadan yeniden yükle: /phoenixfish reload</yellow>"
+
 fix_inventory: "<green>Envanterin tarandı: %rods% olta, %baits% yem güncellendi.</green>"
 fixall_start: "<yellow>Depo taraması başlatıldı (%chunks% yüklü chunk)... bu biraz sürebilir.</yellow>"
 fixall_done_online: "<green>%players% çevrimiçi oyuncu tarandı: %rods% olta, %baits% yem güncellendi.</green>"
 fixall_done_containers: "<green>Depo taraması tamamlandı! %containers% depo tarandı, %rods% olta, %baits% yem güncellendi.</green>"
 fixall_offline_note: "<gray>Not: Çevrimdışı oyuncuların eşyaları, bir dahaki girişlerinde otomatik düzeltilecek.</gray>"
+fixall_container_error: "<red>Depo taraması başlatılamadı - detaylar için konsolu kontrol et.</red>"
+
 rod_not_found: "<red>Bu olta bulunamadı!</red>"
 rod_given: "<green>Sana özel olta verildi!</green>"
+bait_not_found: "<red>Bu yem bulunamadı!</red>"
+bait_given: "<green>Sana özel yem verildi: <yellow>%bait_id%</yellow></green>"
 invalid_material: "<red>rods.yml içinde geçersiz materyal: %material%</red>"
 rods_not_found: "<red>rods.yml bulunamadı!</red>"
 word_page: "Sayfa"
@@ -59,9 +79,12 @@ catalog_button_bait: "<gold>Yemler"
 catalog_button_prev_page: "<yellow>« Önceki Sayfa"
 catalog_button_next_page: "<yellow>Sonraki Sayfa »"
 catalog_button_back: "<red>Menüye Dön"
+catalog_button_sell: "<gold>Tüm Balıkları Sat</gold>"
 catalog_undiscovered_name: "<dark_gray>??? <gray>Bilinmeyen Balık"
 catalog_undiscovered_lore_1: "<gray>Bu balığı daha önce yakalamadın."
 catalog_undiscovered_lore_2: "<dark_gray>Keşfetmek için balık tutmaya devam et!"
+catalog_not_ready: "<red>Katalog hâlâ yükleniyor. Lütfen birazdan tekrar dene.</red>"
+catalog_category_empty: "<gray>Bu kategoride henüz bir eşya yok.</gray>"
 item_default_rod_name: "<white>Olta</white>"
 
 # Balık Konsol Mesajları
@@ -71,6 +94,7 @@ fish_invalid_material: "%fish% balığı için geçersiz materyal: %material%. V
 fish_load_error: "'%fish%' balığı yüklenirken hata oluştu: %error%"
 fish_loaded_success: "%amount% adet özel balık başarıyla yüklendi."
 fish_lore_rarity: "<bold>Nadirlik: %rarity%</bold>"
+fish_lore_weight: "<gray>Ağırlık: <aqua>%weight% kg</aqua></gray>"
 
 # Yem Konsol Mesajları
 bait_invalid_material: "%bait% yemi için geçersiz materyal: %material%. Varsayılan olarak STICK kullanılıyor."
@@ -83,9 +107,11 @@ craft_api_hook_failed: "PhoenixCraft API'sine bağlanılamadı: %error%"
 craft_recipe_load_error: "'%recipe%' tarifi yüklenirken hata oluştu: %error%"
 craft_recipes_loaded: "%amount% adet özel tarif PhoenixCraft'a başarıyla gönderildi."
 craft_invalid_material: "Tarifte geçersiz materyal: %material%. Varsayılan olarak STONE kullanılıyor."
+craft_recipes_section_not_found: "custom_recipes.yml içinde 'recipes' bölümü bulunamadı."
 
 # Veritabanı Konsol Mesajları (MySQL)
 db_connected_mysql: "HikariCP kullanılarak MySQL veritabanına başarıyla bağlanıldı."
+db_failed_connect_mysql: "MySQL veritabanına bağlanılamadı: %error%"
 db_failed_create_table: "MySQL tablosu oluşturulamadı: %error%"
 db_failed_load_data: "%uuid% için MySQL'den veriler yüklenemedi: %error%"
 db_failed_save_data: "%uuid% için MySQL'e veriler kaydedilemedi: %error%"
@@ -111,31 +137,38 @@ plugin_db_init_failed: "Veritabanı başlatılamadı! Sistemler devre dışı b�
 plugin_systems_disabled: "XP ve Keşif sistemleri devre dışı. Sadece balık tutma modunda çalışıyor."
 plugin_cmd_not_defined: "'phoenixfish' komutu plugin.yml içinde tanımlanmamış! /phoenixfish komutu çalışmayacak."
 
+# Reload Mesajları
+reload_started: "<yellow>PhoenixFish yapılandırması yeniden yükleniyor...</yellow>"
+plugin_reloaded: "<green>PhoenixFish yapılandırması başarıyla yeniden yüklendi!</green>"
+reload_failed: "<red>Yeniden yükleme başarısız - detaylar için konsolu kontrol et.</red>"
+
 # Turnuva Sistemi
-usage_tournament: "<yellow>Kullanım: /phoenixfish tournament <start [dakika] | stop></yellow>"
 tournament_disabled: "<red>Turnuva sistemi config.yml'den devre dışı bırakılmış!</red>"
 tournament_already_active: "<red>Zaten aktif bir turnuva var!</red>"
 tournament_no_active: "<red>Şu an aktif bir turnuva yok.</red>"
+tournament_invalid_duration: "<red>Geçersiz süre! 1 ile 1440 dakika arasında olmalı.</red>"
 tournament_start: "<gold>🎣 Balık Tutma Turnuvası başladı! %minutes% dakika boyunca olabildiğince çok balık tut!</gold>"
 tournament_stopped: "<red>Turnuva bir yetkili tarafından zorla durduruldu.</red>"
 tournament_bossbar_start: "🎣 Balık Turnuvası"
 tournament_bossbar_progress: "🎣 Turnuva | Lider: %leader% (%score% puan)"
 tournament_end_announcement: "<gold>🎣 Balık Tutma Turnuvası sona erdi! İşte kazananlar:"
 tournament_winner_line: "<yellow>%rank%. %player% - %score% puan"
+tournament_unknown_player: "Bilinmeyen Oyuncu"
 tournament_no_winners: "<gray>Turnuva süresince kimse balık tutamadı."
 
 # Turnuva Ödül Ayarı
-usage_addreward: "<yellow>Kullanım: /phoenixfish tournament addreward <sıralama></yellow>"
 addreward_no_item: "<red>Ödül olarak kaydetmek için elinde bir item tutmalısın!</red>"
 addreward_error: "<red>Item kaydedilirken bir hata oluştu. Konsolu kontrol et!</red>"
 addreward_success: "<green>Elindeki item %rank%. sıra ödülü olarak başarıyla kaydedildi!</green>"
 
-fish_lore_weight: "<gray>Ağırlık: <aqua>%weight% kg</aqua></gray>"
+# Rekorlar
 record_personal_broken: "<gold>★ YENİ KİŞİSEL REKOR! %fish_name% (%weight% kg)</gold>"
 record_server_broken: "<light_purple><bold>★ YENİ SUNUCU REKORU! ★</bold></light_purple> <gold>%player%</gold> <white>bir %fish_name% yakaladı, ağırlığı %weight% kg!"
 
-usage_skills: "<yellow>Yetenek ağacını açmak için: /phoenixfish skills</yellow>"
+# Yetenekler
 skills_disabled: "<red>XP sistemi kapalı! Yetenekler kullanılamaz.</red>"
+skills_data_error: "<red>Yetenek verilerin yüklenemedi. Lütfen birazdan tekrar dene.</red>"
+skills_invalid: "<red>Geçersiz yetenek isteği.</red>"
 skills_no_points: "<red>Yeterli yetenek puanın yok!</red>"
 skills_maxed: "<red>Bu yetenek zaten maksimum seviyede!</red>"
 skills_bait_saved: "<green>★ Şanslı Yem! Yemin tüketilmedi.</green>"
@@ -146,25 +179,25 @@ skills_fast_desc: "<gray>Mini-oyunda yakalama hızını artırır."
 skills_hunter_desc: "<gray>Nadir+ balık çıkma şansını artırır."
 skills_double_desc: "<gray>Aynı anda 2 balık tutma şansı."
 skills_bait_desc: "<gray>Yem tüketmeme şansı."
-
-# NOT: Tek tanım - eski dosyada "all | hand" ile mükerrerdi, silindi.
-usage_sell: "<yellow>Balıklarını satmak için: /phoenixfish sell <menu | hand></yellow>"
-economy_disabled: "<red>Ekonomi sistemi devre dışı!</red>"
-sell_all_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
-sell_hand_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
-sell_no_fish: "<red>Satılacak özel balığın yok!</red>"
-catalog_button_sell: "<gold>Tüm Balıkları Sat</gold>"
-
-sell_gui_title: "<dark_gray>» <gold>Balık Pazarı</gold>"
-sell_gui_confirm: "<green>✔ Hepsini Sat ve Parayı Al</green>"
-sell_gui_cancel: "<red>✖ İptal Et ve Balıkları Geri Al</red>"
-
 skills_name_fast: "<yellow>Hızlı Tutucu"
 skills_name_hunter: "<red>Usta Avcı"
 skills_name_double: "<aqua>Çift Av"
 skills_name_bait: "<gold>Şanslı Yem"
 
-# ==================== Fishing Mode (Toggle) ====================
+# Ekonomi
+economy_disabled: "<red>Ekonomi sistemi devre dışı!</red>"
+sell_all_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
+sell_hand_success: "<green>%amount% adet balık $%price% karşılığında satıldı!</green>"
+sell_no_fish: "<red>Satılacak özel balığın yok!</red>"
+sell_cancelled: "<red>Balık satışı başka bir eklenti tarafından iptal edildi.</red>"
+sell_gui_title: "<dark_gray>» <gold>Balık Pazarı</gold>"
+sell_gui_confirm: "<green>✔ Hepsini Sat ve Parayı Al</green>"
+sell_gui_cancel: "<red>✖ İptal Et ve Balıkları Geri Al</red>"
+
+# Yakalama ve Hata Düzeltme Mesajları
+catch_cancelled: "<gray>Balık yakalama başka bir eklenti tarafından iptal edildi.</gray>"
+
+# Balıkçılık Modu (Toggle)
 fishing_mode_disabled: "<red>Bu özellik sunucuda kapalı! (config: fishing-mode.enabled)</red>"
 fishing_mode_cooldown: "<red>Çok hızlı geçiş yapıyorsun! <yellow>%seconds%</yellow> saniye bekle.</red>"
 fishing_mode_player_not_found: "<red>Oyuncu bulunamadı veya çevrimdışı: <yellow>%player%</yellow></red>"
@@ -184,24 +217,18 @@ fishing_mode_status: "<gray>Aktif balıkçılık modu: <yellow>%mode%</yellow> <
 fishing_mode_status_other: "<gray>%player% adlı oyuncunun aktif modu: <yellow>%mode%</yellow> <dark_gray>(%source%)</dark_gray></gray>"
 fishing_mode_source_choice: "oyuncunun seçimi"
 fishing_mode_source_default: "varsayılan"
-usage_toggle: "<yellow>Vanilla/eklenti balıkçılığı arasında geçiş yap: /phoenixfish toggle</yellow>"
-usage_toggle_status: "<yellow>Aktif balıkçılık modunu göster: /phoenixfish toggle status</yellow>"
-usage_toggle_admin: "<yellow>Oyuncunun modunu değiştir: /phoenixfish toggle [oyuncu]</yellow>"
-usage_toggle_admin_reset: "<yellow>Oyuncuyu varsayılan moda döndür: /phoenixfish toggle reset [oyuncu]</yellow>"
 
-# ==================== AddLevel (admin) ====================
-usage_addlevel: "<red>Kullanım: /phoenixfish addlevel [miktar]</red>"
+# AddLevel (admin)
 addlevel_xp_disabled: "<red>Bu komut için XP sistemi etkin olmalıdır!</red>"
 addlevel_data_error: "<red>Veriler yüklenemedi, tekrar deneyin.</red>"
 addlevel_invalid_number: "<red>Lütfen geçerli bir sayı girin!</red>"
+addlevel_out_of_range: "<red>Seviye miktarı -1000 ile 1000 arasında olmalı.</red>"
 addlevel_success_fishing: "<green>Başarıyla %amount% Balıkçılık seviyesi eklendi! Yeni seviye: <yellow>%level%</yellow></green>"
 addlevel_success_crafting: "<green>Başarıyla %amount% Zanaat (Crafting) seviyesi eklendi! Yeni seviye: <yellow>%level%</yellow></green>"
-usage_addlevel_help: "<gray>/phoenixfish addlevel [miktar] - Balıkçılık seviyesi ekle</gray>"
-usage_addcraft_help: "<gray>/phoenixfish addcraft [miktar] - Zanaat seviyesi ekle</gray>"
 
-# ==================== Rod ====================
+# Olta
 rod_level_required: "<red>Bu oltayı kullanmak için <yellow>%level%</yellow> balıkçılık seviyesi gerekir! (Mevcut: %current%)</red>"
 
-# ==================== Mod İsimleri ====================
+# Mod İsimleri (Plain text olmalı - MiniMessage tag'leri kullanılmaz)
 mode_custom: "PhoenixFish"
 mode_vanilla: "Vanilla"

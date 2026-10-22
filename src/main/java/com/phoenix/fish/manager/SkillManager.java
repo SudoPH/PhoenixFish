@@ -20,12 +20,13 @@ import java.util.List;
 
 public class SkillManager {
 
-    private static final int MAX_LEVEL = 5;
+    private static final int CONFIG_MAX_CAP = 10;
 
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
     private final NamespacedKey actionKey;
     private final NamespacedKey valueKey;
+    private final int maxLevel;
 
     public static class SkillGUIHolder implements InventoryHolder {
         @Override
@@ -39,6 +40,12 @@ public class SkillManager {
         this.miniMessage = MiniMessage.miniMessage();
         this.actionKey = new NamespacedKey(plugin, "skill_action");
         this.valueKey = new NamespacedKey(plugin, "skill_value");
+        int configVal = plugin.getConfig().getInt("xp-system.skill-max-level", 5);
+        this.maxLevel = Math.max(1, Math.min(CONFIG_MAX_CAP, configVal));
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
     }
 
     public void openMenu(Player player) {
@@ -65,7 +72,7 @@ public class SkillManager {
         List<String> fastLore = new ArrayList<>();
         fastLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
                 .replace("%level%", String.valueOf(data.getFastCatcher()))
-                .replace("%max%", String.valueOf(MAX_LEVEL)));
+                .replace("%max%", String.valueOf(maxLevel)));
         fastLore.add(plugin.getMessageManager().getPlainMessage("skills_fast_desc"));
         inv.setItem(10, createItem(Material.GOLDEN_BOOTS,
                 plugin.getMessageManager().getPlainMessage("skills_name_fast"), fastLore, "upgrade", "fast"));
@@ -73,7 +80,7 @@ public class SkillManager {
         List<String> hunterLore = new ArrayList<>();
         hunterLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
                 .replace("%level%", String.valueOf(data.getMasterHunter()))
-                .replace("%max%", String.valueOf(MAX_LEVEL)));
+                .replace("%max%", String.valueOf(maxLevel)));
         hunterLore.add(plugin.getMessageManager().getPlainMessage("skills_hunter_desc"));
         inv.setItem(12, createItem(Material.GOLDEN_SWORD,
                 plugin.getMessageManager().getPlainMessage("skills_name_hunter"), hunterLore, "upgrade", "hunter"));
@@ -81,7 +88,7 @@ public class SkillManager {
         List<String> doubleLore = new ArrayList<>();
         doubleLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
                 .replace("%level%", String.valueOf(data.getDoubleCatch()))
-                .replace("%max%", String.valueOf(MAX_LEVEL)));
+                .replace("%max%", String.valueOf(maxLevel)));
         doubleLore.add(plugin.getMessageManager().getPlainMessage("skills_double_desc"));
         inv.setItem(14, createItem(Material.TRIPWIRE_HOOK,
                 plugin.getMessageManager().getPlainMessage("skills_name_double"), doubleLore, "upgrade", "double"));
@@ -89,7 +96,7 @@ public class SkillManager {
         List<String> baitLore = new ArrayList<>();
         baitLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
                 .replace("%level%", String.valueOf(data.getLuckyBait()))
-                .replace("%max%", String.valueOf(MAX_LEVEL)));
+                .replace("%max%", String.valueOf(maxLevel)));
         baitLore.add(plugin.getMessageManager().getPlainMessage("skills_bait_desc"));
         inv.setItem(16, createItem(Material.GOLDEN_CARROT,
                 plugin.getMessageManager().getPlainMessage("skills_name_bait"), baitLore, "upgrade", "bait"));
@@ -109,47 +116,21 @@ public class SkillManager {
             return;
         }
 
-        if (data.getSkillPoints() <= 0) {
-            player.sendMessage(plugin.getMessageManager().getMessage("skills_no_points", true));
+        boolean validSkill = "fast".equals(skill) || "hunter".equals(skill)
+                || "double".equals(skill) || "bait".equals(skill);
+        if (!validSkill) {
+            plugin.getLogger().warning("Unknown skill upgrade requested: " + skill + " by " + player.getName());
+            player.sendMessage(plugin.getMessageManager().getMessage("skills_invalid", true));
             return;
         }
 
-        boolean upgraded = false;
-        switch (skill) {
-            case "fast":
-                if (data.getFastCatcher() < MAX_LEVEL) {
-                    data.setFastCatcher(data.getFastCatcher() + 1);
-                    upgraded = true;
-                }
-                break;
-            case "hunter":
-                if (data.getMasterHunter() < MAX_LEVEL) {
-                    data.setMasterHunter(data.getMasterHunter() + 1);
-                    upgraded = true;
-                }
-                break;
-            case "double":
-                if (data.getDoubleCatch() < MAX_LEVEL) {
-                    data.setDoubleCatch(data.getDoubleCatch() + 1);
-                    upgraded = true;
-                }
-                break;
-            case "bait":
-                if (data.getLuckyBait() < MAX_LEVEL) {
-                    data.setLuckyBait(data.getLuckyBait() + 1);
-                    upgraded = true;
-                }
-                break;
-            default:
-                plugin.getLogger().warning("Unknown skill upgrade requested: " + skill + " by " + player.getName());
-                player.sendMessage(plugin.getMessageManager().getMessage("skills_invalid", true));
-                return;
-        }
+        boolean upgraded = data.tryUpgradeSkill(skill, maxLevel);
 
         if (upgraded) {
-            data.setSkillPoints(data.getSkillPoints() - 1);
             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
             openMenu(player);
+        } else if (data.getSkillPoints() <= 0) {
+            player.sendMessage(plugin.getMessageManager().getMessage("skills_no_points", true));
         } else {
             player.sendMessage(plugin.getMessageManager().getMessage("skills_maxed", true));
         }

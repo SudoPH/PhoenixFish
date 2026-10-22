@@ -6,7 +6,7 @@
 
     <groupId>com.Phoenix.Fish</groupId>
     <artifactId>PhoenixFish</artifactId>
-    <version>1.2.2</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
     <name>PhoenixFish</name>
 
@@ -20,6 +20,22 @@
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+
+        <!-- ================================================================= -->
+        <!-- FEATURE #11: PlaceholderAPI repository                            -->
+        <!--                                                                   -->
+        <!-- PhoenixFish artık PlaceholderAPI (PAPI) entegrasyonu içeriyor.    -->
+        <!-- Skript, scoreboard plugin'leri, HolographicDisplays ve diğer      -->
+        <!-- PAPI-consumer plugin'ler %phoenixfish_*% placeholder'larını      -->
+        <!-- kullanabilir.                                                     -->
+        <!--                                                                   -->
+        <!-- PAPI yaygın olarak ExtendedClip'in self-hosted repo'sunda durur.  -->
+        <!-- https://repo.extendedclip.com/content/repositories/placeholderapi/ -->
+        <!-- ================================================================= -->
+        <repository>
+            <id>extendedclip-repo</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
 
@@ -42,6 +58,22 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ================================================================= -->
+        <!-- FEATURE #11: PlaceholderAPI dependency                            -->
+        <!--                                                                   -->
+        <!-- scope=provided çünkü server'da zaten yüklü olacak (softdepend).  -->
+        <!-- Jar'a bundle etmeye gerek yok — bu boyut kazanır ve DuplicateClass -->
+        <!-- hatasını önler.                                                   -->
+        <!--                                                                   -->
+        <!-- Version 2.11.6 Paper 1.21+ ile uyumlu en son stabil sürüm.        -->
+        <!-- ================================================================= -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -58,6 +58,20 @@ public class RecordManager {
         });
     }
 
+    // C-11 FIX: synchronous flush for onDisable. Saves in-memory recordConfig to disk on the calling thread
+    // so personal bests / server records set just before shutdown are not lost in a pending async save.
+    public void flush() {
+        synchronized (fileLock) {
+            if (recordConfig == null || recordFile == null)
+                return;
+            try {
+                recordConfig.save(recordFile);
+            } catch (IOException e) {
+                plugin.getLogger().severe("Could not flush records.yml: " + e.getMessage());
+            }
+        }
+    }
+
     public void checkRecords(Player player, CustomFish fish, double weight, String formattedWeight) {
         if (player == null || fish == null)
             return;
@@ -83,7 +97,6 @@ public class RecordManager {
         }
 
         if (wrBroken) {
-            @SuppressWarnings("null")
             Map<String, String> ph = Map.of(
                     "%player%", player.getName(),
                     "%fish_name%", plainSerializer.serialize(fish.name()),
@@ -91,7 +104,6 @@ public class RecordManager {
             Bukkit.broadcast(plugin.getMessageManager().getMessage("record_server_broken", true, ph));
             player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
         } else if (pbBroken) {
-            @SuppressWarnings("null")
             Map<String, String> ph = Map.of(
                     "%fish_name%", plainSerializer.serialize(fish.name()),
                     "%weight%", formattedWeight);

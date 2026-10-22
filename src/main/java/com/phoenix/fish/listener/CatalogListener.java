@@ -1,50 +1,45 @@
 package com.phoenix.fish.listener;
 
 import com.phoenix.fish.PhoenixFish;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import com.phoenix.fish.manager.CatalogManager;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.util.Map;
 
 public class CatalogListener implements Listener {
 
     private final PhoenixFish plugin;
     private final NamespacedKey actionKey;
     private final NamespacedKey valueKey;
-    private final String pageWord;
 
     public CatalogListener(PhoenixFish plugin) {
         this.plugin = plugin;
         this.actionKey = plugin.getCatalogManager().getActionKey();
         this.valueKey = plugin.getCatalogManager().getValueKey();
-        this.pageWord = plugin.getMessageManager().getPlainMessage("word_page");
     }
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getView().getTopInventory() == null)
+        Inventory topInv = event.getView().getTopInventory();
+        if (topInv == null)
             return;
 
-        boolean isMainMenu = event.getView().getTopInventory().equals(plugin.getCatalogManager().getMainMenu());
-        String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
-        boolean isPageMenu = title.contains(pageWord);
-
-        if (!isMainMenu && !isPageMenu)
+        boolean isCatalog = topInv.getHolder() instanceof CatalogManager.CatalogGUIHolder;
+        if (!isCatalog)
             return;
 
         event.setCancelled(true);
 
         if (event.getClickedInventory() == null
-                || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+                || !event.getClickedInventory().equals(topInv)) {
             return;
         }
 
@@ -87,38 +82,24 @@ public class CatalogListener implements Listener {
     }
 
     @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player player))
+    public void onDrag(InventoryDragEvent event) {
+        Inventory topInv = event.getView().getTopInventory();
+        if (topInv == null)
             return;
 
+        if (!(topInv.getHolder() instanceof CatalogManager.CatalogGUIHolder))
+            return;
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        
         Inventory top = event.getInventory();
         if (top == null)
             return;
-
-        boolean isMainMenu = top.equals(plugin.getCatalogManager().getMainMenu());
-        String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
-        boolean isPageMenu = title.contains(pageWord);
-
-        if (!isMainMenu && !isPageMenu)
+        if (!(top.getHolder() instanceof CatalogManager.CatalogGUIHolder))
             return;
-
-        // H5 FIX (güvenlik ağı): Her türlü yoluyla GUI'ye sızmış yabancı item
-        // varsa (eski sürümden kalan vb.) oyuncuya iade et, butonları dokunma.
-        for (int i = 0; i < top.getSize(); i++) {
-            ItemStack item = top.getItem(i);
-            if (item == null || item.getType().isAir())
-                continue;
-
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null && meta.getPersistentDataContainer().has(actionKey, PersistentDataType.STRING)) {
-                continue; // GUI butonu, yerinde kalabilir
-            }
-
-            top.setItem(i, null);
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
-            for (ItemStack rest : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), rest);
-            }
-        }
     }
 }
