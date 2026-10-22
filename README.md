@@ -4,11 +4,11 @@
 
 [![PhoenixFish Demo](https://img.youtube.com/vi/JEfE1KNi5do/maxresdefault.jpg)](https://www.youtube.com/watch?v=JEfE1KNi5do)
 
-It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities, XP progression, skill progression, environmental fishing, fish weights, personal and server records, economy, selling, tournaments, and extensive configuration options.
+It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities, XP progression, skill progression, environmental fishing, fish weights, personal and server records, a built-in economy, selling, tournaments, and extensive configuration options.
 
 Not everyone wants custom fishing all the time, so every player can **switch between PhoenixFish and vanilla fishing** with a single command and still catch vanilla treasure and enchanted books.
 
-> **Status:** In Development · **License:** GNU GPL v3.0 · **Minecraft:** 1.21 – 26.1.2 · **Java:** 21+ · **Server Software:** Paper / Purpur
+> **Status:** In Development · **License:** GNU GPL v3.0 · **Minecraft:** 1.21 – 26.1.3 · **Java:** 21+ · **Server Software:** Paper / Purpur
 
 ---
 
@@ -28,6 +28,7 @@ Not everyone wants custom fishing all the time, so every player can **switch bet
 * [Fishing Catalog](#fishing-catalog)
 * [Economy & Selling](#economy--selling)
 * [Tournament System](#tournament-system)
+* [PlaceholderAPI](#placeholderapi)
 * [Performance](#performance)
 * [Installation](#installation)
 * [Getting Started](#getting-started)
@@ -68,9 +69,9 @@ Each player can choose how they fish, and the choice is saved per player. It sur
 /phoenixfish toggle
 ```
 
-| Mode                 | What the player gets                                             |
-| -------------------- | ---------------------------------------------------------------- |
-| **Custom** (default) | The full PhoenixFish experience                                  |
+| Mode                 | What the player gets                                                |
+| -------------------- | ------------------------------------------------------------------- |
+| **Custom** (default) | The full PhoenixFish experience                                     |
 | **Vanilla**          | Normal Minecraft fishing. PhoenixFish does not touch fishing at all |
 
 In **vanilla mode**:
@@ -87,12 +88,12 @@ Switching to vanilla mode while a minigame is running cancels it without awardin
 
 Toggle commands:
 
-| Command                               | Description                                                          |
-| ------------------------------------- | -------------------------------------------------------------------- |
-| `/phoenixfish toggle`                 | Switch your own fishing mode.                                        |
+| Command                               | Description                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| `/phoenixfish toggle`                 | Switch your own fishing mode.                                          |
 | `/phoenixfish toggle status [player]` | Shows the current mode and where it comes from (`choice` / `default`). |
-| `/phoenixfish toggle <player>`        | **Admin:** toggle another player's mode.                             |
-| `/phoenixfish toggle reset <player>`  | **Admin:** reset a player to the default mode.                       |
+| `/phoenixfish toggle <player>`        | **Admin:** toggle another player's mode.                               |
+| `/phoenixfish toggle reset <player>`  | **Admin:** reset a player to the default mode.                         |
 
 Configuration:
 
@@ -134,6 +135,8 @@ Fish can be configured to appear only in specific biomes while unrestricted fish
 Create custom bait items that can target specific fish rarities.
 
 Bait can be configured to provide different effects and can interact with the **Lucky Bait** skill to reduce bait consumption.
+
+Admins can give bait with `/phoenixfish givebait <bait-name>`.
 
 ---
 
@@ -196,7 +199,12 @@ Available skills include:
 | **Double Catch**  | Gives a 10% chance per level to catch 2 fish at once. |
 | **Lucky Bait**    | Gives a 20% chance per level to avoid consuming bait. |
 
-Each skill can be upgraded up to **Level 5**.
+Each skill can be upgraded up to **Level 5** by default. The maximum can be changed (1 to 10) in `config.yml`:
+
+```yaml
+xp-system:
+  skill-max-level: 5
+```
 
 ---
 
@@ -356,7 +364,9 @@ Fish are automatically revealed after being caught for the first time.
 
 ### 💰 Economy & Selling
 
-PhoenixFish supports economy integration through **Vault**.
+PhoenixFish has its own **built-in economy**. Money earned from selling fish is stored as an internal balance in the plugin's database, together with the rest of the player's data.
+
+> PhoenixFish does **not** support Vault or other economy plugins. The balance can be shown in other plugins through [PlaceholderAPI](#placeholderapi) (`%phoenixfish_balance%`).
 
 Selling commands:
 
@@ -376,14 +386,6 @@ A **Sell** button is also available in the Fishing Catalog.
 
 Fish prices are calculated using their base price and individual weight. If a player's inventory is full, extra items are dropped at their feet instead of being lost.
 
-Players can check their money with:
-
-```text
-/phoenixfish balance
-```
-
-> Vault is required for economy-related features.
-
 ---
 
 ### 🏆 Tournament System
@@ -395,6 +397,8 @@ Administrators can host timed fishing competitions.
 ```text
 /phoenixfish tournament start <minutes>
 ```
+
+The duration must be between 1 and 1440 minutes.
 
 #### Stop
 
@@ -418,12 +422,38 @@ Example:
 
 This sets the item currently held in the player's hand as the **1st place reward**.
 
-Tournament rankings can be based on:
+#### Scoring
 
-* Total catch count
-* Fish rarity
+Every catch earns points based on the fish's rarity:
+
+| Rarity    | Points |
+| --------- | ------ |
+| Common    | 1      |
+| Uncommon  | 2      |
+| Rare      | 5      |
+| Epic      | 12     |
+| Legendary | 25     |
 
 Rewards are distributed to the **top 3 players** when the tournament ends. Players in vanilla mode do not earn tournament points.
+
+---
+
+### 🔌 PlaceholderAPI
+
+PhoenixFish registers **22 placeholders** for [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/), so you can use them in scoreboards, holograms, Skript and any other plugin that supports PlaceholderAPI. PlaceholderAPI is optional: without it PhoenixFish works as usual, just without placeholders.
+
+| Category     | Placeholders                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------- |
+| Progression  | `level`, `xp`, `xp_required`, `xp_progress_percent`, `total_xp`, `skillpoints`                                |
+| Economy      | `balance`                                                                                                     |
+| Crafting     | `crafting_level`, `crafting_xp`                                                                               |
+| Skills       | `skill_fast`, `skill_hunter`, `skill_double`, `skill_bait`                                                    |
+| Discovery    | `discovered_count`, `total_fish_count`, `discovered_percent`                                                  |
+| Records      | `pb_<fish_id>`, `sr_<fish_id>`                                                                                |
+| Fishing mode | `mode`                                                                                                        |
+| Tournament   | `tournament_active`, `tournament_score`, `tournament_leader`, `tournament_leader_score`, `tournament_time_left` |
+
+Use them as `%phoenixfish_<placeholder>%`, for example `%phoenixfish_level%`.
 
 ---
 
@@ -476,7 +506,7 @@ Database and record operations are designed to minimize blocking on the main ser
 
 ## Installation
 
-PhoenixFish requires a server running **Paper or a compatible fork such as Purpur**, on **Minecraft 1.21 – 26.1.2**.
+PhoenixFish requires a server running **Paper or a compatible fork such as Purpur**, on **Minecraft 1.21 – 26.1.3**.
 
 | Minecraft version | Java version required by the server |
 | ----------------- | ----------------------------------- |
@@ -505,21 +535,19 @@ Place `PhoenixFish.jar` into your server's `plugins` directory.
 C:\Users\Username\Desktop\Server\plugins\
 ```
 
-### 3. Install Vault
+### 3. Install PlaceholderAPI (Optional)
 
-If you want to use the economy and selling features, install **Vault** and a compatible economy provider.
+If you want to use PhoenixFish placeholders in scoreboards, holograms or other plugins, install [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/).
 
-### 4. Install PhoenixCraft (Optional)
+### 4. PhoenixCraft (Optional, not released yet)
 
-If you want custom crafting recipes for fishing rods and bait, place `PhoenixCraft.jar` into the `plugins` directory as well.
-
-PhoenixCraft is **not required** for the core fishing features.
+**PhoenixCraft** is a planned add-on that adds custom crafting recipes for fishing rods and bait. It is **not required** for the core fishing features. Until it is released, admins can give rods and bait with `/phoenixfish giverod` and `/phoenixfish givebait`.
 
 ### 5. Restart the Server
 
 Restart your server after installing the plugin.
 
-> ⚠️ **Do not use `/reload`.** Reloading can cause issues with plugin state, database connections, and other plugin systems.
+> ⚠️ **Do not use the server's `/reload`.** Reloading can cause issues with plugin state, database connections, and other plugin systems. To apply configuration changes without a restart, use PhoenixFish's own `/phoenixfish reload` (see [Commands & Permissions](#commands--permissions)).
 
 > **First start:** Paper downloads PhoenixFish's required libraries (such as HikariCP) once, so the server needs internet access on the first start.
 
@@ -532,8 +560,6 @@ plugins/PhoenixFish/
 ```
 
 Edit these files to customize fish, rods, bait, messages, fishing mechanics, economy, skills, weather, and other plugin features.
-
-Restart the server after making configuration changes.
 
 ---
 
@@ -549,7 +575,15 @@ Use:
 
 to receive a custom fishing rod.
 
-Alternatively, rods can be crafted if **PhoenixCraft** is installed and the corresponding recipes are configured.
+### Get Bait
+
+Use:
+
+```text
+/phoenixfish givebait <bait-name>
+```
+
+to receive custom bait. Bait names are the keys under `baits:` in `baits.yml` and are suggested by tab completion.
 
 ### Equip Bait
 
@@ -593,37 +627,44 @@ Catch fish to:
 
 ## Commands & Permissions
 
-| Command                                     | Description                                                             | Required Permission   |
-| ------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
-| `/phoenixfish`                              | Shows the help menu.                                                    | `phoenixfish.use`     |
-| `/phoenixfish skills`                       | Opens the Skill Tree.                                                   | `phoenixfish.use`     |
-| `/phoenixfish catalog`                      | Opens the Fishing Catalog.                                              | `phoenixfish.use`     |
-| `/phoenixfish toggle`                       | Switches between PhoenixFish and vanilla fishing.                       | `phoenixfish.toggle`  |
-| `/phoenixfish toggle status [player]`       | Shows your (or another player's) fishing mode.                          | `phoenixfish.toggle`  |
-| `/phoenixfish sell hand`                    | Sells the fish in your hand.                                            | `phoenixfish.use`     |
-| `/phoenixfish sell all`                     | Sells all supported fish in your inventory.                             | `phoenixfish.use`     |
-| `/phoenixfish sell menu`                    | Opens the fish selling menu.                                            | `phoenixfish.use`     |
-| `/phoenixfish balance`                      | Shows your balance.                                                     | `phoenixfish.use`     |
-| `/phoenixfish fix`                          | Scans and fixes broken custom items in your inventory.                  | `phoenixfish.use`     |
-| `/phoenixfish toggle <player>`              | Toggles another player's fishing mode.                                  | `phoenixfish.admin`   |
-| `/phoenixfish toggle reset <player>`        | Resets a player's fishing mode to the default.                          | `phoenixfish.admin`   |
-| `/phoenixfish giverod <rod>`                | Gives a custom fishing rod to the player.                               | `phoenixfish.admin`   |
-| `/phoenixfish addlevel <amount>`            | Modifies a player's fishing level.                                      | `phoenixfish.admin`   |
-| `/phoenixfish fixall`                       | Fixes broken fishing items across supported inventories and containers. | `phoenixfish.admin`   |
-| `/phoenixfish tournament start <minutes>`   | Starts a fishing tournament.                                            | `phoenixfish.admin`   |
-| `/phoenixfish tournament stop`              | Stops the active tournament.                                            | `phoenixfish.admin`   |
-| `/phoenixfish tournament addreward <place>` | Sets the held item as a tournament reward.                              | `phoenixfish.admin`   |
+| Command                                     | Description                                                             | Required Permission  |
+| ------------------------------------------- | ----------------------------------------------------------------------- | -------------------- |
+| `/phoenixfish`                              | Shows the help menu.                                                    | `phoenixfish.use`    |
+| `/phoenixfish skills`                       | Opens the Skill Tree.                                                   | `phoenixfish.use`    |
+| `/phoenixfish catalog`                      | Opens the Fishing Catalog.                                              | `phoenixfish.use`    |
+| `/phoenixfish toggle`                       | Switches between PhoenixFish and vanilla fishing.                       | `phoenixfish.toggle` |
+| `/phoenixfish toggle status [player]`       | Shows your (or another player's) fishing mode.                          | `phoenixfish.toggle` |
+| `/phoenixfish sell hand`                    | Sells the fish in your hand.                                            | `phoenixfish.use`    |
+| `/phoenixfish sell all`                     | Sells all supported fish in your inventory.                             | `phoenixfish.use`    |
+| `/phoenixfish sell menu`                    | Opens the fish selling menu.                                            | `phoenixfish.use`    |
+| `/phoenixfish fix`                          | Scans and fixes broken custom items in your inventory.                  | `phoenixfish.use`    |
+| `/phoenixfish toggle <player>`              | Toggles another player's fishing mode.                                  | `phoenixfish.admin`  |
+| `/phoenixfish toggle reset <player>`        | Resets a player's fishing mode to the default.                          | `phoenixfish.admin`  |
+| `/phoenixfish giverod <rod>`                | Gives a custom fishing rod to the player.                               | `phoenixfish.admin`  |
+| `/phoenixfish givebait <bait>`              | Gives custom bait to the player.                                        | `phoenixfish.admin`  |
+| `/phoenixfish addlevel <amount>`            | Modifies a player's fishing level (-1000 to 1000).                      | `phoenixfish.admin`  |
+| `/phoenixfish fixall`                       | Fixes broken fishing items across supported inventories and containers. | `phoenixfish.admin`  |
+| `/phoenixfish reload`                       | Reloads the configuration files without restarting the server.          | `phoenixfish.admin`  |
+| `/phoenixfish tournament start <minutes>`   | Starts a fishing tournament.                                            | `phoenixfish.admin`  |
+| `/phoenixfish tournament stop`              | Stops the active tournament.                                            | `phoenixfish.admin`  |
+| `/phoenixfish tournament addreward <place>` | Sets the held item as a tournament reward.                              | `phoenixfish.admin`  |
 
 > Offline players' supported items are automatically repaired the next time they join when applicable.
 
-Commands and rod names support tab completion.
+Commands, rod names and bait names support tab completion.
+
+### What `/phoenixfish reload` reloads
+
+**Reloaded:** `config.yml`, language files, `fish.yml`, `baits.yml`, `rods.yml`, `custom_recipes.yml` and the Catalog menu.
+
+**Not reloaded:** the database connection, the player cache, active tournaments and active minigames. Restart the server to change these.
 
 ### Permission Defaults
 
-| Permission           | Default     | Description                                                             |
-| -------------------- | ----------- | ----------------------------------------------------------------------- |
-| `phoenixfish.use`    | All players | Basic commands                                                          |
-| `phoenixfish.toggle` | All players | Switch your own fishing mode                                            |
+| Permission           | Default     | Description                                                                |
+| -------------------- | ----------- | -------------------------------------------------------------------------- |
+| `phoenixfish.use`    | All players | Basic commands                                                             |
+| `phoenixfish.toggle` | All players | Switch your own fishing mode                                               |
 | `phoenixfish.admin`  | OP only     | Admin commands, bypasses the toggle cooldown, manages other players' modes |
 
 ### Aliases
@@ -669,6 +710,16 @@ xp-system:
 
 > `database` settings are nested **under** `xp-system`. Refer to your generated `config.yml` for the complete configuration.
 
+#### MySQL SSL
+
+Two options control the SSL connection:
+
+| `use-ssl` | `verify-server-certificate` | Behavior                                                        |
+| --------- | --------------------------- | --------------------------------------------------------------- |
+| `true`    | `true`                      | SSL required, certificate verified (recommended for production) |
+| `true`    | `false`                     | SSL required, certificate not verified (self-signed certificates) |
+| `false`   | n/a                         | No SSL (only for a database on the same machine)                |
+
 If the database cannot be read, PhoenixFish does not overwrite existing player data with an empty profile.
 
 ---
@@ -677,16 +728,17 @@ If the database cannot be read, PhoenixFish does not overwrite existing player d
 
 PhoenixFish uses several configuration files:
 
-| File                 | Purpose                                                                       |
-| -------------------- | ----------------------------------------------------------------------------- |
+| File                 | Purpose                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
 | `config.yml`         | Main plugin configuration, XP, economy, skills, weather, fishing mode toggle, and general settings |
-| `fish.yml`           | Custom fish, weights, rarities, prices, and biome restrictions                |
-| `rods.yml`           | Custom fishing rod definitions                                                |
-| `custom_recipes.yml` | Custom crafting recipes                                                       |
-| `messages_en.yml`    | English messages                                                              |
-| `messages_tr.yml`    | Turkish messages                                                              |
-| `fish_tr.yml`        | Turkish fish names                                                            |
-| `records.yml`        | Persistent fish records                                                       |
+| `fish.yml`           | Custom fish, weights, rarities, prices, and biome restrictions                                     |
+| `baits.yml`          | Custom bait definitions                                                                            |
+| `rods.yml`           | Custom fishing rod definitions                                                                     |
+| `custom_recipes.yml` | Custom crafting recipes                                                                            |
+| `messages_en.yml`    | English messages                                                                                   |
+| `messages_tr.yml`    | Turkish messages                                                                                   |
+| `fish_tr.yml`        | Turkish fish names                                                                                 |
+| `records.yml`        | Persistent fish records                                                                            |
 
 Almost every aspect of the plugin can be customized without modifying the source code.
 
@@ -720,9 +772,9 @@ The active language can be selected through `config.yml`.
 
 ### PhoenixCraft
 
-**PhoenixCraft** is an optional add-on that provides custom crafting recipes for PhoenixFish fishing rods and bait.
+**PhoenixCraft** is a planned add-on that provides custom crafting recipes for PhoenixFish fishing rods and bait. It has not been released yet.
 
-PhoenixCraft is **not required** for the core PhoenixFish fishing features.
+PhoenixCraft is **not required** for the core PhoenixFish fishing features. Until it is released, rods and bait can be given with `/phoenixfish giverod` and `/phoenixfish givebait`.
 
 ---
 
