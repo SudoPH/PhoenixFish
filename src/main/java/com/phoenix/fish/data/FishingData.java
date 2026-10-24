@@ -1,6 +1,9 @@
 package com.phoenix.fish.data;
 
+import com.phoenix.fish.PhoenixFish;
+
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -215,18 +218,106 @@ public class FishingData {
     public synchronized void addCraftingXp(int amount) {
         if (amount <= 0)
             return;
+        // Faz 0.9.0: apply global XP multiplier from config
+        PhoenixFish plugin = PhoenixFish.getInstance();
+        if (plugin != null) {
+            double globalMult = plugin.getConfig().getDouble(
+                    "xp-system.crafting-xp.global-multiplier", 1.0);
+            if (globalMult != 1.0) {
+                amount = (int) Math.round(amount * globalMult);
+            }
+        }
         this.craftingXp += amount;
         this.totalCraftingXp += amount;
+
+        // Faz 0.9.0: cap XP at max level (prevent infinite accumulation)
+        if (this.craftingLevel >= 100) {
+            this.craftingXp = 0;
+        }
     }
 
     public synchronized boolean checkCraftingLevelUp() {
-        int requiredXp = this.craftingLevel * 100;
+        // Faz 0.9.0: Exponential XP formula (config-driven)
+        // Formula: base × level^exponent × tierMultiplier
+        // Falls back to linear (level × 100) if config not loaded
+        int requiredXp = getCraftingXpRequired();
         if (this.craftingXp >= requiredXp) {
             this.craftingXp -= requiredXp;
             this.craftingLevel++;
             return true;
         }
         return false;
+    }
+
+    /**
+     * Faz 0.9.0: Calculate XP required for next crafting level.
+     * Uses exponential formula: base × level^exponent × tierMultiplier
+     * Falls back to linear (level × 100) if PhoenixFish instance is null.
+     *
+     * Config values are cached after first read and invalidated on reload.
+     */
+    private static volatile double cachedBase = -1;
+    private static volatile double cachedExponent = -1;
+    private static volatile double cachedGlobalMult = -1;
+    private static volatile Map<String, Double> cachedTierMultipliers = null;
+
+    public static void invalidateXpCache() {
+        cachedBase = -1;
+        cachedExponent = -1;
+        cachedGlobalMult = -1;
+        cachedTierMultipliers = null;
+    }
+
+    private void loadXpConfigCache() {
+        if (cachedBase >= 0) return;
+        PhoenixFish plugin = PhoenixFish.getInstance();
+        if (plugin == null) return;
+
+        cachedBase = plugin.getConfig().getDouble("xp-system.crafting-xp.base", 50.0);
+        cachedExponent = plugin.getConfig().getDouble("xp-system.crafting-xp.exponent", 1.5);
+        cachedGlobalMult = plugin.getConfig().getDouble("xp-system.crafting-xp.global-multiplier", 1.0);
+
+        cachedTierMultipliers = new java.util.concurrent.ConcurrentHashMap<>();
+        var tierMultipliers = plugin.getConfig().getConfigurationSection(
+                "xp-system.crafting-xp.tier-multipliers");
+        if (tierMultipliers != null) {
+            for (String key : tierMultipliers.getKeys(false)) {
+                cachedTierMultipliers.put(key, tierMultipliers.getDouble(key, 1.0));
+            }
+        }
+    }
+
+    public int getCraftingXpRequired() {
+        PhoenixFish plugin = PhoenixFish.getInstance();
+        if (plugin == null) return this.craftingLevel * 100;
+
+        loadXpConfigCache();
+
+        double base = cachedBase >= 0 ? cachedBase : 50.0;
+        double exponent = cachedExponent >= 0 ? cachedExponent : 1.5;
+        double globalMult = cachedGlobalMult >= 0 ? cachedGlobalMult : 1.0;
+
+        // Find tier multiplier
+        double tierMult = 1.0;
+        if (cachedTierMultipliers != null) {
+            for (Map.Entry<String, Double> entry : cachedTierMultipliers.entrySet()) {
+                String[] parts = entry.getKey().split("-");
+                if (parts.length == 2) {
+                    try {
+                        int min = Integer.parseInt(parts[0].trim());
+                        int max = Integer.parseInt(parts[1].trim());
+                        if (this.craftingLevel >= min && this.craftingLevel <= max) {
+                            tierMult = entry.getValue();
+                            break;
+                        }
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        }
+
+        double required = base * Math.pow(this.craftingLevel, exponent) * tierMult * globalMult;
+        return Math.max(1, (int) Math.round(required));
     }
 
     public synchronized int checkAllLevelUps() {
@@ -242,8 +333,10 @@ public class FishingData {
 
     public synchronized int checkAllCraftingLevelUps() {
         int leveled = 0;
-        while (this.craftingXp >= this.craftingLevel * 100 && leveled < 1000) {
-            this.craftingXp -= this.craftingLevel * 100;
+        while (leveled < 1000) {
+            int req = getCraftingXpRequired();
+            if (this.craftingXp < req) break;
+            this.craftingXp -= req;
             this.craftingLevel++;
             leveled++;
         }

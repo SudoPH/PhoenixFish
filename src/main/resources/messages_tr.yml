@@ -102,12 +102,24 @@ bait_load_error: "'%bait%' yemi yüklenirken hata oluştu: %error%"
 bait_loaded_success: "%amount% adet özel yem başarıyla yüklendi."
 
 # Üretim Konsol Mesajları
-craft_api_not_found: "PhoenixCraft kurulu değil! Özel üretim tarifleri devre dışı bırakıldı."
-craft_api_hook_failed: "PhoenixCraft API'sine bağlanılamadı: %error%"
-craft_recipe_load_error: "'%recipe%' tarifi yüklenirken hata oluştu: %error%"
-craft_recipes_loaded: "%amount% adet özel tarif PhoenixCraft'a başarıyla gönderildi."
-craft_invalid_material: "Tarifte geçersiz materyal: %material%. Varsayılan olarak STONE kullanılıyor."
 craft_recipes_section_not_found: "custom_recipes.yml içinde 'recipes' bölümü bulunamadı."
+craft_recipes_loaded: "custom_recipes.yml'den %amount% üretim tarifi yüklendi."
+craft_invalid_material: "Tarifte geçersiz materyal: %material%. Varsayılan olarak STONE kullanılıyor."
+craft_recipe_load_error: "'%recipe%' tarifi yüklenirken hata oluştu: %error%"
+
+# Üretim — PhoenixCraft'a API üzerinden açılır
+craft_success: "<green>✔ Üretildi: <white>%item%</white> (+%xp% Zanaat XP)</green>"
+craft_fail_materials: "<red>✖ Gerekli malzemelerin tamamına sahip değilsin!</red>"
+craft_fail_level: "<red>✖ Bu tarifi yapmak için <yellow>%required%</yellow> zanaat seviyesi gerekir! (Senin: %current%)</red>"
+craft_recipe_unknown: "<red>✖ Bilinmeyen tarif.</red>"
+craft_no_data: "<red>✖ Üretim sistemi şu an kullanılamıyor (XP sistemi kapalı).</red>"
+craft_internal_error: "<red>✖ Üretim sırasında iç hata. Lütfen bir yetkiliye bildir.</red>"
+craft_usage: "<yellow>Kullanım: /pcraft</yellow> — üretim menüsünü açar</yellow>"
+craft_no_recipes: "<gray>Bu kategoride henüz tarif yok.</gray>"
+
+# Üretim level-up (title + ses, chat mesajına ek olarak)
+crafting_level_up_title: "<gold><bold>ZANAAT SEVİYESİ ARTTI!</bold></gold>"
+crafting_level_up_subtitle: "<white>Yeni Seviye: <yellow>%level%</yellow></white>"
 
 # Veritabanı Konsol Mesajları (MySQL)
 db_connected_mysql: "HikariCP kullanılarak MySQL veritabanına başarıyla bağlanıldı."

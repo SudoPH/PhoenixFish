@@ -102,12 +102,24 @@ bait_load_error: "Error while loading bait '%bait%': %error%"
 bait_loaded_success: "Loaded %amount% custom baits successfully."
 
 # Crafting Console Messages
-craft_api_not_found: "PhoenixCraft is not installed! Custom recipes are disabled."
-craft_api_hook_failed: "Failed to hook into PhoenixCraft API: %error%"
-craft_recipe_load_error: "Error while loading recipe '%recipe%': %error%"
-craft_recipes_loaded: "%amount% custom recipes have been sent to PhoenixCraft successfully."
-craft_invalid_material: "Invalid material '%material%' in recipe. Defaulting to STONE."
 craft_recipes_section_not_found: "No 'recipes' section found in custom_recipes.yml."
+craft_recipes_loaded: "Loaded %amount% crafting recipes from custom_recipes.yml."
+craft_invalid_material: "Invalid material '%material%' in recipe. Defaulting to STONE."
+craft_recipe_load_error: "Error while loading recipe '%recipe%': %error%"
+
+# Crafting — exposed via API to PhoenixCraft
+craft_success: "<green>✔ Crafted: <white>%item%</white> (+%xp% Crafting XP)</green>"
+craft_fail_materials: "<red>✖ You don't have all the required materials!</red>"
+craft_fail_level: "<red>✖ You need crafting level <yellow>%required%</yellow> to craft this! (Yours: %current%)</red>"
+craft_recipe_unknown: "<red>✖ Unknown recipe.</red>"
+craft_no_data: "<red>✖ Crafting system is currently unavailable (XP system disabled).</red>"
+craft_internal_error: "<red>✖ Internal error while crafting. Please contact an admin.</red>"
+craft_usage: "<yellow>Usage: /pcraft</yellow> — open the crafting menu</yellow>"
+craft_no_recipes: "<gray>No recipes in this category yet.</gray>"
+
+# Crafting level-up (title + sound, in addition to chat message)
+crafting_level_up_title: "<gold><bold>CRAFTING LEVEL UP!</bold></gold>"
+crafting_level_up_subtitle: "<white>New Level: <yellow>%level%</yellow></white>"
 
 # Database Console Messages (MySQL)
 db_connected_mysql: "Successfully connected to MySQL database using HikariCP."

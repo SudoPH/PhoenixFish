@@ -96,7 +96,7 @@ public final class FishRewardHelper {
 
         plugin.getRecordManager().checkRecords(player, fish, weight, formattedWeight);
 
-        if (plugin.getTournamentManager().isActive()) {
+        if (plugin.getTournamentManager().isActive()) { 
             int points = calculateTournamentPoints(fish);
             plugin.getTournamentManager().addScore(player, points * amountToGive);
         }

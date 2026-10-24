@@ -5,6 +5,7 @@ import com.phoenix.fish.command.FishCommand;
 import com.phoenix.fish.command.FishTabCompleter;
 import com.phoenix.fish.data.CacheManager;
 import com.phoenix.fish.data.FishingData;
+import com.phoenix.fish.event.PhoenixFishReloadEvent;
 import com.phoenix.fish.listener.CatalogListener;
 import com.phoenix.fish.listener.FishingListener;
 import com.phoenix.fish.listener.SellListener;
@@ -323,6 +324,17 @@ public final class PhoenixFish extends JavaPlugin {
 
         long elapsed = System.currentTimeMillis() - start;
         getLogger().info("PhoenixFish config reloaded in " + elapsed + "ms.");
+
+        // Faz 0.9.0: invalidate XP formula cache on reload
+        FishingData.invalidateXpCache();
+
+        // Notify external consumers (e.g. PhoenixCraft) — Faz 1 / 1.3.2 (Madde 2)
+        // They should invalidate caches and close any open GUIs showing stale data.
+        try {
+            Bukkit.getPluginManager().callEvent(new PhoenixFishReloadEvent(elapsed));
+        } catch (Exception e) {
+            getLogger().warning("Failed to dispatch PhoenixFishReloadEvent: " + e.getMessage());
+        }
     }
 
     public static PhoenixFish getInstance() {

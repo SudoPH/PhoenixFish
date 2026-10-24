@@ -5,11 +5,9 @@ api-version: "1.21"
 author: Sudo
 description: Custom fishing system with optional XP and minigame.
 
-# PhoenixCraft loads first if installed (required for custom recipe API hook)
 # PlaceholderAPI must load before PhoenixFish so %phoenixfish_*% placeholders register at enable
 softdepend:
   - PlaceholderAPI
-  - PhoenixCraft
 
 # Paper automatically downloads these libraries at startup.
 libraries:

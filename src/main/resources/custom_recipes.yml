@@ -266,6 +266,76 @@ recipes:
       B:
         material: BREAD
 
+  # ==========================================
+  # YENİ: Erken oyun yemleri (level 2-7 arası doldurur)
+  # ==========================================
+
+  # Minnow Bait (Level 2) — Yakalanan küçük balıkları yem olarak işle
+  minnow_bait:
+    result:
+      material: COD
+      custom-model-data: 40011
+      display-name: "<#A0A0A0>Minnow Bait</#A0A0A0>"
+      bait-id: "minnow_bait"
+      lore:
+        - "<gray>Crushed minnows mixed with bone meal."
+        - "<dark_gray>» <white>Slightly better than a worm."
+    crafting-level-requirement: 2
+    xp-reward: 3
+    shape:
+      - " C "
+      - "CBC"
+      - " C "
+    ingredients:
+      C:
+        material: COD
+      B:
+        material: BONE_MEAL
+
+  # Seaweed Wrap (Level 3) — Su altı yosunu, uncommon balıkları çeker
+  seaweed_wrap:
+    result:
+      material: KELP
+      custom-model-data: 40012
+      display-name: "<#3CB371>Seaweed Wrap</#3CB371>"
+      bait-id: "seaweed_wrap"
+      lore:
+        - "<gray>Wet kelp woven into a fragrant wrap."
+        - "<dark_gray>» <aqua>Attracts uncommon fish."
+    crafting-level-requirement: 3
+    xp-reward: 4
+    shape:
+      - "K K"
+      - "KSK"
+      - " K "
+    ingredients:
+      K:
+        material: KELP
+      S:
+        material: STICK
+
+  # Bug Paste (Level 7) — Böcek ezmesi, glowing_bait ile yarışır
+  bug_paste:
+    result:
+      material: HONEY_BOTTLE
+      custom-model-data: 40013
+      display-name: "<#DAA520>Bug Paste</#DAA520>"
+      bait-id: "bug_paste"
+      lore:
+        - "<gray>Mashed bugs soaked in sweet honey."
+        - "<dark_gray>» <aqua>Smells awful to humans, irresistible to fish."
+    crafting-level-requirement: 7
+    xp-reward: 5
+    shape:
+      - " S "
+      - "SHS"
+      - " S "
+    ingredients:
+      S:
+        material: SPIDER_EYE
+      H:
+        material: HONEY_BOTTLE
+
   glowing_bait:
     result:
       material: SLIME_BALL
@@ -433,3 +503,698 @@ recipes:
         material: PHANTOM_MEMBRANE
       C:
         material: END_CRYSTAL
+
+  # ==========================================================
+  # ENHANCED RODS (Faz 0.8.0 — Tiered Equipment System)
+  # ==========================================================
+  # Higher crafting level = better rods with higher luck.
+  # These are UPGRADES of the base rods, requiring both the
+  # base rod AND additional materials.
+  # All ratios (luck-multiplier) are easily adjustable here.
+  # ==========================================================
+
+  # Enhanced Hardwood Rod (Level 5) — luck 1.15 (base 1.1)
+  enhanced_hardwood_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21001
+      display-name: "<#D2B48C><italic>Reinforced Hardwood Rod</italic></#D2B48C>"
+      luck-multiplier: 1.15
+      lore:
+        - "<dark_gray>» <gray>Enhanced Starter"
+        - "<gray>Reinforced with iron bindings."
+        - ""
+        - "<dark_gray>Luck Multiplier: <white>x1.15"
+        - "<dark_gray>Required Fishing Level: <white>1"
+    crafting-level-requirement: 5
+    xp-reward: 8
+    shape:
+      - "  I"
+      - " IR"
+      - "R  "
+    ingredients:
+      I:
+        material: IRON_NUGGET
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20001
+
+  # Enhanced Iron Rod (Level 15) — luck 1.3 (base 1.2)
+  enhanced_iron_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21002
+      display-name: "<white><italic>Tempered Iron Rod</italic></white>"
+      luck-multiplier: 1.3
+      lore:
+        - "<dark_gray>» <gray>Enhanced Common"
+        - "<gray>Heat-treated for extra durability."
+        - ""
+        - "<dark_gray>Luck Multiplier: <white>x1.3"
+        - "<dark_gray>Required Fishing Level: <white>10"
+    crafting-level-requirement: 15
+    xp-reward: 20
+    shape:
+      - "  C"
+      - " CR"
+      - "R  "
+    ingredients:
+      C:
+        material: COPPER_INGOT
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20002
+
+  # Enhanced Gold Rod (Level 25) — luck 1.45 (base 1.35)
+  enhanced_gold_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21003
+      display-name: "<gold><italic>Gilded Gold Rod</italic></gold>"
+      luck-multiplier: 1.45
+      lore:
+        - "<dark_gray>» <gold>Enhanced Rare"
+        - "<gold>Gold-plated with enchanted gold."
+        - ""
+        - "<dark_gray>Luck Multiplier: <gold>x1.45"
+        - "<dark_gray>Required Fishing Level: <white>20"
+    crafting-level-requirement: 25
+    xp-reward: 40
+    shape:
+      - "  A"
+      - " AR"
+      - "R  "
+    ingredients:
+      A:
+        material: AMETHYST_SHARD
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20003
+
+  # Enhanced Diamond Rod (Level 40) — luck 1.6 (base 1.5)
+  enhanced_diamond_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21004
+      display-name: "<#55FFFF><italic>Prismatic Diamond Rod</italic></#55FFFF>"
+      luck-multiplier: 1.6
+      lore:
+        - "<dark_gray>» <aqua>Enhanced Epic"
+        - "<aqua>Cut with prismarine crystals."
+        - ""
+        - "<dark_gray>Luck Multiplier: <aqua>x1.6"
+        - "<dark_gray>Required Fishing Level: <white>35"
+    crafting-level-requirement: 40
+    xp-reward: 80
+    shape:
+      - "  P"
+      - " PR"
+      - "R  "
+    ingredients:
+      P:
+        material: PRISMARINE_SHARD
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20004
+
+  # Enhanced Netherite Rod (Level 55) — luck 1.8 (base 1.7)
+  enhanced_netherite_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21005
+      display-name: "<#5C5C5C><bold><italic>Infernal Netherite Rod</italic></bold></#5C5C5C>"
+      luck-multiplier: 1.8
+      lore:
+        - "<dark_gray>» <dark_red>Enhanced Superior"
+        - "<dark_red>Infused with soul fire."
+        - ""
+        - "<dark_gray>Luck Multiplier: <dark_red>x1.8"
+        - "<dark_gray>Required Fishing Level: <white>50"
+    crafting-level-requirement: 55
+    xp-reward: 130
+    shape:
+      - "  S"
+      - " SR"
+      - "R  "
+    ingredients:
+      S:
+        material: SOUL_LANTERN
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20005
+
+  # Enhanced Ocean Rod (Level 70) — luck 1.95 (base 1.85)
+  enhanced_ocean_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21006
+      display-name: "<#00CED1><bold><italic>Tidal Ocean's Wrath</italic></bold></#00CED1>"
+      luck-multiplier: 1.95
+      lore:
+        - "<dark_gray>» <dark_aqua>Enhanced Mystic"
+        - "<#00CED1>Blessed by the ocean guardians."
+        - ""
+        - "<dark_gray>Luck Multiplier: <dark_aqua>x1.95"
+        - "<dark_gray>Required Fishing Level: <white>65"
+    crafting-level-requirement: 70
+    xp-reward: 200
+    shape:
+      - "NSN"
+      - "SRP"
+      - "NSN"
+    ingredients:
+      N:
+        material: NAUTILUS_SHELL
+      S:
+        material: SEA_LANTERN
+      P:
+        material: PRISMARINE_CRYSTALS
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20006
+
+  # Enhanced Legendary Rod (Level 85) — luck 2.15 (base 2.0)
+  enhanced_legendary_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21007
+      display-name: "<#FFD700><bold><italic>Mythic Legendary Rod</italic></bold></#FFD700>"
+      luck-multiplier: 2.15
+      lore:
+        - "<dark_gray>» <gold><bold>Enhanced Legendary</bold></gold>"
+        - "<gold>Woven with pure starlight."
+        - ""
+        - "<dark_gray>Luck Multiplier: <gold>x2.15"
+        - "<dark_gray>Required Fishing Level: <white>80"
+    crafting-level-requirement: 85
+    xp-reward: 350
+    shape:
+      - " C "
+      - "CRC"
+      - " C "
+    ingredients:
+      C:
+        material: HEART_OF_THE_SEA
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20007
+
+  # Enhanced Cosmic Rod (Level 95) — luck 2.7 (base 2.5)
+  enhanced_cosmic_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 21008
+      display-name: "<#9D00FF><bold><italic>Celestial Cosmic Rod</italic></bold></#9D00FF>"
+      luck-multiplier: 2.7
+      lore:
+        - "<dark_gray>» <#9D00FF><bold>Enhanced Divine</bold></#9D00FF>"
+        - "<#9D00FF>Forged with the power of a dying star."
+        - "<gray>The tip can fish in the void itself."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#9D00FF>x2.7"
+        - "<dark_gray>Required Fishing Level: <white>100"
+    crafting-level-requirement: 95
+    xp-reward: 600
+    shape:
+      - " E "
+      - "ERE"
+      - " E "
+    ingredients:
+      E:
+        material: END_CRYSTAL
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20008
+
+  # ==========================================================
+  # ENHANCED BAITS (Faz 0.8.0 — Tiered Equipment System)
+  # ==========================================================
+  # Higher crafting level = better baits with higher chance
+  # modifiers. All ratios easily adjustable here.
+  # ==========================================================
+
+  # Enhanced Worm (Level 4) — chance 1.5 (base 1.3)
+  enhanced_worm:
+    result:
+      material: STICK
+      custom-model-data: 41001
+      display-name: "<#8B4513><italic>Fat Worm</italic></#8B4513>"
+      bait-id: "enhanced_worm"
+      lore:
+        - "<gray>A plump, juicy worm."
+        - "<dark_gray>» <white>Greatly attracts common fish."
+    crafting-level-requirement: 4
+    xp-reward: 4
+    shape:
+      - " D "
+      - "DBD"
+      - " D "
+    ingredients:
+      D:
+        material: DIRT
+      B:
+        material: BONE_MEAL
+
+  # Enhanced Glowing Bait (Level 8) — chance 1.55 (base 1.4)
+  enhanced_glowing_bait:
+    result:
+      material: SLIME_BALL
+      custom-model-data: 41002
+      display-name: "<aqua><italic>Radiant Bait</italic></aqua>"
+      bait-id: "enhanced_glowing_bait"
+      lore:
+        - "<gray>Glows with an otherworldly light."
+        - "<dark_gray>» <aqua>Strongly attracts uncommon fish."
+    crafting-level-requirement: 8
+    xp-reward: 8
+    shape:
+      - " S "
+      - "SGS"
+      - " S "
+    ingredients:
+      S:
+        material: SLIME_BALL
+      G:
+        material: GLOWSTONE
+
+  # Enhanced Bloodied Flesh (Level 22) — chance 1.65 (base 1.5)
+  enhanced_bloodied_flesh:
+    result:
+      material: ROTTEN_FLESH
+      custom-model-data: 41003
+      display-name: "<red><italic>Enchanted Flesh</italic></red>"
+      bait-id: "enhanced_bloodied_flesh"
+      lore:
+        - "<gray>Dark magic infuses this flesh."
+        - "<dark_gray>» <red>Powerfully attracts rare fish."
+    crafting-level-requirement: 22
+    xp-reward: 20
+    shape:
+      - " R "
+      - "RFR"
+      - " R "
+    ingredients:
+      R:
+        material: REDSTONE_BLOCK
+      F:
+        material: ROTTEN_FLESH
+
+  # Enhanced Ocean Essence (Level 45) — chance 1.75 (base 1.6)
+  enhanced_ocean_essence:
+    result:
+      material: PRISMARINE_CRYSTALS
+      custom-model-data: 41004
+      display-name: "<#00CED1><italic>Concentrated Ocean Essence</italic></#00CED1>"
+      bait-id: "enhanced_ocean_essence"
+      lore:
+        - "<#00CED1>Distilled essence of the deep."
+        - "<dark_gray>» <gold>Powerfully attracts epic fish."
+    crafting-level-requirement: 45
+    xp-reward: 55
+    shape:
+      - " P "
+      - "PCP"
+      - " P "
+    ingredients:
+      P:
+        material: PRISMARINE_CRYSTALS
+      C:
+        material: HEART_OF_THE_SEA
+
+  # Enhanced Golden Roe (Level 60) — chance 1.85 (base 1.7)
+  enhanced_golden_roe:
+    result:
+      material: EGG
+      custom-model-data: 41005
+      display-name: "<gold><italic>Radiant Golden Roe</italic></gold>"
+      bait-id: "enhanced_golden_roe"
+      lore:
+        - "<gold>Golden eggs blessed by the sun."
+        - "<dark_gray>» <gold>Iridescent attraction for epic fish."
+    crafting-level-requirement: 60
+    xp-reward: 80
+    shape:
+      - " E "
+      - "EGE"
+      - " E "
+    ingredients:
+      E:
+        material: EGG
+      G:
+        material: GOLD_BLOCK
+
+  # Enhanced Void Leech (Level 75) — chance 1.9 (base 1.7)
+  enhanced_void_leech:
+    result:
+      material: NETHERITE_SCRAP
+      custom-model-data: 41006
+      display-name: "<dark_purple><italic>Abyssal Void Leech</italic></dark_purple>"
+      bait-id: "enhanced_void_leech"
+      lore:
+        - "<dark_purple>A parasitic horror from the void."
+        - "<dark_gray>» <light_purple>Irresistible to legendary fish."
+    crafting-level-requirement: 75
+    xp-reward: 130
+    shape:
+      - " N "
+      - "NSN"
+      - " N "
+    ingredients:
+      N:
+        material: NETHERITE_SCRAP
+      S:
+        material: SOUL_SOIL
+
+  # ==========================================================
+  # FILLER RODS (Faz 1.0.0 — Level boşluklarını doldur)
+  # ==========================================================
+
+  # L30: Copper Rod — Gold ve Diamond arası
+  copper_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20009
+      display-name: "<#FF8C00><italic>Copper Rod</italic></#FF8C00>"
+      luck-multiplier: 1.38
+      lore:
+        - "<dark_gray>» <#FF8C00>Transitional"
+        - "<gray>A budget rod made of copper."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#FF8C00>x1.38"
+        - "<dark_gray>Required Fishing Level: <white>25"
+    crafting-level-requirement: 30
+    xp-reward: 30
+    shape:
+      - "  C"
+      - " CR"
+      - "R  "
+    ingredients:
+      C:
+        material: COPPER_INGOT
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20003
+
+  # L45: Quartz Rod — Diamond ve Netherite arası
+  quartz_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20010
+      display-name: "<white><italic>Quartz Rod</italic></white>"
+      luck-multiplier: 1.55
+      lore:
+        - "<dark_gray>» <white>Transitional"
+        - "<gray>Lightweight but durable."
+        - ""
+        - "<dark_gray>Luck Multiplier: <white>x1.55"
+        - "<dark_gray>Required Fishing Level: <white>40"
+    crafting-level-requirement: 45
+    xp-reward: 55
+    shape:
+      - "  Q"
+      - " QR"
+      - "R  "
+    ingredients:
+      Q:
+        material: QUARTZ_BLOCK
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20004
+
+  # L60: Amethyst Rod — Netherite ve Ocean arası
+  amethyst_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20011
+      display-name: "<#9B30FF><italic>Amethyst Rod</italic></#9B30FF>"
+      luck-multiplier: 1.75
+      lore:
+        - "<dark_gray>» <#9B30FF>Transitional"
+        - "<gray>Crackling with crystal energy."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#9B30FF>x1.75"
+        - "<dark_gray>Required Fishing Level: <white>55"
+    crafting-level-requirement: 60
+    xp-reward: 100
+    shape:
+      - "  A"
+      - " AR"
+      - "R  "
+    ingredients:
+      A:
+        material: AMETHYST_BLOCK
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20005
+
+  # L75: Coral Rod — Ocean ve Legendary arası
+  coral_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20012
+      display-name: "<#FF7F50><italic>Coral Rod</italic></#FF7F50>"
+      luck-multiplier: 1.9
+      lore:
+        - "<dark_gray>» <#FF7F50>Transitional"
+        - "<gray>Grown from living coral."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#FF7F50>x1.9"
+        - "<dark_gray>Required Fishing Level: <white>70"
+    crafting-level-requirement: 75
+    xp-reward: 160
+    shape:
+      - "  B"
+      - " BR"
+      - "R  "
+    ingredients:
+      B:
+        material: BRAIN_CORAL_BLOCK
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20006
+
+  # L90: Echo Rod — Legendary ve Cosmic arası
+  echo_rod:
+    result:
+      material: FISHING_ROD
+      custom-model-data: 20013
+      display-name: "<#00FF7F><italic>Echo Rod</italic></#00FF7F>"
+      luck-multiplier: 2.25
+      lore:
+        - "<dark_gray>» <#00FF7F>Transitional"
+        - "<gray>Resonates with the void's echo."
+        - ""
+        - "<dark_gray>Luck Multiplier: <#00FF7F>x2.25"
+        - "<dark_gray>Required Fishing Level: <white>85"
+    crafting-level-requirement: 90
+    xp-reward: 280
+    shape:
+      - " S "
+      - "SRS"
+      - " S "
+    ingredients:
+      S:
+        material: SCULK_CATALYST
+      R:
+        material: FISHING_ROD
+        custom-model-data: 20007
+
+  # ==========================================================
+  # FILLER BAITS (Faz 1.0.0 — Level boşluklarını doldur)
+  # ==========================================================
+
+  # L15: Moss Bait — uncommon yem boşluğu
+  moss_bait:
+    result:
+      material: MOSS_BLOCK
+      custom-model-data: 40014
+      display-name: "<#4A7C2E>Moss Bait</#4A7C2E>"
+      bait-id: "moss_bait"
+      lore:
+        - "<gray>Damp moss that fish love."
+        - "<dark_gray>» <white>Attracts common fish."
+    crafting-level-requirement: 15
+    xp-reward: 7
+    shape:
+      - " M "
+      - "MMM"
+      - " M "
+    ingredients:
+      M:
+        material: MOSS_BLOCK
+
+  # L25: Glow Berry Bait — uncommon/rare arası
+  glow_berry_bait:
+    result:
+      material: GLOW_BERRIES
+      custom-model-data: 40015
+      display-name: "<#FFD700>Glow Berry Bait</#FFD700>"
+      bait-id: "glow_berry_bait"
+      lore:
+        - "<gray>Sweet and luminous."
+        - "<dark_gray>» <aqua>Attracts uncommon fish."
+    crafting-level-requirement: 25
+    xp-reward: 12
+    shape:
+      - " G "
+      - "GBG"
+      - " G "
+    ingredients:
+      G:
+        material: GLOW_BERRIES
+      B:
+        material: SUGAR
+
+  # L35: Crimson Fungus Bait — rare yem boşluğu
+  crimson_bait:
+    result:
+      material: NETHER_WART
+      custom-model-data: 40016
+      display-name: "<#DC143C>Crimson Bait</#DC143C>"
+      bait-id: "crimson_bait"
+      lore:
+        - "<gray>From the crimson forests."
+        - "<dark_gray>» <red>Attracts rare fish."
+    crafting-level-requirement: 35
+    xp-reward: 18
+    shape:
+      - " W "
+      - "WNW"
+      - " W "
+    ingredients:
+      W:
+        material: NETHER_WART
+      N:
+        material: NETHER_BRICK
+
+  # L40: Ender Pearl Bait — rare yem
+  ender_bait:
+    result:
+      material: ENDER_PEARL
+      custom-model-data: 40017
+      display-name: "<#00FFB0>Ender Bait</#00FFB0>"
+      bait-id: "ender_bait"
+      lore:
+        - "<gray>Telepathically lures fish."
+        - "<dark_gray>» <red>Attracts rare fish."
+    crafting-level-requirement: 40
+    xp-reward: 25
+    shape:
+      - " E "
+      - "ESE"
+      - " E "
+    ingredients:
+      E:
+        material: ENDER_PEARL
+      S:
+        material: SLIME_BALL
+
+  # L55: Blaze Bait — epic yem boşluğu
+  blaze_bait:
+    result:
+      material: BLAZE_POWDER
+      custom-model-data: 40018
+      display-name: "<#FF4500>Blaze Bait</#FF4500>"
+      bait-id: "blaze_bait"
+      lore:
+        - "<gray>Smolders with nether heat."
+        - "<dark_gray>» <gold>Attracts epic fish."
+    crafting-level-requirement: 55
+    xp-reward: 35
+    shape:
+      - " B "
+      - "BGB"
+      - " B "
+    ingredients:
+      B:
+        material: BLAZE_POWDER
+      G:
+        material: GOLD_NUGGET
+
+  # L70: Shulker Bait — epic/legendary arası
+  shulker_bait:
+    result:
+      material: SHULKER_SHELL
+      custom-model-data: 40019
+      display-name: "<#EB9B8F>Shulker Bait</#EB9B8F>"
+      bait-id: "shulker_bait"
+      lore:
+        - "<gray>A protected morsel."
+        - "<dark_gray>» <gold>Strongly attracts epic fish."
+    crafting-level-requirement: 70
+    xp-reward: 50
+    shape:
+      - " S "
+      - "SCS"
+      - " S "
+    ingredients:
+      S:
+        material: SHULKER_SHELL
+      C:
+        material: CHORUS_FRUIT
+
+  # L85: Wither Bait — legendary yem boşluğu
+  wither_bait:
+    result:
+      material: WITHER_SKELETON_SKULL
+      custom-model-data: 40020
+      display-name: "<#4A4A4A>Wither Bait</#4A4A4A>"
+      bait-id: "wither_bait"
+      lore:
+        - "<gray>Death itself in bait form."
+        - "<dark_gray>» <light_purple>Attracts legendary fish."
+    crafting-level-requirement: 85
+    xp-reward: 90
+    shape:
+      - " W "
+      - "WBW"
+      - " W "
+    ingredients:
+      W:
+        material: WITHER_SKELETON_SKULL
+      B:
+        material: BLAZE_ROD
+
+  # L90: Echo Bait — legendary/divine arası
+  echo_bait:
+    result:
+      material: ECHO_SHARD
+      custom-model-data: 40021
+      display-name: "<#7FDBFF>Echo Bait</#7FDBFF>"
+      bait-id: "echo_bait"
+      lore:
+        - "<gray>Whispers from the deep dark."
+        - "<dark_gray>» <light_purple>Irresistible to legendary fish."
+    crafting-level-requirement: 90
+    xp-reward: 120
+    shape:
+      - " E "
+      - "ESE"
+      - " E "
+    ingredients:
+      E:
+        material: ECHO_SHARD
+      S:
+        material: SCULK_CATALYST
+
+  # L95: Nether Star Bait — divine yem
+  nether_star_bait:
+    result:
+      material: NETHER_STAR
+      custom-model-data: 40022
+      display-name: "<#FFFFFF><bold>Nether Star Bait</bold></#FFFFFF>"
+      bait-id: "nether_star_bait"
+      lore:
+        - "<white>Condensed stellar energy."
+        - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
+    crafting-level-requirement: 95
+    xp-reward: 180
+    shape:
+      - " N "
+      - "NSN"
+      - " N "
+    ingredients:
+      N:
+        material: NETHER_STAR
+      S:
+        material: SCULK_CATALYST

@@ -31,6 +31,39 @@ baits:
       - "<gray>A leftover piece of bread."
       - "<dark_gray>» <white>Cheap bait for desperate fish."
 
+  # ==========================================
+  # YENİ: Erken oyun yemleri (level 2-7)
+  # ==========================================
+  minnow_bait:
+    display-name: "<#A0A0A0>Minnow Bait</#A0A0A0>"
+    material: COD
+    custom-model-data: 40011
+    target-rarity: 1
+    chance-modifier: 1.4
+    lore:
+      - "<gray>Crushed minnows mixed with bone meal."
+      - "<dark_gray>» <white>Slightly better than a worm."
+
+  seaweed_wrap:
+    display-name: "<#3CB371>Seaweed Wrap</#3CB371>"
+    material: KELP
+    custom-model-data: 40012
+    target-rarity: 2
+    chance-modifier: 1.25
+    lore:
+      - "<gray>Wet kelp woven into a fragrant wrap."
+      - "<dark_gray>» <aqua>Attracts uncommon fish."
+
+  bug_paste:
+    display-name: "<#DAA520>Bug Paste</#DAA520>"
+    material: HONEY_BOTTLE
+    custom-model-data: 40013
+    target-rarity: 2
+    chance-modifier: 1.35
+    lore:
+      - "<gray>Mashed bugs soaked in sweet honey."
+      - "<dark_gray>» <aqua>Smells awful to humans, irresistible to fish."
+
   glowing_bait:
     display-name: "<aqua>Glowing Bait</aqua>"
     material: SLIME_BALL
@@ -118,4 +151,164 @@ baits:
     chance-modifier: 1.8
     lore:
       - "<#C0C0C0>Draws energy from the moonlight."
+      - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
+
+  # ==========================================
+  # ENHANCED BAITS (Faz 0.8.0 — Tiered Equipment)
+  # ==========================================
+  # Higher crafting level = better baits.
+  # All chance-modifier values easily adjustable.
+  # ==========================================
+
+  enhanced_worm:
+    display-name: "<#8B4513><italic>Fat Worm</italic></#8B4513>"
+    material: STICK
+    custom-model-data: 41001
+    target-rarity: 1
+    chance-modifier: 1.5
+    lore:
+      - "<gray>A plump, juicy worm."
+      - "<dark_gray>» <white>Greatly attracts common fish."
+
+  enhanced_glowing_bait:
+    display-name: "<aqua><italic>Radiant Bait</italic></aqua>"
+    material: SLIME_BALL
+    custom-model-data: 41002
+    target-rarity: 2
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Glows with an otherworldly light."
+      - "<dark_gray>» <aqua>Strongly attracts uncommon fish."
+
+  enhanced_bloodied_flesh:
+    display-name: "<red><italic>Enchanted Flesh</italic></red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 41003
+    target-rarity: 3
+    chance-modifier: 1.65
+    lore:
+      - "<gray>Dark magic infuses this flesh."
+      - "<dark_gray>» <red>Powerfully attracts rare fish."
+
+  enhanced_ocean_essence:
+    display-name: "<#00CED1><italic>Concentrated Ocean Essence</italic></#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 41004
+    target-rarity: 4
+    chance-modifier: 1.75
+    lore:
+      - "<#00CED1>Distilled essence of the deep."
+      - "<dark_gray>» <gold>Powerfully attracts epic fish."
+
+  enhanced_golden_roe:
+    display-name: "<gold><italic>Radiant Golden Roe</italic></gold>"
+    material: EGG
+    custom-model-data: 41005
+    target-rarity: 4
+    chance-modifier: 1.85
+    lore:
+      - "<gold>Golden eggs blessed by the sun."
+      - "<dark_gray>» <gold>Iridescent attraction for epic fish."
+
+  enhanced_void_leech:
+    display-name: "<dark_purple><italic>Abyssal Void Leech</italic></dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 41006
+    target-rarity: 5
+    chance-modifier: 1.9
+    lore:
+      - "<dark_purple>A parasitic horror from the void."
+      - "<dark_gray>» <light_purple>Irresistible to legendary fish."
+
+  # ==========================================
+  # FILLER BAITS (Faz 1.0.0 — Level boşlukları)
+  # ==========================================
+  moss_bait:
+    display-name: "<#4A7C2E>Moss Bait</#4A7C2E>"
+    material: MOSS_BLOCK
+    custom-model-data: 40014
+    target-rarity: 1
+    chance-modifier: 1.35
+    lore:
+      - "<gray>Damp moss that fish love."
+      - "<dark_gray>» <white>Attracts common fish."
+
+  glow_berry_bait:
+    display-name: "<#FFD700>Glow Berry Bait</#FFD700>"
+    material: GLOW_BERRIES
+    custom-model-data: 40015
+    target-rarity: 2
+    chance-modifier: 1.3
+    lore:
+      - "<gray>Sweet and luminous."
+      - "<dark_gray>» <aqua>Attracts uncommon fish."
+
+  crimson_bait:
+    display-name: "<#DC143C>Crimson Bait</#DC143C>"
+    material: NETHER_WART
+    custom-model-data: 40016
+    target-rarity: 3
+    chance-modifier: 1.45
+    lore:
+      - "<gray>From the crimson forests."
+      - "<dark_gray>» <red>Attracts rare fish."
+
+  ender_bait:
+    display-name: "<#00FFB0>Ender Bait</#00FFB0>"
+    material: ENDER_PEARL
+    custom-model-data: 40017
+    target-rarity: 3
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Telepathically lures fish."
+      - "<dark_gray>» <red>Attracts rare fish."
+
+  blaze_bait:
+    display-name: "<#FF4500>Blaze Bait</#FF4500>"
+    material: BLAZE_POWDER
+    custom-model-data: 40018
+    target-rarity: 4
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Smolders with nether heat."
+      - "<dark_gray>» <gold>Attracts epic fish."
+
+  shulker_bait:
+    display-name: "<#EB9B8F>Shulker Bait</#EB9B8F>"
+    material: SHULKER_SHELL
+    custom-model-data: 40019
+    target-rarity: 4
+    chance-modifier: 1.65
+    lore:
+      - "<gray>A protected morsel."
+      - "<dark_gray>» <gold>Strongly attracts epic fish."
+
+  wither_bait:
+    display-name: "<#4A4A4A>Wither Bait</#4A4A4A>"
+    material: WITHER_SKELETON_SKULL
+    custom-model-data: 40020
+    target-rarity: 5
+    chance-modifier: 1.75
+    lore:
+      - "<gray>Death itself in bait form."
+      - "<dark_gray>» <light_purple>Attracts legendary fish."
+
+  echo_bait:
+    display-name: "<#7FDBFF>Echo Bait</#7FDBFF>"
+    material: ECHO_SHARD
+    custom-model-data: 40021
+    target-rarity: 5
+    chance-modifier: 1.85
+    lore:
+      - "<gray>Whispers from the deep dark."
+      - "<dark_gray>» <light_purple>Irresistible to legendary fish."
+
+  nether_star_bait:
+    display-name: "<#FFFFFF><bold>Nether Star Bait</bold></#FFFFFF>"
+    material: NETHER_STAR
+    custom-model-data: 40022
+    target-rarity: 5
+    chance-modifier: 2.0
+    lore:
+      - "<white>Condensed stellar energy."
       - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
