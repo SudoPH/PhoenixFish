@@ -24,6 +24,12 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.0"
       - "<dark_gray>Required Fishing Level: <white>1"
+    # v1.3.5 — Minigame bonusları (default = no-op, eski davranış)
+    minigame:
+      bar-width-bonus: 0
+      progress-rate-bonus: 0.0
+      tension-resistance: 0.0
+      fish-slow-chance: 1.0
 
   # Tier 1 Rod
   hardwood_rod:
@@ -39,6 +45,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.1"
       - "<dark_gray>Required Fishing Level: <white>1"
+    minigame:
+      bar-width-bonus: 0
+      progress-rate-bonus: 0.0
+      tension-resistance: 0.0
+      fish-slow-chance: 1.0
 
   # Tier 2 Rod
   iron_rod:
@@ -54,6 +65,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <white>x1.2"
       - "<dark_gray>Required Fishing Level: <white>10"
+    minigame:
+      bar-width-bonus: 1
+      progress-rate-bonus: 0.1
+      tension-resistance: 0.05
+      fish-slow-chance: 0.95
 
   # Tier 3 Rod
   gold_rod:
@@ -69,6 +85,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <gold>x1.35"
       - "<dark_gray>Required Fishing Level: <gold>20"
+    minigame:
+      bar-width-bonus: 1
+      progress-rate-bonus: 0.2
+      tension-resistance: 0.05
+      fish-slow-chance: 0.9
 
   # Tier 4 Rod
   diamond_rod:
@@ -84,6 +105,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <aqua>x1.5"
       - "<dark_gray>Required Fishing Level: <aqua>35"
+    minigame:
+      bar-width-bonus: 2
+      progress-rate-bonus: 0.3
+      tension-resistance: 0.10
+      fish-slow-chance: 0.85
 
   # Tier 5 Rod
   netherite_rod:
@@ -99,6 +125,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
       - "<dark_gray>Required Fishing Level: <dark_red>50"
+    minigame:
+      bar-width-bonus: 2
+      progress-rate-bonus: 0.4
+      tension-resistance: 0.15
+      fish-slow-chance: 0.8
 
   # Tier 6 Rod
   ocean_rod:
@@ -114,6 +145,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
       - "<dark_gray>Required Fishing Level: <dark_aqua>65"
+    minigame:
+      bar-width-bonus: 3
+      progress-rate-bonus: 0.5
+      tension-resistance: 0.20
+      fish-slow-chance: 0.75
 
   # Tier 7 Rod
   legendary_rod:
@@ -129,6 +165,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <gold>x2.0"
       - "<dark_gray>Required Fishing Level: <gold>80"
+    minigame:
+      bar-width-bonus: 3
+      progress-rate-bonus: 0.7
+      tension-resistance: 0.25
+      fish-slow-chance: 0.7
 
   # Tier 8 Rod
   cosmic_rod:
@@ -144,6 +185,11 @@ rods:
       - ""
       - "<dark_gray>Luck Multiplier: <#9D00FF>x2.5"
       - "<dark_gray>Required Fishing Level: <#9D00FF>100"
+    minigame:
+      bar-width-bonus: 4
+      progress-rate-bonus: 1.0
+      tension-resistance: 0.30
+      fish-slow-chance: 0.6
 
   # ==========================================
   # ENHANCED RODS (Faz 0.8.0 — Tiered Equipment)

@@ -1,0 +1,323 @@
+# ==========================================
+# PhoenixFish - Baits Configuration
+# ==========================================
+# Bait IDs must be unique. Do not use spaces in IDs.
+# target-rarity: The rarity level of fish this bait boosts (1-5).
+# chance-modifier: The multiplier applied to the base catch chance for the target rarity.
+# Note: Values above 2.0 are not recommended as they break the late-game balance.
+# Recommended range: 1.1 to 1.8
+
+baits:
+  # ==========================================
+  # Early Game (Common & Uncommon)
+  # ==========================================
+  worm:
+    display-name: "<#8B4513>Sıradan Solucan</#8B4513>"
+    material: STICK
+    custom-model-data: 40001
+    target-rarity: 1
+    chance-modifier: 1.3
+    lore:
+      - "<gray>Toprakta bulunan basit bir solucan."
+      - "<dark_gray>» <white>Sıradan balıkları hafifçe çeker."
+
+  bread_crust:
+    display-name: "<#FFDAB9>Ekmek Kırıntısı</#FFDAB9>"
+    material: BREAD
+    custom-model-data: 40002
+    target-rarity: 1
+    chance-modifier: 1.2
+    lore:
+      - "<gray>Artık bir ekmek parçası."
+      - "<dark_gray>» <white>Çaresiz balıklar için ucuz yem."
+
+  # ==========================================
+  # YENİ: Erken oyun yemleri (level 2-7)
+  # ==========================================
+  minnow_bait:
+    display-name: "<#A0A0A0>Küçük Balık Yemi</#A0A0A0>"
+    material: COD
+    custom-model-data: 40011
+    target-rarity: 1
+    chance-modifier: 1.4
+    lore:
+      - "<gray>Ezilmiş küçük balıklar + kemik unu."
+      - "<dark_gray>» <white>Solucandan biraz daha iyi."
+
+  seaweed_wrap:
+    display-name: "<#3CB371>Deniz Yosunu Sarma</#3CB371>"
+    material: KELP
+    custom-model-data: 40012
+    target-rarity: 2
+    chance-modifier: 1.25
+    lore:
+      - "<gray>Kokulu bir sarma olarak örülmüş ıslak deniz yosunu."
+      - "<dark_gray>» <aqua>Nadir olmayan balıkları çeker."
+
+  bug_paste:
+    display-name: "<#DAA520>Böcek Ezmesi</#DAA520>"
+    material: HONEY_BOTTLE
+    custom-model-data: 40013
+    target-rarity: 2
+    chance-modifier: 1.35
+    lore:
+      - "<gray>Tatlı balda bekletilmiş ezilmiş böcekler."
+      - "<dark_gray>» <aqua>İnsana korkunç kokar, balıklara dayanılmaz."
+
+  glowing_bait:
+    display-name: "<aqua>Parıldayan Yem</aqua>"
+    material: SLIME_BALL
+    custom-model-data: 40003
+    target-rarity: 2
+    chance-modifier: 1.4
+    lore:
+      - "<gray>Parıltılı ışık balıkları büyüler."
+      - "<dark_gray>» <aqua>Nadir olmayan balıkları çeker."
+
+  enchanted_dough:
+    display-name: "<#FFC0CB>Büyülü Hamur</#FFC0CB>"
+    material: HONEYCOMB
+    custom-model-data: 40004
+    target-rarity: 2
+    chance-modifier: 1.5
+    lore:
+      - "<gray>Biraz büyü ile pişirilmiş hamur."
+      - "<dark_gray>» <aqua>Nadir olmayan balıklar için güvenilir seçim."
+
+  # ==========================================
+  # Mid Game (Rare)
+  # ==========================================
+  bloodied_flesh:
+    display-name: "<red>Kanlı Et</red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 40005
+    target-rarity: 3
+    chance-modifier: 1.5
+    lore:
+      - "<gray>Yırtıcıları çıldırtan keskin koku."
+      - "<dark_gray>» <red>Nadir balıkları çeker."
+
+  spider_silk:
+    display-name: "<#F5F5DC>Örümcek İpeği</#F5F5DC>"
+    material: COBWEB
+    custom-model-data: 40006
+    target-rarity: 3
+    chance-modifier: 1.6
+    lore:
+      - "<gray>Nadir avları saran örülmüş ipek."
+      - "<dark_gray>» <red>Nadir balıklar için premium yem."
+
+  # ==========================================
+  # Late Game (Epic)
+  # ==========================================
+  ocean_essence:
+    display-name: "<#00CED1>Okyanus Özü</#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 40007
+    target-rarity: 4
+    chance-modifier: 1.6
+    lore:
+      - "<#00CED1>Denizlerin saf büyüsü."
+      - "<dark_gray>» <gold>Efsanevi balıkları çeker."
+
+  golden_roe:
+    display-name: "<gold>Altın Havyar</gold>"
+    material: EGG
+    custom-model-data: 40008
+    target-rarity: 4
+    chance-modifier: 1.7
+    lore:
+      - "<gold>Altınla parıldayan nadir balık yumurtaları."
+      - "<dark_gray>» <gold>Efsanevi balıklara son derece çekici."
+
+  # ==========================================
+  # End Game (Legendary)
+  # ==========================================
+  void_leech:
+    display-name: "<dark_purple>Boşluk Sülüğü</dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 40009
+    target-rarity: 5
+    chance-modifier: 1.7
+    lore:
+      - "<dark_purple>Derin boşluktan gelen asalak bir yaratık."
+      - "<dark_gray>» <light_purple>Efsanevi balıkları çeker."
+    # v1.3.5 — Minigame bonusu: efsanevi balıklarda (rarity 5) uygulanır
+    minigame:
+      fight-strength-reduction: 0.10   # balığın fight strength değerini %10 azaltır
+      fish-slow-bonus: 0.10             # balığın hareket şansını %10 azaltır
+      progress-bonus: 0.2               # progressRate'e +0.2 ekler
+
+  lunar_moth:
+    display-name: "<#C0C0C0>Ay Güvesi</#C0C0C0>"
+    material: PHANTOM_MEMBRANE
+    custom-model-data: 40010
+    target-rarity: 5
+    chance-modifier: 1.8
+    lore:
+      - "<#C0C0C0>Işığı aydan çeker."
+      - "<dark_gray>» <light_purple>Mitolojik balıklar için nihai yem."
+    minigame:
+      fight-strength-reduction: 0.15
+      fish-slow-bonus: 0.15
+      progress-bonus: 0.3
+
+  # ==========================================
+  # ENHANCED BAITS (Faz 0.8.0 — Tiered Equipment)
+  # ==========================================
+  # Higher crafting level = better baits.
+  # All chance-modifier values easily adjustable.
+  # ==========================================
+
+  enhanced_worm:
+    display-name: "<#8B4513><italic>Şişman Solucan</italic></#8B4513>"
+    material: STICK
+    custom-model-data: 41001
+    target-rarity: 1
+    chance-modifier: 1.5
+    lore:
+      - "<gray>Şişman, sulu bir solucan."
+      - "<dark_gray>» <white>Sıradan balıkları güçlü çeker."
+
+  enhanced_glowing_bait:
+    display-name: "<aqua><italic>Işıltılı Yem</italic></aqua>"
+    material: SLIME_BALL
+    custom-model-data: 41002
+    target-rarity: 2
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Diğer dünyaya ait bir ışıkla parlar."
+      - "<dark_gray>» <aqua>Nadir olmayan balıkları güçlü çeker."
+
+  enhanced_bloodied_flesh:
+    display-name: "<red><italic>Büyülü Et</italic></red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 41003
+    target-rarity: 3
+    chance-modifier: 1.65
+    lore:
+      - "<gray>Kara büyü bu ete işlenmiş."
+      - "<dark_gray>» <red>Nadir balıkları güçlü çeker."
+
+  enhanced_ocean_essence:
+    display-name: "<#00CED1><italic>Concentrated Okyanus Özü</italic></#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 41004
+    target-rarity: 4
+    chance-modifier: 1.75
+    lore:
+      - "<#00CED1>Derinliğin damıtılmış özü."
+      - "<dark_gray>» <gold>Efsanevi balıkları güçlü çeker."
+
+  enhanced_golden_roe:
+    display-name: "<gold><italic>Radiant Altın Havyar</italic></gold>"
+    material: EGG
+    custom-model-data: 41005
+    target-rarity: 4
+    chance-modifier: 1.85
+    lore:
+      - "<gold>Güneş tarafından kutsanmış altın yumurtalar."
+      - "<dark_gray>» <gold>Efsanevi balıklar için parıltılı çekicilik."
+
+  enhanced_void_leech:
+    display-name: "<dark_purple><italic>Abyssal Boşluk Sülüğü</italic></dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 41006
+    target-rarity: 5
+    chance-modifier: 1.9
+    lore:
+      - "<dark_purple>Boşluktan gelen asalak bir dehşet."
+      - "<dark_gray>» <light_purple>Efsanevi balıklara dayanılmaz."
+
+  # ==========================================
+  # FILLER BAITS (Faz 1.0.0 — Level boşlukları)
+  # ==========================================
+  moss_bait:
+    display-name: "<#4A7C2E>Yosun Yemi</#4A7C2E>"
+    material: MOSS_BLOCK
+    custom-model-data: 40014
+    target-rarity: 1
+    chance-modifier: 1.35
+    lore:
+      - "<gray>Balıkların sevdiği nemli yosun."
+      - "<dark_gray>» <white>Attracts common fish."
+
+  glow_berry_bait:
+    display-name: "<#FFD700>Parıldayan Meyve Yemi</#FFD700>"
+    material: GLOW_BERRIES
+    custom-model-data: 40015
+    target-rarity: 2
+    chance-modifier: 1.3
+    lore:
+      - "<gray>Tatlı ve parlak."
+      - "<dark_gray>» <aqua>Nadir olmayan balıkları çeker."
+
+  crimson_bait:
+    display-name: "<#DC143C>Kızıl Yem</#DC143C>"
+    material: NETHER_WART
+    custom-model-data: 40016
+    target-rarity: 3
+    chance-modifier: 1.45
+    lore:
+      - "<gray>Kızıl ormanlardan."
+      - "<dark_gray>» <red>Nadir balıkları çeker."
+
+  ender_bait:
+    display-name: "<#00FFB0>Ender Yemi</#00FFB0>"
+    material: ENDER_PEARL
+    custom-model-data: 40017
+    target-rarity: 3
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Balıkları telepatik olarak çeker."
+      - "<dark_gray>» <red>Nadir balıkları çeker."
+
+  blaze_bait:
+    display-name: "<#FF4500>Çıra Yemi</#FF4500>"
+    material: BLAZE_POWDER
+    custom-model-data: 40018
+    target-rarity: 4
+    chance-modifier: 1.55
+    lore:
+      - "<gray>Nether sıcağıyla tüter."
+      - "<dark_gray>» <gold>Efsanevi balıkları çeker."
+
+  shulker_bait:
+    display-name: "<#EB9B8F>Shulker Yemi</#EB9B8F>"
+    material: SHULKER_SHELL
+    custom-model-data: 40019
+    target-rarity: 4
+    chance-modifier: 1.65
+    lore:
+      - "<gray>Korunmuş bir lokma."
+      - "<dark_gray>» <gold>Efsanevi balıkları güçlü çeker."
+
+  wither_bait:
+    display-name: "<#4A4A4A>Wither Yemi</#4A4A4A>"
+    material: WITHER_SKELETON_SKULL
+    custom-model-data: 40020
+    target-rarity: 5
+    chance-modifier: 1.75
+    lore:
+      - "<gray>Ölümün yem formu."
+      - "<dark_gray>» <light_purple>Efsanevi balıkları çeker."
+
+  echo_bait:
+    display-name: "<#7FDBFF>Yankı Yemi</#7FDBFF>"
+    material: ECHO_SHARD
+    custom-model-data: 40021
+    target-rarity: 5
+    chance-modifier: 1.85
+    lore:
+      - "<gray>Derin karanlıktan fısıltılar."
+      - "<dark_gray>» <light_purple>Efsanevi balıklara dayanılmaz."
+
+  nether_star_bait:
+    display-name: "<#FFFFFF><bold>Nether Yıldızı Yemi</bold></#FFFFFF>"
+    material: NETHER_STAR
+    custom-model-data: 40022
+    target-rarity: 5
+    chance-modifier: 2.0
+    lore:
+      - "<white>Yoğunlaşmış yıldız enerjisi."
+      - "<dark_gray>» <light_purple>Mitolojik balıklar için nihai yem."

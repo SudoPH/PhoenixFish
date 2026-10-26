@@ -1,0 +1,323 @@
+# ==========================================
+# PhoenixFish - 鱼饵配置 (中文版)
+# ==========================================
+# Bait IDs 必须唯一。ID 中不要有空格。
+# target-rarity: 此鱼饵提升的鱼稀有度等级 (1-5)。
+# chance-modifier: 应用于目标稀有度基础捕获几率的倍率。
+# 注意：不建议超过 2.0，会破坏后期平衡。
+# 推荐范围：1.1 到 1.8
+
+baits:
+  # ==========================================
+  # 早期游戏 (普通 & 非普通)
+  # ==========================================
+  worm:
+    display-name: "<#8B4513>普通蚯蚓</#8B4513>"
+    material: STICK
+    custom-model-data: 40001
+    target-rarity: 1
+    chance-modifier: 1.3
+    lore:
+      - "<gray>从泥土里挖出的简单蚯蚓。"
+      - "<dark_gray>» <white>略微吸引普通鱼。"
+
+  bread_crust:
+    display-name: "<#FFDAB9>面包皮</#FFDAB9>"
+    material: BREAD
+    custom-model-data: 40002
+    target-rarity: 1
+    chance-modifier: 1.2
+    lore:
+      - "<gray>剩下的面包碎片。"
+      - "<dark_gray>» <white>给饥饿鱼的廉价鱼饵。"
+
+  # ==========================================
+  # 早期游戏鱼饵 (level 2-7)
+  # ==========================================
+  minnow_bait:
+    display-name: "<#A0A0A0>小鱼饵</#A0A0A0>"
+    material: COD
+    custom-model-data: 40011
+    target-rarity: 1
+    chance-modifier: 1.4
+    lore:
+      - "<gray>碎小鱼混骨粉。"
+      - "<dark_gray>» <white>比蚯蚓稍好。"
+
+  seaweed_wrap:
+    display-name: "<#3CB371>海带包</#3CB371>"
+    material: KELP
+    custom-model-data: 40012
+    target-rarity: 2
+    chance-modifier: 1.25
+    lore:
+      - "<gray>湿海带编成香包。"
+      - "<dark_gray>» <aqua>吸引非普通鱼。"
+
+  bug_paste:
+    display-name: "<#DAA520>虫糊</#DAA520>"
+    material: HONEY_BOTTLE
+    custom-model-data: 40013
+    target-rarity: 2
+    chance-modifier: 1.35
+    lore:
+      - "<gray>捣碎的虫子泡在甜蜂蜜里。"
+      - "<dark_gray>» <aqua>对人臭不可闻，对鱼不可抗拒。"
+
+  glowing_bait:
+    display-name: "<aqua>荧光鱼饵</aqua>"
+    material: SLIME_BALL
+    custom-model-data: 40003
+    target-rarity: 2
+    chance-modifier: 1.4
+    lore:
+      - "<gray>虹彩光泽让鱼着迷。"
+      - "<dark_gray>» <aqua>吸引非普通鱼。"
+
+  enchanted_dough:
+    display-name: "<#FFC0CB>附魔面团</#FFC0CB>"
+    material: HONEYCOMB
+    custom-model-data: 40004
+    target-rarity: 2
+    chance-modifier: 1.5
+    lore:
+      - "<gray>带点魔法的烤面团。"
+      - "<dark_gray>» <aqua>非普通鱼的可靠选择。"
+
+  # ==========================================
+  # 中期游戏 (稀有)
+  # ==========================================
+  bloodied_flesh:
+    display-name: "<red>血淋淋的肉</red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 40005
+    target-rarity: 3
+    chance-modifier: 1.5
+    lore:
+      - "<gray>刺鼻气味让捕食者疯狂。"
+      - "<dark_gray>» <red>吸引稀有鱼。"
+
+  spider_silk:
+    display-name: "<#F5F5DC>蜘蛛丝</#F5F5DC>"
+    material: COBWEB
+    custom-model-data: 40006
+    target-rarity: 3
+    chance-modifier: 1.6
+    lore:
+      - "<gray>编织的丝能缠住稀有猎物。"
+      - "<dark_gray>» <red>稀有鱼的高级鱼饵。"
+
+  # ==========================================
+  # 后期游戏 (史诗)
+  # ==========================================
+  ocean_essence:
+    display-name: "<#00CED1>海洋精华</#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 40007
+    target-rarity: 4
+    chance-modifier: 1.6
+    lore:
+      - "<#00CED1>海洋的纯粹魔法。"
+      - "<dark_gray>» <gold>吸引史诗鱼。"
+
+  golden_roe:
+    display-name: "<gold>金色鱼籽</gold>"
+    material: EGG
+    custom-model-data: 40008
+    target-rarity: 4
+    chance-modifier: 1.7
+    lore:
+      - "<gold>闪烁金光的稀有鱼卵。"
+      - "<dark_gray>» <gold>对史诗鱼极具吸引力。"
+
+  # ==========================================
+  # 终局游戏 (传说)
+  # ==========================================
+  void_leech:
+    display-name: "<dark_purple>虚空水蛭</dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 40009
+    target-rarity: 5
+    chance-modifier: 1.7
+    lore:
+      - "<dark_purple>来自虚空深处的寄生生物。"
+      - "<dark_gray>» <light_purple>吸引传说鱼。"
+    # v1.3.5 — 小游戏加成：仅在传说鱼 (rarity 5) 时生效
+    minigame:
+      fight-strength-reduction: 0.10   # 降低鱼 fight strength 10%
+      fish-slow-bonus: 0.10             # 降低鱼移动几率 10%
+      progress-bonus: 0.2               # progressRate +0.2
+
+  lunar_moth:
+    display-name: "<#C0C0C0>月蛾</#C0C0C0>"
+    material: PHANTOM_MEMBRANE
+    custom-model-data: 40010
+    target-rarity: 5
+    chance-modifier: 1.8
+    lore:
+      - "<#C0C0C0>从月光中汲取能量。"
+      - "<dark_gray>» <light_purple>神话鱼的终极鱼饵。"
+    minigame:
+      fight-strength-reduction: 0.15
+      fish-slow-bonus: 0.15
+      progress-bonus: 0.3
+
+  # ==========================================
+  # 强化鱼饵 (Faz 0.8.0 — 阶梯装备)
+  # ==========================================
+  # 制作等级越高 = 鱼饵越好。
+  # 所有 chance-modifier 值均可调整。
+  # ==========================================
+
+  enhanced_worm:
+    display-name: "<#8B4513><italic>肥蚯蚓</italic></#8B4513>"
+    material: STICK
+    custom-model-data: 41001
+    target-rarity: 1
+    chance-modifier: 1.5
+    lore:
+      - "<gray>肥美多汁的蚯蚓。"
+      - "<dark_gray>» <white>强烈吸引普通鱼。"
+
+  enhanced_glowing_bait:
+    display-name: "<aqua><italic>光辉鱼饵</italic></aqua>"
+    material: SLIME_BALL
+    custom-model-data: 41002
+    target-rarity: 2
+    chance-modifier: 1.55
+    lore:
+      - "<gray>散发异界光辉。"
+      - "<dark_gray>» <aqua>强力吸引非普通鱼。"
+
+  enhanced_bloodied_flesh:
+    display-name: "<red><italic>附魔血肉</italic></red>"
+    material: ROTTEN_FLESH
+    custom-model-data: 41003
+    target-rarity: 3
+    chance-modifier: 1.65
+    lore:
+      - "<gray>注入了黑魔法。"
+      - "<dark_gray>» <red>强力吸引稀有鱼。"
+
+  enhanced_ocean_essence:
+    display-name: "<#00CED1><italic>浓缩海洋精华</italic></#00CED1>"
+    material: PRISMARINE_CRYSTALS
+    custom-model-data: 41004
+    target-rarity: 4
+    chance-modifier: 1.75
+    lore:
+      - "<#00CED1>深海精华的蒸馏物。"
+      - "<dark_gray>» <gold>强力吸引史诗鱼。"
+
+  enhanced_golden_roe:
+    display-name: "<gold><italic>光辉金色鱼籽</italic></gold>"
+    material: EGG
+    custom-model-data: 41005
+    target-rarity: 4
+    chance-modifier: 1.85
+    lore:
+      - "<gold>太阳祝福的金色鱼卵。"
+      - "<dark_gray>» <gold>对史诗鱼有虹彩吸引力。"
+
+  enhanced_void_leech:
+    display-name: "<dark_purple><italic>深渊虚空水蛭</italic></dark_purple>"
+    material: NETHERITE_SCRAP
+    custom-model-data: 41006
+    target-rarity: 5
+    chance-modifier: 1.9
+    lore:
+      - "<dark_purple>来自虚空的寄生恐怖。"
+      - "<dark_gray>» <light_purple>传说鱼无法抗拒。"
+
+  # ==========================================
+  # 填充鱼饵 (Faz 1.0.0 — 等级空白)
+  # ==========================================
+  moss_bait:
+    display-name: "<#4A7C2E>苔藓鱼饵</#4A7C2E>"
+    material: MOSS_BLOCK
+    custom-model-data: 40014
+    target-rarity: 1
+    chance-modifier: 1.35
+    lore:
+      - "<gray>鱼喜爱的湿苔藓。"
+      - "<dark_gray>» <white>吸引普通鱼。"
+
+  glow_berry_bait:
+    display-name: "<#FFD700>发光浆果饵</#FFD700>"
+    material: GLOW_BERRIES
+    custom-model-data: 40015
+    target-rarity: 2
+    chance-modifier: 1.3
+    lore:
+      - "<gray>又甜又亮。"
+      - "<dark_gray>» <aqua>吸引非普通鱼。"
+
+  crimson_bait:
+    display-name: "<#DC143C>绯红鱼饵</#DC143C>"
+    material: NETHER_WART
+    custom-model-data: 40016
+    target-rarity: 3
+    chance-modifier: 1.45
+    lore:
+      - "<gray>来自绯红森林。"
+      - "<dark_gray>» <red>吸引稀有鱼。"
+
+  ender_bait:
+    display-name: "<#00FFB0>末影鱼饵</#00FFB0>"
+    material: ENDER_PEARL
+    custom-model-data: 40017
+    target-rarity: 3
+    chance-modifier: 1.55
+    lore:
+      - "<gray>心灵感应式引诱鱼。"
+      - "<dark_gray>» <red>吸引稀有鱼。"
+
+  blaze_bait:
+    display-name: "<#FF4500>烈焰鱼饵</#FF4500>"
+    material: BLAZE_POWDER
+    custom-model-data: 40018
+    target-rarity: 4
+    chance-modifier: 1.55
+    lore:
+      - "<gray>带着下界热度阴燃。"
+      - "<dark_gray>» <gold>吸引史诗鱼。"
+
+  shulker_bait:
+    display-name: "<#EB9B8F>潜影贝鱼饵</#EB9B8F>"
+    material: SHULKER_SHELL
+    custom-model-data: 40019
+    target-rarity: 4
+    chance-modifier: 1.65
+    lore:
+      - "<gray>受保护的小块。"
+      - "<dark_gray>» <gold>强力吸引史诗鱼。"
+
+  wither_bait:
+    display-name: "<#4A4A4A>凋零鱼饵</#4A4A4A>"
+    material: WITHER_SKELETON_SKULL
+    custom-model-data: 40020
+    target-rarity: 5
+    chance-modifier: 1.75
+    lore:
+      - "<gray>死亡本身的鱼饵形态。"
+      - "<dark_gray>» <light_purple>吸引传说鱼。"
+
+  echo_bait:
+    display-name: "<#7FDBFF>回响鱼饵</#7FDBFF>"
+    material: ECHO_SHARD
+    custom-model-data: 40021
+    target-rarity: 5
+    chance-modifier: 1.85
+    lore:
+      - "<gray>来自深暗之地的低语。"
+      - "<dark_gray>» <light_purple>传说鱼无法抗拒。"
+
+  nether_star_bait:
+    display-name: "<#FFFFFF><bold>下界星鱼饵</bold></#FFFFFF>"
+    material: NETHER_STAR
+    custom-model-data: 40022
+    target-rarity: 5
+    chance-modifier: 2.0
+    lore:
+      - "<white>凝聚的恒星能量。"
+      - "<dark_gray>» <light_purple>神话鱼的终极鱼饵。"

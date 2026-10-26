@@ -1,0 +1,165 @@
+# ============================================================
+# PhoenixFish — 中文语言文件 (zh_cn)
+# ============================================================
+# 用于测试动态语言支持 + 英文 fallback 机制。
+# 故意缺少几个 key（level_up, minigame_aborted, console_xxx_*），
+# 让它们自动从 jar 内置的 messages_en.yml 取值 — 验证 setDefaults 机制。
+# ============================================================
+
+prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
+
+# 稀有度名称
+rarity_1: "普通"
+rarity_2: " uncommon"
+rarity_3: "稀有"
+rarity_4: "史诗"
+rarity_5: "传说"
+
+# 钓鱼标题（高稀有度鱼触发）
+catch_title_epic: "<gold><bold>史诗钓获！</bold></gold>"
+catch_subtitle_epic: "<white>你运气真好！钓到了 %fish_name%！</white>"
+catch_title_legendary: "<#9D00FF><bold>传说钓获！</bold></#9D00FF>"
+catch_subtitle_legendary: "<white>奇迹发生！钓到了 %fish_name%！</white>"
+
+# 钓鱼监听器
+fish_bite: "<gold>鱼咬钩了！快收线！</gold>"
+fish_caught_single: "<aqua>你钓到了一条 %fish_name%！</aqua>"
+fish_caught_multiple: "<aqua>太棒了！你一次钓到了 %amount%x %fish_name%！</aqua>"
+fish_discovered: "<gradient:#9D00FF:#00CED1>发现新物种！</gradient> <white>%fish_name%<white> 已加入图鉴！"
+
+# 小游戏（Minigame）
+minigame_win_single: "<green><bold>✓ 钓到了！🐟</bold></green>"
+minigame_win_multiple: "<green><bold>✓ 太厉害了！一次钓到 %amount% 条！🐟</bold></green>"
+minigame_lose: "<red><bold>✖ 鱼线断了！鱼跑了。</bold></red>"
+# ↓↓↓ minigame_aborted 故意不翻译 — 测试英文 fallback ↓↓↓
+# minigame_aborted: (will fall back to English)
+
+# Cache Manager（XP 系统）
+# ↓↓↓ level_up 故意不翻译 — 测试英文 fallback ↓↓↓
+# level_up: (will fall back to English)
+# crafting_level_up 故意不翻译 — 测试英文 fallback
+# console_autosave 故意不翻译 — 测试英文 fallback
+
+# 命令
+no_permission: "<red>你没有权限使用此命令！</red>"
+player_only: "<red>此命令只能由玩家执行！</red>"
+usage_giverod: "<yellow>用法：/phoenixfish giverod <鱼竿名称></yellow>"
+usage_givebait: "<yellow>用法：/phoenixfish givebait <鱼饵名称></yellow>"
+usage_fix: "<yellow>更新你的物品：/phoenixfish fix</yellow>"
+usage_fixall: "<yellow>更新全服物品：/phoenixfish fixall</yellow>"
+usage_catalog: "<yellow>打开图鉴：/phoenixfish catalog</yellow>"
+usage_skills: "<yellow>打开技能树：/phoenixfish skills</yellow>"
+usage_sell: "<yellow>卖鱼：/phoenixfish sell <all | hand | menu></yellow>"
+usage_toggle: "<yellow>切换原版/插件钓鱼模式：/phoenixfish toggle</yellow>"
+usage_toggle_status: "<yellow>查看当前钓鱼模式：/phoenixfish toggle status</yellow>"
+usage_toggle_admin: "<yellow>切换玩家模式：/phoenixfish toggle [玩家]</yellow>"
+usage_toggle_admin_reset: "<yellow>重置玩家为默认模式：/phoenixfish toggle reset [玩家]</yellow>"
+usage_tournament: "<yellow>用法：/phoenixfish tournament <start [分钟] | stop></yellow>"
+usage_addreward: "<yellow>用法：/phoenixfish tournament addreward <名次></yellow>"
+usage_addlevel: "<red>用法：/phoenixfish addlevel [数量]</red>"
+usage_addlevel_help: "<gray>/phoenixfish addlevel [数量] - 增加钓鱼等级</gray>"
+
+# Console 消息（故意不翻译，方便管理员辨识日志）
+# console_xxx_* keys 故意不翻译 — 这些会从英文 fallback 取值
+
+# Skills 系统
+skills_disabled: "<red>XP 系统未启用！技能不可用。</red>"
+skills_data_error: "<red>无法加载技能数据。请稍后重试。</red>"
+skills_invalid: "<red>无效的技能。</red>"
+skills_no_points: "<red>技能点不够！</red>"
+skills_maxed: "<red>此技能已达到最高等级！</red>"
+skills_bait_saved: "<green>★ 幸运鱼饵！你的鱼饵没被消耗。</green>"
+skills_menu_title: "<dark_gray>» <gradient:#9D00FF:#00CED1>技能树</gradient>"
+skills_points_name: "<gold>技能点：<yellow>%points%</yellow></gold>"
+skills_level: "<gray>等级：%level%/%max%"
+skills_fast_desc: "<gray>增加小游戏的钓鱼速度。</gray>"
+skills_hunter_desc: "<gray>提高稀有+鱼的几率。</gray>"
+skills_double_desc: "<gray>一次钓到两条鱼的几率。</gray>"
+skills_bait_desc: "<gray>不消耗鱼饵的几率。</gray>"
+skills_name_fast: "<yellow>快手捕手"
+skills_name_hunter: "<red>大师猎人"
+skills_name_double: "<aqua>双重捕获"
+skills_name_bait: "<gold>幸运鱼饵"
+
+# AddLevel 命令
+addlevel_xp_disabled: "<red>此命令需要启用 XP 系统！</red>"
+addlevel_data_error: "<red>无法加载你的数据，请稍后重试。</red>"
+addlevel_invalid_number: "<red>请输入有效数字！</red>"
+addlevel_out_of_range: "<red>等级变化必须在 -1000 到 1000 之间。</red>"
+addlevel_success_fishing: "<green>成功增加 %amount% 钓鱼等级！新等级：<yellow>%level%</yellow></green>"
+addlevel_success_crafting: "<green>成功增加 %amount% 制作等级！新等级：<yellow>%level%</yellow></green>"
+
+# Sell 命令
+sell_success: "<green>✔ 以 <gold>$%price%</gold> 卖出 %count% 条鱼！</green>"
+sell_no_fish: "<red>你背包里没有可卖的鱼。</red>"
+sell_menu_title: "<dark_gray>» <gold>卖鱼"
+sell_no_fish_inventory: "<red>背包里没有可卖的鱼。</red>"
+
+# Catalog
+catalog_title: "<dark_gray>» <gradient:#9D00FF:#00CED1>鱼类图鉴</gradient>"
+catalog_discovered: "<gray>已发现：<yellow>%count%<dark_gray>/<white>%total%"
+catalog_undiscovered: "<dark_gray>未发现：<red>%count%"
+catalog_hover_discovered: "<gold>%fish_name%\n<gray>稀有度：%rarity%\n<gray>重量记录：%weight%"
+catalog_hover_undiscovered: "<dark_gray>???\n<gray>尚未发现"
+
+# Tournament 锦标赛
+tournament_title: "<dark_gray>» <gold><bold>钓鱼锦标赛</bold></gold>"
+tournament_started: "<green>钓鱼锦标赛已开始！时长：%minutes% 分钟。</green>"
+tournament_stopped: "<green>钓鱼锦标赛已结束！</green>"
+tournament_no_active: "<red>当前没有进行中的锦标赛。</red>"
+tournament_already_running: "<red>锦标赛已在进行中。</red>"
+tournament_stats: "<gray>参赛者：<white>%players% <dark_gray>| 剩余时间：<yellow>%time%"
+tournament_leaderboard_header: "<gold><bold>锦标赛排行榜"
+tournament_leaderboard_line: "<yellow>%rank%. <white>%player% <dark_gray>— <aqua>%points% 分"
+tournament_leaderboard_empty: "<gray>暂无参赛者。"
+tournament_no_permission: "<red>你没有权限管理锦标赛。</red>"
+tournament_reward_added: "<green>奖励已添加给第 %rank% 名。</green>"
+tournament_reward_given: "<gold>你获得了 %rank% 名奖励！</gold>"
+
+# Tournament 结束广播
+tournament_end_announce: "<gold><bold>钓鱼锦标赛结束！</bold></gold>"
+tournament_end_winner: "<gold>冠军：<white>%player% <dark_gray>— <aqua>%points% 分"
+tournament_end_top3: "<gold>%rank%. <white>%player% <dark_gray>— <aqua>%points% 分"
+
+# Toggle 命令
+toggle_self_on: "<green>已切换为：插件钓鱼模式</green>"
+toggle_self_off: "<green>已切换为：原版钓鱼模式</green>"
+toggle_self_status_plugin: "<gray>当前模式：<green>插件钓鱼</green>"
+toggle_self_status_vanilla: "<gray>当前模式：<red>原版钓鱼</red>"
+toggle_other_on: "<green>已将 %player% 切换为：插件钓鱼模式</green>"
+toggle_other_off: "<green>已将 %player% 切换为：原版钓鱼模式</green>"
+toggle_other_reset: "<green>已将 %player% 重置为默认模式。</green>"
+toggle_player_not_found: "<red>玩家未找到：<yellow>%player%</yellow>"
+
+# Reload 命令
+reload_success: "<green>✔ PhoenixFish 配置已重新加载！</green>"
+reload_no_permission: "<red>你没有权限重新加载插件。</red>"
+
+# ItemFixer
+fix_inventory: "<green>已更新你的鱼竿/鱼饵物品。</green>"
+fixall_complete: "<green>已更新全服物品。</green>"
+fix_nothing: "<gray>没有需要修复的物品。</gray>"
+
+# Records 纪录
+record_personal: "<gold><bold>★ 个人纪录！</bold></gold> <white>%fish_name% <dark_gray>— <aqua>%weight% kg"
+record_server: "<#9D00FF><bold>★ 全服纪录！</bold></#9D00FF> <white>%fish_name% <dark_gray>— <aqua>%weight% kg"
+record_progress: "<gray>距离纪录还差：<yellow>%diff% kg"
+
+# Errors
+error_no_rod: "<red>你手里没有鱼竿！</red>"
+error_invalid_rod: "<red>此鱼竿无效。</red>"
+error_no_bait: "<red>你需要鱼饵才能钓鱼。</red>"
+error_low_level: "<red>等级不够！需要 <yellow>%required%</yellow> | 你的：%current%</red>"
+error_inventory_full: "<red>背包满了！鱼掉在了地上。</red>"
+
+# Weather 天气
+weather_clear: "<gray>天气：晴"
+weather_rain: "<aqua>天气：雨 <dark_gray>(钓鱼运气 +0.2)"
+weather_storm: "<dark_aqua>天气：暴风雨 <dark_gray>(钓鱼运气 +0.5)"
+
+# Misc 杂项
+plugin_enabled: "<green>PhoenixFish 已启用！</green>"
+plugin_disabled: "<gray>PhoenixFish 已禁用。</gray>"
+plugin_version: "<gray>版本：%version%</gray>"
+plugin_resource_save_error: "<red>资源保存失败：%error%</red>"
+fish_section_not_found: "<red>fish.yml 中找不到 'fishes' 节！</red>"

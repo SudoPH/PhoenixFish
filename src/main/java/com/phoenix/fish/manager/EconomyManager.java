@@ -101,7 +101,13 @@ public class EconomyManager {
         double total = 0.0;
         int count = 0;
 
+        // v1.4.0 (C-3 fix) — Two-pass approach.
+        // ESKİ DAVRANIŞ (BUG): Eşyalar satıştan ÖNCE silinirdi. Eğer FishSellEvent
+        // iptal edilirse, oyuncu hem eşyalarını hem de parayı kaybederdi.
+        // YENİ DAVRANIŞ: Önce tüm fiyatı hesapla → event fire et → iptal edilmezse sil.
         ItemStack[] contents = player.getInventory().getContents();
+        // Pass 1: hesapla (envanteri değiştirme)
+        java.util.List<Integer> slotsToClear = new java.util.ArrayList<>();
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
             if (item == null || item.getType().isAir())
@@ -112,12 +118,53 @@ public class EconomyManager {
                 if (fish != null) {
                     total += calculatePrice(item, fish);
                     count += item.getAmount();
-                    player.getInventory().setItem(i, null);
+                    slotsToClear.add(i);   // slot'u silme listesine ekle (silme!
                 }
             }
         }
 
-        processSale(player, data, total, count);
+        // Pass 2: Eğer event cancel edilmediyse, slot'ları sil.
+        // processSale önce event fire ediyor. onCancel olursa return ediyor → slot'lar silinmez.
+        // Bu amacla processSale'in "silindimi" bilgisini geri iletmesi gerekir →
+        // burada slotsToClear sadece event onaylırsa silinmeli. Refactor: processSale'a
+        // "onSuccess" callback vermek yerine — iptal kontrolünü burada yap.
+        boolean shouldSell = processSaleCheckCancel(player, data, total, count);
+        if (shouldSell) {
+            // Event onaylandı → slot'ları sil
+            for (int slot : slotsToClear) {
+                player.getInventory().setItem(slot, null);
+            }
+            processSaleComplete(player, data, total, count);
+        }
+    }
+
+    /**
+     * v1.4.0 — Sadece FishSellEvent'i fire edip iptal durumunu döner.
+     * İptal edilmezse true döner (satış devam edebilir).
+     */
+    private boolean processSaleCheckCancel(Player player, FishingData data, double total, int count) {
+        FishSellEvent event = new FishSellEvent(player, total, count);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            player.sendMessage(plugin.getMessageManager().getMessage("sell_cancelled", true));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * v1.4.0 — Satışı tamamla (para ekle + mesaj). Sadece processSaleCheckCancel true döndükten sonra çağrılır.
+     */
+    private void processSaleComplete(Player player, FishingData data, double total, int count) {
+        if (count == 0) {
+            player.sendMessage(plugin.getMessageManager().getMessage("sell_no_fish", true));
+            return;
+        }
+        data.addBalance(total);
+        Map<String, String> ph = Map.of(
+                "%amount%", String.valueOf(count),
+                "%price%", String.format("%.2f", total));
+        player.sendMessage(plugin.getMessageManager().getMessage("sell_all_success", true, ph));
     }
 
     public void openSellGUI(Player player) {
@@ -148,7 +195,12 @@ public class EconomyManager {
         double total = 0.0;
         int count = 0;
 
+        // v1.4.0 (C-3 fix) — Two-pass approach. Eski davranışta balıklar satıştan ÖNCE silinirdi
+        // → event cancel olursa oyuncu eşyalarını kaybederdi. Şimdi: önce hesapla, slot'ları
+        // geçici listeye koy → event fire et → cancel edilmediyse sil.
         int size = inv.getSize();
+        java.util.List<Integer> fishSlots = new java.util.ArrayList<>();
+        java.util.List<Integer> nonFishSlots = new java.util.ArrayList<>();
         for (int i = 0; i < size; i++) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().isAir())
@@ -162,19 +214,36 @@ public class EconomyManager {
                 if (fish != null) {
                     total += calculatePrice(item, fish);
                     count += item.getAmount();
-                    inv.setItem(i, null);
+                    fishSlots.add(i);
                     continue;
                 }
             }
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
-            for (ItemStack rest : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), rest);
+            nonFishSlots.add(i);  // balık olmayan eşyalar — oyuncu envanterine geri verilecek
+        }
+
+        // Event kontrolü: iptal edilmezse balıkları sil
+        if (!processSaleCheckCancel(player, data, total, count)) {
+            // Event iptal edildi — envanteri KAPATMA, eşyalar envanterde kalsın
+            return;
+        }
+
+        // Event onaylandı → balıkları sil, balık olmayanları oyuncuya geri ver
+        for (int slot : fishSlots) {
+            inv.setItem(slot, null);
+        }
+        for (int slot : nonFishSlots) {
+            ItemStack item = inv.getItem(slot);
+            if (item != null && !item.getType().isAir()) {
+                Map<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+                for (ItemStack rest : leftover.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), rest);
+                }
+                inv.setItem(slot, null);
             }
-            inv.setItem(i, null);
         }
 
         player.closeInventory();
-        processSale(player, data, total, count);
+        processSaleComplete(player, data, total, count);
     }
 
     public void sellHand(Player player) {
@@ -207,9 +276,13 @@ public class EconomyManager {
 
         double price = calculatePrice(item, fish);
         int amount = item.getAmount();
-        player.getInventory().setItemInMainHand(null);
 
-        processSale(player, data, price, amount);
+        // v1.4.0 (C-3 fix) — Two-pass: önce event fire et, iptal edilmezse sil.
+        if (!processSaleCheckCancel(player, data, price, amount)) {
+            return;  // event cancelled → item envanterde kalır
+        }
+        player.getInventory().setItemInMainHand(null);
+        processSaleComplete(player, data, price, amount);
     }
 
     private void processSale(Player player, FishingData data, double total, int count) {

@@ -60,6 +60,10 @@ public class SkillManager {
             return;
         }
 
+        // v1.4.0 — FishingData'ya config-driven max skill level'ı set et.
+        // clampSkill artık hardcoded 5 değil, config'teki skill-max-level değerini kullanır.
+        data.setMaxSkillLevel(maxLevel);
+
         Inventory inv = Bukkit.createInventory(new SkillGUIHolder(), 27,
                 miniMessage.deserialize(plugin.getMessageManager().getPlainMessage("skills_menu_title")));
 

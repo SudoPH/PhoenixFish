@@ -48,9 +48,36 @@ public class ItemFixer {
     }
 
     private void cacheRodConfigurations() {
-        File rodFile = new File(plugin.getDataFolder(), "rods.yml");
-        if (!rodFile.exists())
-            return;
+        // v1.3.5 — Dil bazlı rod dosyası yükleme.
+        // Sıra: rods_<dil>.yml → rods.yml (fallback).
+        // Dil bazlı dosya yoksa doğrudan rods.yml kullanılır.
+        String lang = null;
+        try {
+            lang = plugin.getMessageManager().getLanguage();
+        } catch (Throwable ignored) {
+            // MessageManager henüz yüklenmediyse null bırak.
+        }
+        String fileName = "rods.yml";
+        if (lang != null && !lang.trim().isEmpty() && !lang.equalsIgnoreCase("en")) {
+            String candidate = "rods_" + lang.trim().toLowerCase() + ".yml";
+            File candidateFile = new File(plugin.getDataFolder(), candidate);
+            if (candidateFile.exists() || plugin.getResource(candidate) != null) {
+                fileName = candidate;
+            }
+        }
+
+        File rodFile = new File(plugin.getDataFolder(), fileName);
+        if (!rodFile.exists()) {
+            // Fallback: rods.yml
+            fileName = "rods.yml";
+            rodFile = new File(plugin.getDataFolder(), "rods.yml");
+            if (!rodFile.exists()) {
+                plugin.saveResource("rods.yml", false);
+                rodFile = new File(plugin.getDataFolder(), "rods.yml");
+            }
+        }
+
+        plugin.getLogger().info("Loading rods from: " + fileName);
 
         FileConfiguration rodConfig = YamlConfiguration.loadConfiguration(rodFile);
         ConfigurationSection rodsSec = rodConfig.getConfigurationSection("rods");
@@ -155,6 +182,27 @@ public class ItemFixer {
     public ConfigurationSection findRodByItem(ItemStack item) {
         int itemCmd = ItemUtils.getCMD(item);
         ItemIdentifier identifier = new ItemIdentifier(item.getType(), itemCmd);
+        return rodCache.get(identifier);
+    }
+
+    /**
+     * v1.3.6 — Material + custom-model-data'dan rod'un ConfigurationSection'unu bul.
+     * CraftingManager.createItem() tarif ingredient'ları için kullanır — böylece
+     * tarif ekranında "FISHING_ROD ×1" yerine "宇宙鱼竿 ×1" (Çince) gibi
+     * gerçek özel olta adı görünür.
+     *
+     * @param material rod'un Material'ı (genelde FISHING_ROD)
+     * @param cmd rod'un custom-model-data değeri
+     * @return rod'un ConfigurationSection'u, ya da bulunamazsa null
+     */
+    public ConfigurationSection findRodConfig(Material material, int cmd) {
+        if (material == null) return null;
+        // v1.4.0 — cmd == 0 demek "özel model yok" demek (vanilla oltalar).
+        // Bu durumda herhangi bir cached rod'a yanlışlıkla match etmesin diye null dön.
+        // Aksi halde rods.yml'de cmd=0 olan ilk cached rod, vanilla oltalarla yanlış
+        // match olur → /pf fix vanilla oltayı bozar (display-name + luck PDC ekler).
+        if (cmd == 0) return null;
+        ItemIdentifier identifier = new ItemIdentifier(material, cmd);
         return rodCache.get(identifier);
     }
 

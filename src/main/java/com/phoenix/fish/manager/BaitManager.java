@@ -28,6 +28,8 @@ public class BaitManager {
     private final MiniMessage miniMessage;
     private final Map<String, Bait> baits = new ConcurrentHashMap<>();
     private final Map<ItemFixer.ItemIdentifier, Bait> baitItemCache = new ConcurrentHashMap<>();
+    /** v1.3.5 — Yem başına orijinal ConfigurationSection (minigame: bonuslarını okumak için). */
+    private final Map<String, ConfigurationSection> baitConfigs = new ConcurrentHashMap<>();
     private final NamespacedKey baitKey;
 
     public BaitManager(PhoenixFish plugin) {
@@ -39,16 +41,42 @@ public class BaitManager {
     public void loadBaits() {
         baits.clear();
         baitItemCache.clear();
+        baitConfigs.clear();
 
-        File file = new File(plugin.getDataFolder(), "baits.yml");
-        if (!file.exists()) {
-            plugin.saveResource("baits.yml", false);
+        // v1.3.5 — Dil bazlı bait dosyası yükleme.
+        // Sıra: baits_<dil>.yml → baits.yml (fallback).
+        // Dil bazlı dosya yoksa doğrudan baits.yml kullanılır.
+        String lang = null;
+        try {
+            lang = plugin.getMessageManager().getLanguage();
+        } catch (Throwable ignored) {
+            // MessageManager henüz yüklenmediyse null bırak.
         }
+        String fileName = "baits.yml";
+        if (lang != null && !lang.trim().isEmpty() && !lang.equalsIgnoreCase("en")) {
+            String candidate = "baits_" + lang.trim().toLowerCase() + ".yml";
+            File candidateFile = new File(plugin.getDataFolder(), candidate);
+            if (candidateFile.exists() || plugin.getResource(candidate) != null) {
+                fileName = candidate;
+            }
+        }
+
+        File file = new File(plugin.getDataFolder(), fileName);
+        if (!file.exists()) {
+            fileName = "baits.yml";
+            file = new File(plugin.getDataFolder(), "baits.yml");
+            if (!file.exists()) {
+                plugin.saveResource("baits.yml", false);
+                file = new File(plugin.getDataFolder(), "baits.yml");
+            }
+        }
+
+        plugin.getLogger().info("Loading baits from: " + fileName);
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection section = config.getConfigurationSection("baits");
         if (section == null) {
-            plugin.getLogger().warning("No 'baits' section found in baits.yml");
+            plugin.getLogger().warning("No 'baits' section found in " + fileName);
             return;
         }
 
@@ -98,6 +126,7 @@ public class BaitManager {
 
                 Bait bait = new Bait(key, targetRarity, modifier, item);
                 baits.put(key, bait);
+                baitConfigs.put(key, sec);  // v1.3.5 — minigame bonusları için sakla
 
                 int cmd = ItemUtils.getCMD(item);
                 if (cmd > 0) {
@@ -116,6 +145,18 @@ public class BaitManager {
         }
 
         plugin.getLogger().info("Loaded " + baits.size() + " baits.");
+    }
+
+    /**
+     * v1.3.5 — Yemin orijinal ConfigurationSection'unu döner (baits.yml'den).
+     * MinigameTask, yemin {@code minigame:} bölümündeki bonusları okumak için kullanır.
+     *
+     * @param id yem id'si
+     * @return yemin ConfigurationSection'u, ya da yem yoksa null
+     */
+    public ConfigurationSection getBaitConfig(String id) {
+        if (id == null) return null;
+        return baitConfigs.get(id);
     }
 
     public Bait getBaitFromItem(ItemStack item) {

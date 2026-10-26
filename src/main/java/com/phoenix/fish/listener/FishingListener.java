@@ -242,7 +242,29 @@ public class FishingListener implements Listener {
     }
 
     private void startMinigame(Player player, CustomFish fish) {
-        MinigameTask task = new MinigameTask(plugin, player, fish);
+        // v1.3.5 — Ekipman etkili minigame: rod'un ve bait'in config'lerini
+        // MinigameTask constructor'ına geç. Eski çağrı şartları korunur.
+        ItemStack rodItem = player.getInventory().getItemInMainHand();
+        ConfigurationSection rodConfig = null;
+        if (rodItem != null && rodItem.getType().name().endsWith("_FISHING_ROD")) {
+            try {
+                rodConfig = itemFixer.findRodByItem(rodItem);
+            } catch (Throwable ignored) {
+                // ItemFixer erişilemezse minigame eski davranışla çalışır (no bonus).
+            }
+        }
+
+        ItemStack offHandItem = player.getInventory().getItemInOffHand();
+        BaitManager.Bait bait = null;
+        if (offHandItem != null && !offHandItem.getType().isAir()) {
+            try {
+                bait = plugin.getBaitManager().getBaitFromItem(offHandItem);
+            } catch (Throwable ignored) {
+                // BaitManager erişilemezse minigame eski davranışla çalışır (no bonus).
+            }
+        }
+
+        MinigameTask task = new MinigameTask(plugin, player, fish, rodConfig, bait);
         activeMinigames.put(player.getUniqueId(), task);
         task.start();
     }

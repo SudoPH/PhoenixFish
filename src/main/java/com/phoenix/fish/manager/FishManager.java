@@ -58,22 +58,31 @@ public class FishManager {
     }
 
     public void loadFish() {
+        // v1.3.5 — Dinamik dil desteği: messages yüklenirken dil ayarlanmış olabilir.
+        // fish_<dil>.yml dosyasını ara, yoksa fish.yml'a (İngilizce) düş.
         String lang = plugin.getMessageManager().getLanguage();
         String fileName = "fish.yml";
-        if ("tr".equalsIgnoreCase(lang)) {
-            fileName = "fish_tr.yml";
+        if (lang != null && !lang.trim().isEmpty() && !lang.equalsIgnoreCase("en")) {
+            // Sadece fish_<dil>.yml dosyası gerçekten mevcutsa onu kullan;
+            // aksi takdirde fish.yml'a (İngilizce) düş — hardcoded dil kontrolü yok.
+            String candidate = "fish_" + lang.trim().toLowerCase() + ".yml";
+            File candidateFile = new File(plugin.getDataFolder(), candidate);
+            if (candidateFile.exists() || plugin.getResource(candidate) != null) {
+                fileName = candidate;
+            } else {
+                plugin.getLogger().info("fish_" + lang + ".yml bulunamadı — "
+                        + "varsayılan fish.yml (İngilizce) kullanılacak.");
+            }
         }
 
         File fishFile = new File(plugin.getDataFolder(), fileName);
         if (!fishFile.exists()) {
-            if ("tr".equalsIgnoreCase(lang)) {
-                plugin.getLogger().warning("fish_tr.yml bulunamadı! Varsayılan fish.yml kullanılıyor.");
-                fileName = "fish.yml";
-                fishFile = new File(plugin.getDataFolder(), "fish.yml");
-            }
+            // Son çare: İngilizce fish.yml'ı jar'dan çıkar.
+            fileName = "fish.yml";
+            fishFile = new File(plugin.getDataFolder(), "fish.yml");
             if (!fishFile.exists()) {
-                plugin.saveResource(fileName, false);
-                fishFile = new File(plugin.getDataFolder(), fileName);
+                plugin.saveResource("fish.yml", false);
+                fishFile = new File(plugin.getDataFolder(), "fish.yml");
             }
         }
 

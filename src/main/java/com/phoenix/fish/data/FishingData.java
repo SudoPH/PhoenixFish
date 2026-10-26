@@ -61,7 +61,18 @@ public class FishingData {
     }
 
     private int clampSkill(int level) {
-        return Math.min(5, Math.max(0, level));
+        int max = (maxSkillLevel > 0) ? maxSkillLevel : 5;
+        return Math.min(max, Math.max(0, level));
+    }
+
+    private volatile int maxSkillLevel = 5;
+
+    public void setMaxSkillLevel(int max) {
+        this.maxSkillLevel = Math.max(1, Math.min(10, max));
+    }
+
+    public int getMaxSkillLevel() {
+        return maxSkillLevel;
     }
 
     public boolean isLoaded() {
@@ -218,7 +229,7 @@ public class FishingData {
     public synchronized void addCraftingXp(int amount) {
         if (amount <= 0)
             return;
-        // Faz 0.9.0: apply global XP multiplier from config
+
         PhoenixFish plugin = PhoenixFish.getInstance();
         if (plugin != null) {
             double globalMult = plugin.getConfig().getDouble(
@@ -230,16 +241,12 @@ public class FishingData {
         this.craftingXp += amount;
         this.totalCraftingXp += amount;
 
-        // Faz 0.9.0: cap XP at max level (prevent infinite accumulation)
         if (this.craftingLevel >= 100) {
             this.craftingXp = 0;
         }
     }
 
     public synchronized boolean checkCraftingLevelUp() {
-        // Faz 0.9.0: Exponential XP formula (config-driven)
-        // Formula: base × level^exponent × tierMultiplier
-        // Falls back to linear (level × 100) if config not loaded
         int requiredXp = getCraftingXpRequired();
         if (this.craftingXp >= requiredXp) {
             this.craftingXp -= requiredXp;
@@ -249,13 +256,6 @@ public class FishingData {
         return false;
     }
 
-    /**
-     * Faz 0.9.0: Calculate XP required for next crafting level.
-     * Uses exponential formula: base × level^exponent × tierMultiplier
-     * Falls back to linear (level × 100) if PhoenixFish instance is null.
-     *
-     * Config values are cached after first read and invalidated on reload.
-     */
     private static volatile double cachedBase = -1;
     private static volatile double cachedExponent = -1;
     private static volatile double cachedGlobalMult = -1;

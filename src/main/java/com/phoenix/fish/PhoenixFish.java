@@ -74,7 +74,6 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishManager.loadFish();
 
         this.craftingManager = new CraftingManager(this);
-        this.craftingManager.loadRecipes();
 
         this.baitManager = new BaitManager(this);
         this.baitManager.loadBaits();
@@ -90,6 +89,8 @@ public final class PhoenixFish extends JavaPlugin {
 
         this.fishingListener = new FishingListener(this);
         Bukkit.getPluginManager().registerEvents(fishingListener, this);
+
+        this.craftingManager.loadRecipes();
 
         this.catalogManager = new CatalogManager(this);
         this.catalogManager.init();
@@ -135,8 +136,6 @@ public final class PhoenixFish extends JavaPlugin {
         if (fishingListener != null)
             fishingListener.shutdown();
 
-        // Disable order: cancel scheduled tasks FIRST so they don't enqueue more DB work
-        // while we're draining the queue. Then save cache, then flush records, then close DB.
         if (cacheManager != null) {
             cacheManager.shutdown();
         }
@@ -149,8 +148,6 @@ public final class PhoenixFish extends JavaPlugin {
             Collection<FishingData> allData = cacheManager.getSavableData();
             if (!allData.isEmpty()) {
                 try {
-                    // C-7/C-8 FIX: with rethrow-on-failure in DB managers, batchSave().get() now throws
-                    // ExecutionException on save failure — we log it loudly instead of claiming success.
                     database.batchSave(allData).get(10, TimeUnit.SECONDS);
                     if (messageManager != null)
                         getLogger().info(messageManager.getPlainMessage("plugin_cache_saved"));
@@ -197,11 +194,28 @@ public final class PhoenixFish extends JavaPlugin {
             saveResource("custom_recipes.yml", false);
             saveResource("baits.yml", false);
 
-            if (getConfig().getString("settings.language", "en").equalsIgnoreCase("tr")) {
-                if (getResource("fish_tr.yml") != null) {
-                    saveResource("fish_tr.yml", false);
+            // v1.3.5 — Dinamik dil desteği: her dil için fish_<dil>.yml dosyasını
+            // jar'da ara ve varsa çıkar. Hardcoded "tr" kontrolü kalktı.
+            String configuredLang = getConfig().getString("settings.language", "en");
+            if (configuredLang != null && !configuredLang.trim().isEmpty()
+                    && !configuredLang.equalsIgnoreCase("en")) {
+                String fishResource = "fish_" + configuredLang.trim().toLowerCase() + ".yml";
+                if (getResource(fishResource) != null) {
+                    saveResource(fishResource, false);
                 } else {
-                    getLogger().warning("fish_tr.yml bulunamadı, varsayılan fish.yml kullanılacak.");
+                    getLogger().info(fishResource + " bulunamadı (jar'da yok) — "
+                            + "varsayılan fish.yml kullanılacak. Bu uyarı normal: çeviri "
+                            + "dosyası sadece istenen dile sahip PhoenixFish sürümlerinde gelir.");
+                }
+
+                // v1.3.5 — Diğer dil bazlı dosyalar (rods_, baits_, custom_recipes_)
+                // Eğer jar'da varsa çıkar; yoksa sessizce geç.
+                for (String prefix : new String[]{"rods_", "baits_", "custom_recipes_"}) {
+                    String resource = prefix + configuredLang.trim().toLowerCase() + ".yml";
+                    if (getResource(resource) != null) {
+                        saveResource(resource, false);
+                        getLogger().info("Extracted bundled resource: " + resource);
+                    }
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -322,14 +336,35 @@ public final class PhoenixFish extends JavaPlugin {
             catalogManager.init();
         }
 
+        if (fishingListener != null && fishingListener.getItemFixer() != null) {
+            try {
+                java.util.concurrent.atomic.AtomicInteger totalFixed = new java.util.concurrent.atomic.AtomicInteger(0);
+                org.bukkit.Bukkit.getScheduler().runTask(this, () -> {
+                    for (org.bukkit.entity.Player onlinePlayer : org.bukkit.Bukkit.getOnlinePlayers()) {
+                        try {
+                            int[] result = fishingListener.getItemFixer().fixInventory(onlinePlayer.getInventory());
+                            if (result != null && result.length >= 2) {
+                                totalFixed.addAndGet(result[0] + result[1]);
+                            }
+                        } catch (Throwable ignored) {
+                            // Bir oyuncunun envanteri fix edilemezse sessizce geç.
+                        }
+                    }
+                    if (totalFixed.get() > 0) {
+                        getLogger().info("Inventory fix applied after reload: " + totalFixed.get()
+                                + " items updated across online players.");
+                    }
+                });
+            } catch (Throwable ignored) {
+                // Scheduler meşgulse veya plugin disable ise sessizce geç.
+            }
+        }
+
         long elapsed = System.currentTimeMillis() - start;
         getLogger().info("PhoenixFish config reloaded in " + elapsed + "ms.");
 
-        // Faz 0.9.0: invalidate XP formula cache on reload
         FishingData.invalidateXpCache();
 
-        // Notify external consumers (e.g. PhoenixCraft) — Faz 1 / 1.3.2 (Madde 2)
-        // They should invalidate caches and close any open GUIs showing stale data.
         try {
             Bukkit.getPluginManager().callEvent(new PhoenixFishReloadEvent(elapsed));
         } catch (Exception e) {

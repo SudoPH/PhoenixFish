@@ -112,6 +112,29 @@ minigame:
   # (Higher = Easier, recovers faster)
   tension-decrease-rate: 3.0
 
+  # ─── v1.3.5 — Nadirlik bazlı zorluk çarpanı ───
+  # Balık nadirliği 1 (common) → 5 (legendary).
+  # Çarpan, balığın fightStrength değerini scales.
+  # Default 1.0 = eski davranış (nadirlik etkisi yok).
+  # Epik +60%, Efsanevi +100% zorluk önerilir:
+  rarity-difficulty-multipliers:
+    1: 1.0
+    2: 1.0
+    3: 1.2
+    4: 1.6
+    5: 2.0
+
+  # ─── v1.3.5 — Nadirlik başına tension cap ───
+  # Balığın tension bar'ı bu değere ulaşırsa hat kopar (oyuncu kaybeder).
+  # Default 100.0 = eski davranış.
+  # Epik ve efsanevi balıklarda daha düşük cap → daha az tolere ederler:
+  rarity-tension-cap:
+    1: 100.0
+    2: 100.0
+    3: 100.0
+    4: 90.0
+    5: 80.0
+
 # ============================================================
 #  XP & Leveling System
 # ============================================================
@@ -311,6 +334,20 @@ xp-system:
   # Higher values let players spec deeper into one skill.
   # Skills: Fast Catcher, Master Hunter, Double Catch, Lucky Bait.
   skill-max-level: 5
+
+  # ─── v1.3.5 — Skill başına config-driven değerler ───
+  # Bu değerler eskiden hardcoded idi (MinigameTask.java, FishingListener.java,
+  # FishRewardHelper.java). Artık config'den okunur — reload'da anında etkili.
+  # Default değerler eski hardcoded değerlerle birebir aynıdır (geriye dönük uyumlu).
+  skill-per-level:
+    # Fast Catcher — her level başına progressRate'e eklenir (MinigameTask).
+    fast-catcher-progress-bonus: 0.5
+    # Master Hunter — her level başına luckMultiplier'a eklenir (FishingListener).
+    master-hunter-luck-bonus: 0.02
+    # Double Catch — her level başına ikinci balık şansı (FishRewardHelper).
+    double-catch-chance-per-level: 0.10
+    # Lucky Bait — her level başına yem tüketmeme şansı (FishingListener).
+    lucky-bait-chance-per-level: 0.20
 
 # ============================================================
 #  Economy System (Internal)

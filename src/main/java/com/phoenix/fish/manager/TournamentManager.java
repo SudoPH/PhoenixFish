@@ -56,7 +56,7 @@ public class TournamentManager {
         return enabled;
     }
 
-    public void start(int durationMinutes) {
+    public synchronized void start(int durationMinutes) {
         if (!enabled || active)
             return;
 
@@ -84,7 +84,7 @@ public class TournamentManager {
         this.bukkitTask = this.tournamentTask.runTaskTimer(plugin, 0L, 20L);
     }
 
-    public void stop(boolean giveRewards) {
+    public synchronized void stop(boolean giveRewards) {
         if (!active)
             return;
 

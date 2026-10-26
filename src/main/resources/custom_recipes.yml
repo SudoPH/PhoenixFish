@@ -713,7 +713,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <#9D00FF>x2.7"
         - "<dark_gray>Required Fishing Level: <white>100"
-    crafting-level-requirement: 95
+    crafting-level-requirement: 105
     xp-reward: 600
     shape:
       - " E "
@@ -809,7 +809,7 @@ recipes:
       lore:
         - "<#00CED1>Distilled essence of the deep."
         - "<dark_gray>» <gold>Powerfully attracts epic fish."
-    crafting-level-requirement: 45
+    crafting-level-requirement: 55
     xp-reward: 55
     shape:
       - " P "
@@ -831,7 +831,7 @@ recipes:
       lore:
         - "<gold>Golden eggs blessed by the sun."
         - "<dark_gray>» <gold>Iridescent attraction for epic fish."
-    crafting-level-requirement: 60
+    crafting-level-requirement: 70
     xp-reward: 80
     shape:
       - " E "
@@ -853,7 +853,7 @@ recipes:
       lore:
         - "<dark_purple>A parasitic horror from the void."
         - "<dark_gray>» <light_purple>Irresistible to legendary fish."
-    crafting-level-requirement: 75
+    crafting-level-requirement: 85
     xp-reward: 130
     shape:
       - " N "

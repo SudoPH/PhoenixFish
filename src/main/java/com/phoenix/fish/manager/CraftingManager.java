@@ -45,11 +45,34 @@ public class CraftingManager {
     public void loadRecipes() {
         recipes.clear();
 
-        File file = new File(plugin.getDataFolder(), "custom_recipes.yml");
-        if (!file.exists()) {
-            plugin.saveResource("custom_recipes.yml", false);
-            file = new File(plugin.getDataFolder(), "custom_recipes.yml");
+        // v1.3.5 — Dil bazlı custom_recipes dosyası yükleme.
+        // Sıra: custom_recipes_<dil>.yml → custom_recipes.yml (fallback).
+        String lang = null;
+        try {
+            lang = plugin.getMessageManager().getLanguage();
+        } catch (Throwable ignored) {
+            // MessageManager henüz yüklenmediyse null bırak.
         }
+        String fileName = "custom_recipes.yml";
+        if (lang != null && !lang.trim().isEmpty() && !lang.equalsIgnoreCase("en")) {
+            String candidate = "custom_recipes_" + lang.trim().toLowerCase() + ".yml";
+            File candidateFile = new File(plugin.getDataFolder(), candidate);
+            if (candidateFile.exists() || plugin.getResource(candidate) != null) {
+                fileName = candidate;
+            }
+        }
+
+        File file = new File(plugin.getDataFolder(), fileName);
+        if (!file.exists()) {
+            fileName = "custom_recipes.yml";
+            file = new File(plugin.getDataFolder(), "custom_recipes.yml");
+            if (!file.exists()) {
+                plugin.saveResource("custom_recipes.yml", false);
+                file = new File(plugin.getDataFolder(), "custom_recipes.yml");
+            }
+        }
+
+        plugin.getLogger().info("Loading crafting recipes from: " + fileName);
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection recipesSec = config.getConfigurationSection("recipes");
@@ -172,6 +195,64 @@ public class CraftingManager {
             String displayNameStr = sec.getString("display-name");
             if (displayNameStr != null) {
                 meta.displayName(miniMessage.deserialize(displayNameStr));
+            }
+        } else {
+            // v1.3.6 — Ingredient olarak belirtilen özel eşyalar (FISHING_ROD + custom-model-data,
+            // veya yemler) için display-name set edilmiyordu. Bu yüzden tarif ekranında
+            // her özel olta sadece "Olta", her özel yem de ham material adıyla görünüyordu.
+            // Çözüm: custom-model-data varsa, önce ItemFixer'dan oltayı ara, sonra
+            // BaitManager'dan yemi ara. Hangisi bulunursa, onun display-name'ini set et.
+            int cmd = sec.getInt("custom-model-data", 0);
+            if (cmd > 0) {
+                boolean resolved = false;
+
+                // 1) Özel olta ara (FISHING_ROD + cmd)
+                if (mat == Material.FISHING_ROD) {
+                    try {
+                        if (plugin.getFishingListener() != null
+                                && plugin.getFishingListener().getItemFixer() != null) {
+                            ConfigurationSection rodSec = plugin.getFishingListener().getItemFixer()
+                                    .findRodConfig(mat, cmd);
+                            if (rodSec != null && rodSec.contains("display-name")) {
+                                String rodDisplayName = rodSec.getString("display-name");
+                                if (rodDisplayName != null) {
+                                    meta.displayName(miniMessage.deserialize(rodDisplayName));
+                                    if (rodSec.contains("lore")) {
+                                        List<Component> loreComponents = new ArrayList<>();
+                                        for (String line : rodSec.getStringList("lore")) {
+                                            loreComponents.add(miniMessage.deserialize(line));
+                                        }
+                                        meta.lore(loreComponents);
+                                    }
+                                    resolved = true;
+                                }
+                            }
+                        }
+                    } catch (Throwable ignored) {
+                        // ItemFixer erişilemezse — diğer yola düş.
+                    }
+                }
+
+                // 2) Özel yem ara (herhangi bir material + cmd)
+                if (!resolved && plugin.getBaitManager() != null) {
+                    try {
+                        item.setItemMeta(meta);  // cmd'i set etmek için önce meta'yı uygula
+                        BaitManager.Bait bait = plugin.getBaitManager().getBaitFromItem(item);
+                        if (bait != null && bait.item() != null && bait.item().hasItemMeta()) {
+                            ItemMeta baitMeta = bait.item().getItemMeta();
+                            if (baitMeta != null && baitMeta.hasDisplayName()) {
+                                meta.displayName(baitMeta.displayName());
+                                // Bait'in lore'unu da ekle (eğer varsa)
+                                if (baitMeta.hasLore()) {
+                                    meta.lore(baitMeta.lore());
+                                }
+                                resolved = true;
+                            }
+                        }
+                    } catch (Throwable ignored) {
+                        // BaitManager erişilemezse — display-name set edilmeden devam et.
+                    }
+                }
             }
         }
 
@@ -364,16 +445,45 @@ public class CraftingManager {
         if (toCraft > 1000) toCraft = 1000;
 
         try {
+            // v1.4.0 (H-2 fix) — Snapshot-and-restore pattern.
+            // Eski davranış: A ingredient consume edildikten sonra B fail olursa, A kaybolurdu.
+            // Yeni davranış: Tüketimden ÖNCE envanter snapshot'ı al. Bir hata olursa snapshot'ı geri yükle.
+            // Snapshot: slot → (ItemStack klonu). Sadece ingredient'lara dokunulan slot'lar snapshot'lanır
+            // (genelde tüm envanter ingredient içerebilir, o yüzden tam snapshot güvenli).
+            ItemStack[] snapshot = new ItemStack[36];
+            ItemStack[] contents = player.getInventory().getContents();
+            int snapshotLen = Math.min(snapshot.length, contents.length);
+            for (int i = 0; i < snapshotLen; i++) {
+                ItemStack it = contents[i];
+                snapshot[i] = (it == null) ? null : it.clone();
+            }
+
             // Consume ingredients `toCraft` times
+            boolean consumeFailed = false;
+            String failMsg = null;
             for (CraftRecipe.Ingredient ing : recipe.ingredients()) {
                 int totalNeeded = ing.amount() * toCraft;
                 if (!consume(player, ing.item(), totalNeeded)) {
-                    // Should not happen since maxCraftable checked, but defensive
-                    plugin.getLogger().warning("craftBulk(): consume failed for "
-                            + player.getName() + " recipe=" + recipe.id()
-                            + " needed=" + totalNeeded);
-                    return CraftBulkResult.failure(CraftResult.INTERNAL_ERROR);
+                    consumeFailed = true;
+                    failMsg = "craftBulk(): consume failed for " + player.getName()
+                            + " recipe=" + recipe.id() + " needed=" + totalNeeded;
+                    break;
                 }
+            }
+
+            if (consumeFailed) {
+                // Rollback — snapshot'ı geri yükle
+                plugin.getLogger().warning(failMsg + " — ROLLING BACK inventory.");
+                try {
+                    for (int i = 0; i < snapshotLen; i++) {
+                        player.getInventory().setItem(i, snapshot[i]);
+                    }
+                    player.sendMessage(plugin.getMessageManager().getMessage("craft_internal_error", true));
+                } catch (Throwable rbErr) {
+                    plugin.getLogger().severe("Rollback FAILED for " + player.getName()
+                            + ": " + rbErr.getMessage() + " — items may be lost!");
+                }
+                return CraftBulkResult.failure(CraftResult.INTERNAL_ERROR);
             }
 
             // Give result items (stack-aware — handle overflow)

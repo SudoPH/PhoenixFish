@@ -142,6 +142,11 @@ baits:
     lore:
       - "<dark_purple>A parasitic creature from the deep void."
       - "<dark_gray>» <light_purple>Attracts legendary fish."
+    # v1.3.5 — Minigame bonusu: efsanevi balıklarda (rarity 5) uygulanır
+    minigame:
+      fight-strength-reduction: 0.10   # balığın fight strength değerini %10 azaltır
+      fish-slow-bonus: 0.10             # balığın hareket şansını %10 azaltır
+      progress-bonus: 0.2               # progressRate'e +0.2 ekler
 
   lunar_moth:
     display-name: "<#C0C0C0>Lunar Moth</#C0C0C0>"
@@ -152,6 +157,10 @@ baits:
     lore:
       - "<#C0C0C0>Draws energy from the moonlight."
       - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
+    minigame:
+      fight-strength-reduction: 0.15
+      fish-slow-bonus: 0.15
+      progress-bonus: 0.3
 
   # ==========================================
   # ENHANCED BAITS (Faz 0.8.0 — Tiered Equipment)

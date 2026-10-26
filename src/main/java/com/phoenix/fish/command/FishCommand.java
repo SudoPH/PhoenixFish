@@ -363,6 +363,7 @@ public class FishCommand implements CommandExecutor {
             if (projected > MAX_LEVEL_CAP) projected = MAX_LEVEL_CAP;
             int newLevel = (int) projected;
             data.setCraftingLevel(newLevel);
+
             player.sendMessage(plugin.getMessageManager().getMessage("addlevel_success_crafting", true,
                     Map.of("%amount%", String.valueOf(levelsToAdd),
                             "%level%", String.valueOf(newLevel))));
@@ -372,6 +373,11 @@ public class FishCommand implements CommandExecutor {
             if (projected > MAX_LEVEL_CAP) projected = MAX_LEVEL_CAP;
             int newLevel = (int) projected;
             data.setCurrentLevel(newLevel);
+
+            if (levelsToAdd > 0) {
+                int currentSkillPoints = data.getSkillPoints();
+                data.setSkillPoints(currentSkillPoints + levelsToAdd);
+            }
             player.sendMessage(plugin.getMessageManager().getMessage("addlevel_success_fishing", true,
                     Map.of("%amount%", String.valueOf(levelsToAdd),
                             "%level%", String.valueOf(newLevel))));
