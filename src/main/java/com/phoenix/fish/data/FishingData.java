@@ -60,13 +60,24 @@ public class FishingData {
         this.balance = Math.max(0.0, balance);
     }
 
+    /**
+     * v1.4.0 — Skill seviyesini config'den okunan max değere göre clamp'ler.
+     * Eskiden hardcoded 5 idi, artık config'teki `xp-system.skill-max-level`
+     * değerini kullanır (SkillManager tarafından setMaxSkillLevel metodu ile ayarlanır).
+     * Config 10 olsa bile 5'te takılı kalıyordu → oyuncu skill puanı kaybediyordu.
+     */
     private int clampSkill(int level) {
         int max = (maxSkillLevel > 0) ? maxSkillLevel : 5;
         return Math.min(max, Math.max(0, level));
     }
 
+    /** v1.4.0 — SkillManager tarafından set'lenen config-driven max skill level. */
     private volatile int maxSkillLevel = 5;
 
+    /**
+     * SkillManager plugin init sırasında bunu çağırır — config'teki
+     * xp-system.skill-max-level değerini FishingData'ya iletir.
+     */
     public void setMaxSkillLevel(int max) {
         this.maxSkillLevel = Math.max(1, Math.min(10, max));
     }
@@ -171,6 +182,22 @@ public class FishingData {
         this.skillPoints = Math.max(0, skillPoints);
     }
 
+    /**
+     * v1.5.0 (F-4) — Skill tree re-spec.
+     * Tüm skill'leri 0'a sıfırlar, skill puanlarını geri verir (refunds).
+     * Skill puanı = (fastCatcher + masterHunter + doubleCatch + luckyBait).
+     */
+    public int respecAllSkills() {
+        int refunded = this.fastCatcher + this.masterHunter
+                + this.doubleCatch + this.luckyBait;
+        this.fastCatcher = 0;
+        this.masterHunter = 0;
+        this.doubleCatch = 0;
+        this.luckyBait = 0;
+        this.skillPoints = Math.max(0, this.skillPoints + refunded);
+        return refunded;
+    }
+
     public void setFastCatcher(int level) {
         this.fastCatcher = clampSkill(level);
     }
@@ -229,7 +256,7 @@ public class FishingData {
     public synchronized void addCraftingXp(int amount) {
         if (amount <= 0)
             return;
-
+        // Faz 0.9.0: apply global XP multiplier from config
         PhoenixFish plugin = PhoenixFish.getInstance();
         if (plugin != null) {
             double globalMult = plugin.getConfig().getDouble(
@@ -241,12 +268,16 @@ public class FishingData {
         this.craftingXp += amount;
         this.totalCraftingXp += amount;
 
+        // Faz 0.9.0: cap XP at max level (prevent infinite accumulation)
         if (this.craftingLevel >= 100) {
             this.craftingXp = 0;
         }
     }
 
     public synchronized boolean checkCraftingLevelUp() {
+        // Faz 0.9.0: Exponential XP formula (config-driven)
+        // Formula: base × level^exponent × tierMultiplier
+        // Falls back to linear (level × 100) if config not loaded
         int requiredXp = getCraftingXpRequired();
         if (this.craftingXp >= requiredXp) {
             this.craftingXp -= requiredXp;
@@ -256,6 +287,13 @@ public class FishingData {
         return false;
     }
 
+    /**
+     * Faz 0.9.0: Calculate XP required for next crafting level.
+     * Uses exponential formula: base × level^exponent × tierMultiplier
+     * Falls back to linear (level × 100) if PhoenixFish instance is null.
+     *
+     * Config values are cached after first read and invalidated on reload.
+     */
     private static volatile double cachedBase = -1;
     private static volatile double cachedExponent = -1;
     private static volatile double cachedGlobalMult = -1;

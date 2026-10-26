@@ -198,7 +198,11 @@ public class FishingListener implements Listener {
                         * plugin.getConfig().getDouble("xp-system.level-luck-bonus", 0.02);
 
                 if (data.getMasterHunter() > 0) {
-                    luckMultiplier += (data.getMasterHunter() * 0.02);
+                    // v1.5.0 (F-6) — Hardcoded 0.02 yerine config-driven per-level değer.
+                    // xp-system.skill-per-level.master-hunter-luck-bonus (default 0.02)
+                    luckMultiplier += (data.getMasterHunter()
+                            * plugin.getConfig().getDouble(
+                                    "xp-system.skill-per-level.master-hunter-luck-bonus", 0.02));
                 }
             }
         }

@@ -73,6 +73,10 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishManager = new FishManager(this);
         this.fishManager.loadFish();
 
+        // v1.3.7 — ÖNEMLİ: CraftingManager ve BaitManager constructor'larıBurada çağrılır,
+        // ama loadRecipes()/loadBaits() FishingListener oluşturulduktan SONRA çağrılmalı.
+        // Çünkü createItem() metodu ItemFixer'dan rod display-name'ini okuyor.
+        // Eğer loadRecipes() burada çağrılırsa, ItemFixer henüz null olur → "Olta" görünür.
         this.craftingManager = new CraftingManager(this);
 
         this.baitManager = new BaitManager(this);
@@ -90,6 +94,9 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishingListener = new FishingListener(this);
         Bukkit.getPluginManager().registerEvents(fishingListener, this);
 
+        // v1.3.7 — Şimdi FishingListener ve ItemFixer hazır, tarifleri yükleyebiliriz.
+        // createItem() artık ItemFixer'a erişebilir → rod ingredient'larına
+        // gerçek display-name set edilir (örn. "Cosmic Rod" / "宇宙鱼竿").
         this.craftingManager.loadRecipes();
 
         this.catalogManager = new CatalogManager(this);
@@ -136,6 +143,8 @@ public final class PhoenixFish extends JavaPlugin {
         if (fishingListener != null)
             fishingListener.shutdown();
 
+        // Disable order: cancel scheduled tasks FIRST so they don't enqueue more DB work
+        // while we're draining the queue. Then save cache, then flush records, then close DB.
         if (cacheManager != null) {
             cacheManager.shutdown();
         }
@@ -148,6 +157,8 @@ public final class PhoenixFish extends JavaPlugin {
             Collection<FishingData> allData = cacheManager.getSavableData();
             if (!allData.isEmpty()) {
                 try {
+                    // C-7/C-8 FIX: with rethrow-on-failure in DB managers, batchSave().get() now throws
+                    // ExecutionException on save failure — we log it loudly instead of claiming success.
                     database.batchSave(allData).get(10, TimeUnit.SECONDS);
                     if (messageManager != null)
                         getLogger().info(messageManager.getPlainMessage("plugin_cache_saved"));
@@ -336,7 +347,19 @@ public final class PhoenixFish extends JavaPlugin {
             catalogManager.init();
         }
 
+        // v1.3.7 — Reload sonrası envanter fix.
+        // Dil değiştiyse (örn. en → zh_cn), oyuncuların envanterindeki eski olta/yemler
+        // hâlâ ESKİ dildeki display-name'i taşıyor. Yeni açılan /pcraft menüsü güncel veriyi
+        // gösterir, ama eldeki eşyalar eski adıyla kalır. Bu fix, reload sonrası tüm online
+        // oyuncuların envanterini tarayıp eski olta/yemleri yeni dildeki display-name'le günceller.
+        //
+        // v1.4.0 (C-1 fix) — Envanter mutation Bukkit API'sinde thread-safe DEĞİL.
+        // reloadAll() async thread'te çağrıldığı için (FishCommand.handleReload → runTaskAsynchronously),
+        // envanter fix'i main thread'e taşımalı. Yoksa ConcurrentModificationException
+        // veya envanter eşyalarının çoğalması/kaybolması riski var.
         if (fishingListener != null && fishingListener.getItemFixer() != null) {
+            // Envanter mutation'ı main thread'e atla. Bukkit.getScheduler().runTask çağrısı
+            // async context'ten çağrılabilir, lambda bir sonraki main-thread tick'te çalışır.
             try {
                 java.util.concurrent.atomic.AtomicInteger totalFixed = new java.util.concurrent.atomic.AtomicInteger(0);
                 org.bukkit.Bukkit.getScheduler().runTask(this, () -> {
@@ -363,8 +386,11 @@ public final class PhoenixFish extends JavaPlugin {
         long elapsed = System.currentTimeMillis() - start;
         getLogger().info("PhoenixFish config reloaded in " + elapsed + "ms.");
 
+        // Faz 0.9.0: invalidate XP formula cache on reload
         FishingData.invalidateXpCache();
 
+        // Notify external consumers (e.g. PhoenixCraft) — Faz 1 / 1.3.2 (Madde 2)
+        // They should invalidate caches and close any open GUIs showing stale data.
         try {
             Bukkit.getPluginManager().callEvent(new PhoenixFishReloadEvent(elapsed));
         } catch (Exception e) {

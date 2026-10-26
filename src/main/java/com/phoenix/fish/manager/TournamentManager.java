@@ -46,6 +46,135 @@ public class TournamentManager {
         this.plugin = plugin;
         this.miniMessage = MiniMessage.miniMessage();
         this.enabled = plugin.getConfig().getBoolean("tournament.enabled", false);
+
+        // v1.5.0 (F-1) — Otomatik tekrarlanan turnuva planlama.
+        // Eğer config'de tournament.schedule.daily veya tournament.schedule.weekly varsa,
+        // bir sonraki turnuva zamanını hesapla ve scheduler'a kaydet.
+        if (enabled) {
+            scheduleRecurringTournaments();
+        }
+    }
+
+    /**
+     * v1.5.0 (F-1) — config.yml'deki tournament.schedule bölümünü okuyup
+     * otomatik tekrarlanan turnuva zamanlayıcı kurar.
+     *
+     * Config formatı:
+     *   tournament:
+     *     schedule:
+     *       daily:
+     *         time: "20:00"   # her gün 20:00
+     *         duration-minutes: 30
+     *       weekly:
+     *         day: SATURDAY    # MONDAY..SUNDAY
+     *         time: "18:00"
+     *         duration-minutes: 60
+     */
+    private void scheduleRecurringTournaments() {
+        org.bukkit.configuration.ConfigurationSection sched =
+                plugin.getConfig().getConfigurationSection("tournament.schedule");
+        if (sched == null) return;
+
+        // Daily schedule
+        org.bukkit.configuration.ConfigurationSection daily = sched.getConfigurationSection("daily");
+        if (daily != null) {
+            String time = daily.getString("time");
+            int duration = daily.getInt("duration-minutes", 30);
+            if (time != null && !time.isEmpty()) {
+                long delayTicks = calculateDelayTicksForToday(time);
+                if (delayTicks >= 0) {
+                    long periodTicks = 24L * 60 * 60 * 20;  // 24 saat (ticks)
+                    Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                        if (!active) {
+                            start(duration);
+                            plugin.getLogger().info("Scheduled daily tournament started (duration: "
+                                    + duration + " min).");
+                        }
+                    }, delayTicks, periodTicks);
+                    plugin.getLogger().info("Daily tournament scheduled at " + time
+                            + " (duration " + duration + " min, first start in "
+                            + (delayTicks / 20 / 60) + " min).");
+                }
+            }
+        }
+
+        // Weekly schedule
+        org.bukkit.configuration.ConfigurationSection weekly = sched.getConfigurationSection("weekly");
+        if (weekly != null) {
+            String dayStr = weekly.getString("day", "SATURDAY").toUpperCase();
+            String time = weekly.getString("time");
+            int duration = weekly.getInt("duration-minutes", 60);
+            try {
+                java.time.DayOfWeek dayOfWeek = java.time.DayOfWeek.valueOf(dayStr);
+                long delayTicks = calculateWeeklyDelayTicks(dayOfWeek, time);
+                if (delayTicks >= 0) {
+                    long periodTicks = 7L * 24 * 60 * 60 * 20;  // 7 gün (ticks)
+                    Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                        if (!active) {
+                            start(duration);
+                            plugin.getLogger().info("Scheduled weekly tournament started on "
+                                    + dayOfWeek + " at " + time + " (duration: " + duration + " min).");
+                        }
+                    }, delayTicks, periodTicks);
+                    plugin.getLogger().info("Weekly tournament scheduled on " + dayOfWeek
+                            + " at " + time + " (duration " + duration + " min, first start in "
+                            + (delayTicks / 20 / 60 / 60) + " hours).");
+                }
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid day-of-week '" + dayStr
+                        + "' for weekly tournament schedule. Use MONDAY..SUNDAY.");
+            }
+        }
+    }
+
+    /**
+     * Bugün belirtilen saat için tick sayısı hesapla (20 ticks = 1 saniye).
+     */
+    private long calculateDelayTicksForToday(String timeStr) {
+        try {
+            String[] parts = timeStr.split(":");
+            int hour = Integer.parseInt(parts[0]);
+            int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            java.time.LocalTime targetTime = java.time.LocalTime.of(hour, minute);
+            java.time.LocalTime now = java.time.LocalTime.now();
+            long secondsUntil;
+            if (now.isBefore(targetTime)) {
+                secondsUntil = java.time.Duration.between(now, targetTime).getSeconds();
+            } else {
+                // Bugün geçti → yarın aynı saat
+                secondsUntil = java.time.Duration.between(now, targetTime).getSeconds()
+                        + (24 * 60 * 60);
+            }
+            return secondsUntil * 20;  // 20 ticks per second
+        } catch (Exception e) {
+            plugin.getLogger().warning("Invalid time format '" + timeStr
+                    + "'. Use HH:MM (e.g., 20:00).");
+            return -1;
+        }
+    }
+
+    /**
+     * Belirtilen gün ve saat için tick sayısı hesapla.
+     */
+    private long calculateWeeklyDelayTicks(java.time.DayOfWeek targetDay, String timeStr) {
+        try {
+            String[] parts = timeStr.split(":");
+            int hour = Integer.parseInt(parts[0]);
+            int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.LocalDateTime target = now
+                    .with(java.time.temporal.TemporalAdjusters.nextOrSame(targetDay))
+                    .withHour(hour).withMinute(minute).withSecond(0).withNano(0);
+            if (target.isBefore(now) || target.isEqual(now)) {
+                // Bu hafta geçti → bir sonraki hafta
+                target = target.plusWeeks(1);
+            }
+            long secondsUntil = java.time.Duration.between(now, target).getSeconds();
+            return secondsUntil * 20;
+        } catch (Exception e) {
+            plugin.getLogger().warning("Invalid weekly schedule format.");
+            return -1;
+        }
     }
 
     public boolean isActive() {

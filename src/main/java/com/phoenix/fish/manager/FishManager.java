@@ -57,6 +57,14 @@ public class FishManager {
         return fishMap.get(id.toLowerCase());
     }
 
+    /**
+     * v1.5.0 (F-3) — Tüm yüklenmiş balıkları döndür.
+     * /pf catalog search komutu tarafından arama için kullanılır.
+     */
+    public java.util.Collection<CustomFish> getAllFish() {
+        return fishMap.values();
+    }
+
     public void loadFish() {
         // v1.3.5 — Dinamik dil desteği: messages yüklenirken dil ayarlanmış olabilir.
         // fish_<dil>.yml dosyasını ara, yoksa fish.yml'a (İngilizce) düş.

@@ -42,6 +42,18 @@ public class SQLiteManager implements IDatabase {
                 this.connection = DriverManager.getConnection(url);
                 try (Statement stmt = connection.createStatement()) {
                     stmt.execute("PRAGMA journal_mode=WAL;");
+                    // v1.5.0 (F-5) — WAL checkpoint ayarları.
+                    // WAL mode büyük sunucularda dosya boyutunu büyütür.
+                    // `wal_autocheckpoint=1000` → her 1000 sayfa değişiklikte otomatik checkpoint.
+                    // 1000 sayfa ≈ 4 MB (varsayılan sayfa boyutu 4096 byte).
+                    // Bu, WAL dosyasının çok büyümesini engeller, performansı korur.
+                    stmt.execute("PRAGMA wal_autocheckpoint=1000;");
+                    // synchronous=NORMAL → fsync'i azaltır, daha hızlı write ama biraz daha riskli.
+                    // FULL (default) en güvenli ama yavaş. NORMAL genelde yeterli WAL ile.
+                    stmt.execute("PRAGMA synchronous=NORMAL;");
+                    // cache -200MB → büyük sunucularda memory cache (genelde 2MB default).
+                    // Bu sayede SELECT'ler memory'den gelir, disk I/O azalır.
+                    stmt.execute("PRAGMA cache_size=-20000;");  // -20000 = 20 MB
                 }
                 createTable();
                 addMissingColumns();

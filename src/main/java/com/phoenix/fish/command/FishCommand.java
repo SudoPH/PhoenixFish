@@ -66,7 +66,15 @@ public class FishCommand implements CommandExecutor {
                 }
                 handleGiveBait(player, args[1]);
             }
-            case "catalog" -> plugin.getCatalogManager().openMainMenu(player);
+            case "catalog" -> {
+                // v1.5.0 (F-3) — /pf catalog search <query> → balık ara
+                // /pf catalog (alone) → ana menü
+                if (args.length >= 2 && "search".equalsIgnoreCase(args[1])) {
+                    handleCatalogSearch(player, args);
+                } else {
+                    plugin.getCatalogManager().openMainMenu(player);
+                }
+            }
             case "skills" -> plugin.getSkillManager().openMenu(player);
             case "tournament" -> handleTournament(player, args);
             case "sell" -> handleSell(player, args);
@@ -74,9 +82,225 @@ public class FishCommand implements CommandExecutor {
             case "addlevel" -> handleAddLevel(player, args, false);
             case "addcraft" -> handleAddLevel(player, args, true);
             case "reload" -> handleReload(player);
+            // v1.5.0 (F-7) — Admin debug tools
+            case "debug" -> handleDebug(player, args);
+            // v1.5.0 (F-4) — Skill re-spec (per-player)
+            case "respec" -> handleRespec(player, args);
             default -> sendHelp(player);
         }
         return true;
+    }
+
+    /**
+     * v1.5.0 (F-7) — Admin debug komutu.
+     * Kullanım:
+     *   /pf debug player <name>  — oyuncunun XP, level, skill puanı, balance, discovery sayısını göster
+     *   /pf debug rod            — eldeki oltanın resolved config'ini göster (material, cmd, luck, PDC)
+     *   /pf debug self           — kendi FishingData özetini göster
+     */
+    private void handleDebug(Player sender, String[] args) {
+        if (!sender.hasPermission("phoenixfish.admin")) {
+            sender.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage("<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
+            return;
+        }
+
+        String sub = args[1].toLowerCase();
+
+        if ("self".equals(sub)) {
+            // Kendi FishingData özetini göster
+            com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(sender.getUniqueId());
+            if (data == null) {
+                sender.sendMessage("<red>Your FishingData is not loaded yet.");
+                return;
+            }
+            sendDebugSummary(sender, sender.getName(), data);
+            return;
+        }
+
+        if ("player".equals(sub)) {
+            if (args.length < 3) {
+                sender.sendMessage("<yellow>Usage: <white>/pf debug player <name>");
+                return;
+            }
+            Player target = org.bukkit.Bukkit.getPlayerExact(args[2]);
+            if (target == null) {
+                sender.sendMessage("<red>Player not found: <yellow>" + args[2]);
+                return;
+            }
+            com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(target.getUniqueId());
+            if (data == null) {
+                sender.sendMessage("<red>FishingData not loaded for <yellow>" + target.getName());
+                return;
+            }
+            sendDebugSummary(sender, target.getName(), data);
+            return;
+        }
+
+        if ("rod".equals(sub)) {
+            // Elindeki oltanın resolved config'ini göster
+            org.bukkit.inventory.ItemStack rod = sender.getInventory().getItemInMainHand();
+            if (rod == null || rod.getType().isAir()) {
+                sender.sendMessage("<red>Your main hand is empty.");
+                return;
+            }
+            sender.sendMessage("<gold>=== Rod Debug ===");
+            sender.sendMessage("<gray>Material: <white>" + rod.getType());
+            int cmd = com.phoenix.fish.manager.ItemUtils.getCMD(rod);
+            sender.sendMessage("<gray>CustomModelData: <white>" + cmd);
+            if (rod.hasItemMeta() && rod.getItemMeta().hasDisplayName()) {
+                sender.sendMessage("<gray>Display name: <white>"
+                        + net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                                .serialize(rod.getItemMeta().displayName()));
+            }
+            // Luck PDC oku
+            org.bukkit.NamespacedKey luckKey = new org.bukkit.NamespacedKey(plugin, "luck_multiplier");
+            if (rod.hasItemMeta()) {
+                Double luck = rod.getItemMeta().getPersistentDataContainer()
+                        .get(luckKey, org.bukkit.persistence.PersistentDataType.DOUBLE);
+                sender.sendMessage("<gray>Luck PDC: <white>"
+                        + (luck != null ? String.format("%.2f", luck) : "<red>(none)"));
+            }
+            // ItemFixer'dan rod config resolve et
+            if (plugin.getFishingListener() != null && plugin.getFishingListener().getItemFixer() != null) {
+                org.bukkit.configuration.ConfigurationSection rodSec =
+                        plugin.getFishingListener().getItemFixer().findRodConfig(rod.getType(), cmd);
+                if (rodSec != null) {
+                    sender.sendMessage("<gray>Matched rod in rods.yml: <green>YES");
+                    sender.sendMessage("<gray>  luck-multiplier: <white>" + rodSec.getDouble("luck-multiplier", 1.0));
+                    sender.sendMessage("<gray>  fishing-level-requirement: <white>"
+                            + rodSec.getInt("fishing-level-requirement", 1));
+                    sender.sendMessage("<gray>  has minigame block: <white>"
+                            + (rodSec.contains("minigame") ? "<green>YES" : "<red>NO"));
+                } else {
+                    sender.sendMessage("<gray>Matched rod in rods.yml: <red>NO (not a custom rod)");
+                }
+            }
+            return;
+        }
+
+        sender.sendMessage("<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
+    }
+
+    private void sendDebugSummary(Player sender, String targetName, com.phoenix.fish.data.FishingData data) {
+        sender.sendMessage("<gold>=== Debug: <white>" + targetName + "</white> ===");
+        sender.sendMessage("<gray>Fishing level: <white>" + data.getCurrentLevel()
+                + " <dark_gray>(XP: <white>" + data.getCurrentXp() + "<dark_gray>)");
+        sender.sendMessage("<gray>Crafting level: <white>" + data.getCraftingLevel()
+                + " <dark_gray>(XP: <white>" + data.getCraftingXp() + "<dark_gray>)");
+        sender.sendMessage("<gray>Balance: <green>$" + String.format("%.2f", data.getBalance()));
+        sender.sendMessage("<gray>Skill points: <yellow>" + data.getSkillPoints());
+        sender.sendMessage("<gray>Fast Catcher: <white>" + data.getFastCatcher() + "/"
+                + data.getMaxSkillLevel());
+        sender.sendMessage("<gray>Master Hunter: <white>" + data.getMasterHunter() + "/"
+                + data.getMaxSkillLevel());
+        sender.sendMessage("<gray>Double Catch: <white>" + data.getDoubleCatch() + "/"
+                + data.getMaxSkillLevel());
+        sender.sendMessage("<gray>Lucky Bait: <white>" + data.getLuckyBait() + "/"
+                + data.getMaxSkillLevel());
+        sender.sendMessage("<gray>Discovered fish: <white>" + data.getDiscoveredFish().size());
+    }
+
+    /**
+     * v1.5.0 (F-4) — Skill re-spec komutu.
+     * Kullanım:
+     *   /pf respec             — kendi skill'lerini sıfırla, puanları geri al (ücretsiz, default)
+     *   /pf respec <player>    — başkasının skill'lerini sıfırla (admin yetkisi gerek)
+     *
+     * Opsiyonel: config'de xp-system.respec-cost belirlenebilir (PhoenixFish bakiyesinden düşülür).
+     */
+    private void handleRespec(Player sender, String[] args) {
+        Player target = sender;
+        if (args.length >= 2) {
+            // Admin tarafından başkası için respec
+            if (!sender.hasPermission("phoenixfish.admin")) {
+                sender.sendMessage(plugin.getMessageManager().getMessage("no_permission", true));
+                return;
+            }
+            target = org.bukkit.Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage("<red>Player not found: <yellow>" + args[1]);
+                return;
+            }
+        }
+
+        com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(target.getUniqueId());
+        if (data == null) {
+            sender.sendMessage("<red>FishingData not loaded for <yellow>" + target.getName());
+            return;
+        }
+
+        // Opsiyonel ücret (PhoenixFish bakiyesinden)
+        double respecCost = plugin.getConfig().getDouble("xp-system.respec-cost", 0.0);
+        if (respecCost > 0 && !sender.hasPermission("phoenixfish.admin")) {
+            // Sadece non-admin için ücret kontrol et
+            double balance = data.getBalance();
+            if (balance < respecCost) {
+                sender.sendMessage("<red>Re-spec costs <yellow>$" + String.format("%.2f", respecCost)
+                        + "<red> but you only have <yellow>$" + String.format("%.2f", balance));
+                return;
+            }
+            data.withdrawBalance(respecCost);
+        }
+
+        int refunded = data.respecAllSkills();
+        sender.sendMessage("<green>✔ Re-spec complete for <white>" + target.getName()
+                + "<green>. <white>" + refunded + "<green> skill points refunded.");
+        if (respecCost > 0) {
+            sender.sendMessage("<gray>Cost: <red>-$" + String.format("%.2f", respecCost));
+        }
+    }
+
+    /**
+     * v1.5.0 (F-3) — Basit katalog arama.
+     * Kullanım: /pf catalog search <query>
+     * Eşleşen balıkları chat'te listeler — case-insensitive, partial match.
+     */
+    private void handleCatalogSearch(Player player, String[] args) {
+        if (args.length < 3) {
+            player.sendMessage("<yellow>Usage: <white>/pf catalog search <query>");
+            return;
+        }
+        // args[2...] birleşerek query
+        StringBuilder query = new StringBuilder();
+        for (int i = 2; i < args.length; i++) {
+            if (i > 2) query.append(" ");
+            query.append(args[i]);
+        }
+        String q = query.toString().toLowerCase().trim();
+        if (q.length() < 2) {
+            player.sendMessage("<red>Query too short (min 2 chars).");
+            return;
+        }
+
+        // Tüm balıkları tara, eşleşenleri topla
+        java.util.List<com.phoenix.fish.model.CustomFish> matches = new java.util.ArrayList<>();
+        for (com.phoenix.fish.model.CustomFish fish : plugin.getFishManager().getAllFish()) {
+            String fishId = fish.id().toLowerCase();
+            String fishName = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                    .plainText().serialize(fish.name()).toLowerCase();
+            if (fishId.contains(q) || fishName.contains(q)) {
+                matches.add(fish);
+            }
+        }
+
+        if (matches.isEmpty()) {
+            player.sendMessage("<gray>No fish found for '<white>" + q + "<gray>'.");
+            return;
+        }
+
+        // Listeyi chat'te göster
+        player.sendMessage("<gold>=== Fish search: '<white>" + q + "<gold>' (" + matches.size() + " results) ===");
+        for (com.phoenix.fish.model.CustomFish fish : matches) {
+            String name = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                    .plainText().serialize(fish.name());
+            player.sendMessage("<aqua>" + fish.id() + " <dark_gray>» <white>" + name
+                    + " <dark_gray>(rarity " + fish.rarity() + ")");
+        }
     }
 
     private void handleSell(Player player, String[] args) {
@@ -363,7 +587,8 @@ public class FishCommand implements CommandExecutor {
             if (projected > MAX_LEVEL_CAP) projected = MAX_LEVEL_CAP;
             int newLevel = (int) projected;
             data.setCraftingLevel(newLevel);
-
+            // v1.4.0 — /pf addcraft hiçbir zaman crafting skill puanı vermez
+            // (fishing skill puanı ayrı sistem). Bu bilinçli bir karar.
             player.sendMessage(plugin.getMessageManager().getMessage("addlevel_success_crafting", true,
                     Map.of("%amount%", String.valueOf(levelsToAdd),
                             "%level%", String.valueOf(newLevel))));
@@ -373,7 +598,9 @@ public class FishCommand implements CommandExecutor {
             if (projected > MAX_LEVEL_CAP) projected = MAX_LEVEL_CAP;
             int newLevel = (int) projected;
             data.setCurrentLevel(newLevel);
-
+            // v1.4.0 — /pf addlevel normal levelUp yolunu bypass ettiği için
+            // skillPoints artmıyordu. Şimdi sadece POZİTİF level eklemelerinde
+            // skill puanı da veriyoruz. Negatif (level düşürme) puan düşürmez.
             if (levelsToAdd > 0) {
                 int currentSkillPoints = data.getSkillPoints();
                 data.setSkillPoints(currentSkillPoints + levelsToAdd);
