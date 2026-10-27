@@ -46,7 +46,10 @@ public class EconomyManager {
     }
 
     public double getBalance(Player player) {
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+        // v1.6.1 (bug #4 fix): CacheManager null guard.
+        var cache = plugin.getCacheManager();
+        if (cache == null) return 0.0;
+        FishingData data = cache.getData(player.getUniqueId());
         return data != null ? data.getBalance() : 0.0;
     }
 
@@ -76,7 +79,14 @@ public class EconomyManager {
         double weight = getWeight(item);
         if (weight <= 0)
             weight = 1.0;
-        return basePrice * weight * item.getAmount();
+        double price = basePrice * weight * item.getAmount();
+
+        // v1.6.0 — MarketManager'dan dinamik fiyat çarpanı uygula
+        if (plugin.getMarketManager() != null && plugin.getMarketManager().isEnabled()) {
+            double multiplier = plugin.getMarketManager().getMultiplier(fish.id());
+            price *= multiplier;
+        }
+        return price;
     }
 
     private String getFishId(ItemStack item) {
@@ -94,7 +104,10 @@ public class EconomyManager {
             return;
         }
 
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+        // v1.6.1 (bug #4 fix): CacheManager null guard.
+        var cache = plugin.getCacheManager();
+        if (cache == null) return;
+        FishingData data = cache.getData(player.getUniqueId());
         if (data == null)
             return;
 
@@ -188,7 +201,11 @@ public class EconomyManager {
     }
 
     public void confirmSell(Player player, Inventory inv) {
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+        // v1.6.1 (bug #4 fix): CacheManager null guard.
+        var cache = plugin.getCacheManager();
+        if (cache == null)
+            return;
+        FishingData data = cache.getData(player.getUniqueId());
         if (data == null)
             return;
 
@@ -252,7 +269,10 @@ public class EconomyManager {
             return;
         }
 
-        FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+        // v1.6.1 (bug #4 fix): CacheManager null guard.
+        var cache = plugin.getCacheManager();
+        if (cache == null) return;
+        FishingData data = cache.getData(player.getUniqueId());
         if (data == null)
             return;
 

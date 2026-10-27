@@ -98,7 +98,21 @@ public class SQLiteManager implements IDatabase {
                 "balance DOUBLE DEFAULT 0.0, " +
                 "crafting_xp INT DEFAULT 0, " +
                 "crafting_level INT DEFAULT 1, " +
-                "total_crafting_xp INT DEFAULT 0" +
+                "total_crafting_xp INT DEFAULT 0, " +
+                // v1.6.0 — new skill columns
+                "skill_big INT DEFAULT 0, " +
+                "skill_lucky INT DEFAULT 0, " +
+                "skill_stamina INT DEFAULT 0, " +
+                // v1.6.0 — new stat columns
+                "total_catches INT DEFAULT 0, " +
+                "biggest_weight DOUBLE DEFAULT 0.0, " +
+                "biggest_fish_name TEXT DEFAULT NULL, " +
+                "rarest_catch_rarity INT DEFAULT 0, " +
+                "rarest_catch_name TEXT DEFAULT NULL, " +
+                "total_earnings DOUBLE DEFAULT 0.0, " +
+                "current_streak INT DEFAULT 0, " +
+                "best_streak INT DEFAULT 0, " +
+                "mutation_count INT DEFAULT 0" +
                 ");";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.execute();
@@ -106,26 +120,42 @@ public class SQLiteManager implements IDatabase {
     }
 
     private void addMissingColumns() {
-        String[] columns = {
+        // v1.6.0 — Refactored to handle three column types cleanly (INT / DOUBLE / TEXT).
+        String[] intColumns = {
                 "skill_points", "skill_fast", "skill_hunter", "skill_double", "skill_bait",
-                "balance",
-                "crafting_xp", "crafting_level", "total_crafting_xp"
+                "crafting_xp", "crafting_level", "total_crafting_xp",
+                // v1.6.0 — new int skill + stat columns
+                "skill_big", "skill_lucky", "skill_stamina",
+                "total_catches", "rarest_catch_rarity",
+                "current_streak", "best_streak", "mutation_count"
         };
-        for (String col : columns) {
-            String type = col.equals("balance") ? "DOUBLE DEFAULT 0.0" : "INT DEFAULT 0";
-            String sql = "ALTER TABLE player_professions ADD COLUMN " + col + " " + type + ";";
-            try (Statement stmt = connection.createStatement()) {
-                stmt.execute(sql);
-                plugin.getLogger().info("SQLite migration: added column '" + col + "' to player_professions.");
-            } catch (SQLException e) {
-                if (isColumnAlreadyExistsError(e)) {
-                    // expected — silent
-                } else {
-                    plugin.getLogger().warning(
-                            "SQLite: could not add column '" + col + "' to player_professions: "
-                                    + e.getMessage() + " (SQL state: " + e.getSQLState()
-                                    + ", error code: " + e.getErrorCode() + ")");
-                }
+        String[] doubleColumns = {
+                "balance",
+                // v1.6.0 — new double stat columns
+                "biggest_weight", "total_earnings"
+        };
+        String[] textColumns = {
+                // v1.6.0 — new text stat columns
+                "biggest_fish_name", "rarest_catch_name"
+        };
+        for (String col : intColumns)   addColumnIfMissing(col, "INT DEFAULT 0");
+        for (String col : doubleColumns) addColumnIfMissing(col, "DOUBLE DEFAULT 0.0");
+        for (String col : textColumns)  addColumnIfMissing(col, "TEXT DEFAULT NULL");
+    }
+
+    private void addColumnIfMissing(String col, String type) {
+        String sql = "ALTER TABLE player_professions ADD COLUMN " + col + " " + type + ";";
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(sql);
+            plugin.getLogger().info("SQLite migration: added column '" + col + "' to player_professions.");
+        } catch (SQLException e) {
+            if (isColumnAlreadyExistsError(e)) {
+                // expected — silent
+            } else {
+                plugin.getLogger().warning(
+                        "SQLite: could not add column '" + col + "' to player_professions: "
+                                + e.getMessage() + " (SQL state: " + e.getSQLState()
+                                + ", error code: " + e.getErrorCode() + ")");
             }
         }
     }
@@ -151,9 +181,14 @@ public class SQLiteManager implements IDatabase {
     @Override
     public CompletableFuture<FishingData> loadData(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
+            // v1.6.0 — SELECT now includes the 12 new skill+stat columns.
             String sql = "SELECT fishing_xp, fishing_level, total_xp, discovered_fish, " +
                     "skill_points, skill_fast, skill_hunter, skill_double, skill_bait, balance, " +
-                    "crafting_xp, crafting_level, total_crafting_xp " +
+                    "crafting_xp, crafting_level, total_crafting_xp, " +
+                    "skill_big, skill_lucky, skill_stamina, " +
+                    "total_catches, biggest_weight, biggest_fish_name, " +
+                    "rarest_catch_rarity, rarest_catch_name, " +
+                    "total_earnings, current_streak, best_streak, mutation_count " +
                     "FROM player_professions WHERE uuid = ?;";
 
             synchronized (connectionLock) {
@@ -184,6 +219,22 @@ public class SQLiteManager implements IDatabase {
                                     rs.getInt("crafting_xp"),
                                     rs.getInt("crafting_level"),
                                     rs.getInt("total_crafting_xp"));
+                            // v1.6.0 — Restore the new skill + stat fields via setters
+                            // (the existing 14-arg constructor only knows the 4 original skills).
+                            // NOTE: bug #3 fix is required for skill values >5 to survive the
+                            // setter's clampSkill() call — tracked separately.
+                            data.setBigCatch(rs.getInt("skill_big"));
+                            data.setLuckyCast(rs.getInt("skill_lucky"));
+                            data.setStamina(rs.getInt("skill_stamina"));
+                            data.setTotalCatches(rs.getInt("total_catches"));
+                            data.setBiggestWeight(rs.getDouble("biggest_weight"));
+                            data.setBiggestFishName(rs.getString("biggest_fish_name"));
+                            data.setRarestCatchRarity(rs.getInt("rarest_catch_rarity"));
+                            data.setRarestCatchName(rs.getString("rarest_catch_name"));
+                            data.setTotalEarnings(rs.getDouble("total_earnings"));
+                            data.setCurrentStreak(rs.getInt("current_streak"));
+                            data.setBestStreak(rs.getInt("best_streak"));
+                            data.setMutationCount(rs.getInt("mutation_count"));
                             data.markLoaded();
                             return data;
                         }
@@ -204,11 +255,16 @@ public class SQLiteManager implements IDatabase {
     @Override
     public CompletableFuture<Void> saveData(UUID uuid, FishingData data) {
         return CompletableFuture.runAsync(() -> {
+            // v1.6.0 — INSERT/UPDATE now covers the 12 new skill+stat columns.
             String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level, discovered_fish, "
                     +
                     "skill_points, skill_fast, skill_hunter, skill_double, skill_bait, balance, " +
-                    "crafting_xp, crafting_level, total_crafting_xp) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                    "crafting_xp, crafting_level, total_crafting_xp, " +
+                    "skill_big, skill_lucky, skill_stamina, " +
+                    "total_catches, biggest_weight, biggest_fish_name, " +
+                    "rarest_catch_rarity, rarest_catch_name, " +
+                    "total_earnings, current_streak, best_streak, mutation_count) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                     "ON CONFLICT(uuid) DO UPDATE SET " +
                     "total_xp = EXCLUDED.total_xp, " +
                     "fishing_xp = EXCLUDED.fishing_xp, " +
@@ -222,7 +278,19 @@ public class SQLiteManager implements IDatabase {
                     "balance = EXCLUDED.balance, " +
                     "crafting_xp = EXCLUDED.crafting_xp, " +
                     "crafting_level = EXCLUDED.crafting_level, " +
-                    "total_crafting_xp = EXCLUDED.total_crafting_xp;";
+                    "total_crafting_xp = EXCLUDED.total_crafting_xp, " +
+                    "skill_big = EXCLUDED.skill_big, " +
+                    "skill_lucky = EXCLUDED.skill_lucky, " +
+                    "skill_stamina = EXCLUDED.skill_stamina, " +
+                    "total_catches = EXCLUDED.total_catches, " +
+                    "biggest_weight = EXCLUDED.biggest_weight, " +
+                    "biggest_fish_name = EXCLUDED.biggest_fish_name, " +
+                    "rarest_catch_rarity = EXCLUDED.rarest_catch_rarity, " +
+                    "rarest_catch_name = EXCLUDED.rarest_catch_name, " +
+                    "total_earnings = EXCLUDED.total_earnings, " +
+                    "current_streak = EXCLUDED.current_streak, " +
+                    "best_streak = EXCLUDED.best_streak, " +
+                    "mutation_count = EXCLUDED.mutation_count;";
 
             synchronized (connectionLock) {
                 if (connection == null) {
@@ -243,6 +311,19 @@ public class SQLiteManager implements IDatabase {
                     ps.setInt(12, data.getCraftingXp());
                     ps.setInt(13, data.getCraftingLevel());
                     ps.setInt(14, data.getTotalCraftingXp());
+                    // v1.6.0 — bind the 12 new columns
+                    ps.setInt(15, data.getBigCatch());
+                    ps.setInt(16, data.getLuckyCast());
+                    ps.setInt(17, data.getStamina());
+                    ps.setInt(18, data.getTotalCatches());
+                    ps.setDouble(19, data.getBiggestWeight());
+                    ps.setString(20, data.getBiggestFishName());
+                    ps.setInt(21, data.getRarestCatchRarity());
+                    ps.setString(22, data.getRarestCatchName());
+                    ps.setDouble(23, data.getTotalEarnings());
+                    ps.setInt(24, data.getCurrentStreak());
+                    ps.setInt(25, data.getBestStreak());
+                    ps.setInt(26, data.getMutationCount());
                     ps.executeUpdate();
                 } catch (SQLException e) {
                     String msg = plugin.getMessageManager().getPlainMessage("db_failed_save_data_sqlite");
@@ -259,11 +340,16 @@ public class SQLiteManager implements IDatabase {
             if (dataCollection == null || dataCollection.isEmpty())
                 return;
 
+            // v1.6.0 — batch INSERT/UPDATE mirrors saveData's column list.
             String sql = "INSERT INTO player_professions (uuid, total_xp, fishing_xp, fishing_level, discovered_fish, "
                     +
                     "skill_points, skill_fast, skill_hunter, skill_double, skill_bait, balance, " +
-                    "crafting_xp, crafting_level, total_crafting_xp) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                    "crafting_xp, crafting_level, total_crafting_xp, " +
+                    "skill_big, skill_lucky, skill_stamina, " +
+                    "total_catches, biggest_weight, biggest_fish_name, " +
+                    "rarest_catch_rarity, rarest_catch_name, " +
+                    "total_earnings, current_streak, best_streak, mutation_count) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                     "ON CONFLICT(uuid) DO UPDATE SET " +
                     "total_xp = EXCLUDED.total_xp, " +
                     "fishing_xp = EXCLUDED.fishing_xp, " +
@@ -277,7 +363,19 @@ public class SQLiteManager implements IDatabase {
                     "balance = EXCLUDED.balance, " +
                     "crafting_xp = EXCLUDED.crafting_xp, " +
                     "crafting_level = EXCLUDED.crafting_level, " +
-                    "total_crafting_xp = EXCLUDED.total_crafting_xp;";
+                    "total_crafting_xp = EXCLUDED.total_crafting_xp, " +
+                    "skill_big = EXCLUDED.skill_big, " +
+                    "skill_lucky = EXCLUDED.skill_lucky, " +
+                    "skill_stamina = EXCLUDED.skill_stamina, " +
+                    "total_catches = EXCLUDED.total_catches, " +
+                    "biggest_weight = EXCLUDED.biggest_weight, " +
+                    "biggest_fish_name = EXCLUDED.biggest_fish_name, " +
+                    "rarest_catch_rarity = EXCLUDED.rarest_catch_rarity, " +
+                    "rarest_catch_name = EXCLUDED.rarest_catch_name, " +
+                    "total_earnings = EXCLUDED.total_earnings, " +
+                    "current_streak = EXCLUDED.current_streak, " +
+                    "best_streak = EXCLUDED.best_streak, " +
+                    "mutation_count = EXCLUDED.mutation_count;";
 
             synchronized (connectionLock) {
                 if (connection == null) {
@@ -303,6 +401,19 @@ public class SQLiteManager implements IDatabase {
                         ps.setInt(12, data.getCraftingXp());
                         ps.setInt(13, data.getCraftingLevel());
                         ps.setInt(14, data.getTotalCraftingXp());
+                        // v1.6.0 — bind the 12 new columns
+                        ps.setInt(15, data.getBigCatch());
+                        ps.setInt(16, data.getLuckyCast());
+                        ps.setInt(17, data.getStamina());
+                        ps.setInt(18, data.getTotalCatches());
+                        ps.setDouble(19, data.getBiggestWeight());
+                        ps.setString(20, data.getBiggestFishName());
+                        ps.setInt(21, data.getRarestCatchRarity());
+                        ps.setString(22, data.getRarestCatchName());
+                        ps.setDouble(23, data.getTotalEarnings());
+                        ps.setInt(24, data.getCurrentStreak());
+                        ps.setInt(25, data.getBestStreak());
+                        ps.setInt(26, data.getMutationCount());
                         ps.addBatch();
                     }
                     ps.executeBatch();

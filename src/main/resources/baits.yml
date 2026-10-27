@@ -174,7 +174,7 @@ baits:
     material: STICK
     custom-model-data: 41001
     target-rarity: 1
-    chance-modifier: 1.5
+    chance-modifier: 1.45
     lore:
       - "<gray>A plump, juicy worm."
       - "<dark_gray>» <white>Greatly attracts common fish."
@@ -184,7 +184,7 @@ baits:
     material: SLIME_BALL
     custom-model-data: 41002
     target-rarity: 2
-    chance-modifier: 1.55
+    chance-modifier: 1.50
     lore:
       - "<gray>Glows with an otherworldly light."
       - "<dark_gray>» <aqua>Strongly attracts uncommon fish."
@@ -194,7 +194,7 @@ baits:
     material: ROTTEN_FLESH
     custom-model-data: 41003
     target-rarity: 3
-    chance-modifier: 1.65
+    chance-modifier: 1.60
     lore:
       - "<gray>Dark magic infuses this flesh."
       - "<dark_gray>» <red>Powerfully attracts rare fish."
@@ -204,7 +204,7 @@ baits:
     material: PRISMARINE_CRYSTALS
     custom-model-data: 41004
     target-rarity: 4
-    chance-modifier: 1.75
+    chance-modifier: 1.70
     lore:
       - "<#00CED1>Distilled essence of the deep."
       - "<dark_gray>» <gold>Powerfully attracts epic fish."
@@ -214,7 +214,7 @@ baits:
     material: EGG
     custom-model-data: 41005
     target-rarity: 4
-    chance-modifier: 1.85
+    chance-modifier: 1.78
     lore:
       - "<gold>Golden eggs blessed by the sun."
       - "<dark_gray>» <gold>Iridescent attraction for epic fish."
@@ -224,7 +224,7 @@ baits:
     material: NETHERITE_SCRAP
     custom-model-data: 41006
     target-rarity: 5
-    chance-modifier: 1.9
+    chance-modifier: 1.82
     lore:
       - "<dark_purple>A parasitic horror from the void."
       - "<dark_gray>» <light_purple>Irresistible to legendary fish."
@@ -317,7 +317,7 @@ baits:
     material: NETHER_STAR
     custom-model-data: 40022
     target-rarity: 5
-    chance-modifier: 2.0
+    chance-modifier: 1.8
     lore:
       - "<white>Condensed stellar energy."
       - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."

@@ -194,6 +194,18 @@ public class PhoenixFishPlaceholder extends PlaceholderExpansion {
             case "discovered_count":
             case "total_fish_count":
             case "discovered_percent":
+            // v1.6.0 — Yeni placeholder'lar
+            case "total_catches":
+            case "biggest_fish":
+            case "biggest_weight":
+            case "rarest_fish":
+            case "current_streak":
+            case "best_streak":
+            case "skill_big":
+            case "skill_lucky":
+            case "skill_stamina":
+            case "mutation_count":
+            case "total_earnings":
                 return "0";
             default:
                 // H-24 FIX: return "" (empty) for unknown placeholder rather than null.
@@ -260,6 +272,40 @@ public class PhoenixFishPlaceholder extends PlaceholderExpansion {
                 if (total == 0)
                     return "0";
                 return String.format(Locale.US, "%.1f", (discovered * 100.0) / total);
+
+            // v1.6.0 — Yeni placeholder'lar
+            case "total_catches":
+                return String.valueOf(data.getTotalCatches());
+
+            case "biggest_fish":
+                return data.getBiggestFishName() != null ? data.getBiggestFishName() : "—";
+
+            case "biggest_weight":
+                return String.format(Locale.US, "%.1f", data.getBiggestWeight());
+
+            case "rarest_fish":
+                return data.getRarestCatchName() != null ? data.getRarestCatchName() : "—";
+
+            case "current_streak":
+                return String.valueOf(data.getCurrentStreak());
+
+            case "best_streak":
+                return String.valueOf(data.getBestStreak());
+
+            case "skill_big":
+                return String.valueOf(data.getBigCatch());
+
+            case "skill_lucky":
+                return String.valueOf(data.getLuckyCast());
+
+            case "skill_stamina":
+                return String.valueOf(data.getStamina());
+
+            case "mutation_count":
+                return String.valueOf(data.getMutationCount());
+
+            case "total_earnings":
+                return String.format(Locale.US, "%.2f", data.getTotalEarnings());
 
             default:
                 return "";

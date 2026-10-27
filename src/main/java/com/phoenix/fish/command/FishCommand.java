@@ -31,6 +31,17 @@ public class FishCommand implements CommandExecutor {
     private static final int MAX_LEVEL_CAP = 1_000_000;
 
     private final PhoenixFish plugin;
+    private static final net.kyori.adventure.text.minimessage.MiniMessage MM =
+            net.kyori.adventure.text.minimessage.MiniMessage.miniMessage();
+
+    /**
+     * v1.5.1 — MiniMessage tag'lerini parse ederek renkli mesaj gönderir.
+     * player.sendMessage(String) plain text gönderir — <gold> gibi tag'ler literal görünür.
+     * Bu helper, tag'leri deserialize edip Component olarak gönderir → renkler doğru render olur.
+     */
+    private void sendMini(Player p, String msg) {
+        p.sendMessage(MM.deserialize(msg));
+    }
 
     public FishCommand(PhoenixFish plugin) {
         this.plugin = plugin;
@@ -86,6 +97,49 @@ public class FishCommand implements CommandExecutor {
             case "debug" -> handleDebug(player, args);
             // v1.5.0 (F-4) — Skill re-spec (per-player)
             case "respec" -> handleRespec(player, args);
+            // v1.6.0 — Achievement GUI
+            case "achievements" -> {
+                if (plugin.getAchievementManager() != null
+                        && plugin.getAchievementManager().isEnabled()) {
+                    plugin.getAchievementManager().openGUI(player);
+                } else {
+                    sendMini(player, "<red>Achievement system is disabled.");
+                }
+            }
+            // v1.6.0 — Contracts GUI
+            case "contracts" -> {
+                if (plugin.getContractManager() != null
+                        && plugin.getContractManager().isEnabled()) {
+                    plugin.getContractManager().openGUI(player);
+                } else {
+                    sendMini(player, "<red>Contract system is disabled.");
+                }
+            }
+            // v1.6.0 — Season info
+            case "season" -> {
+                if (plugin.getSeasonManager() != null
+                        && plugin.getSeasonManager().isEnabled()) {
+                    var sm = plugin.getSeasonManager();
+                    sendMini(player, "<gold>=== Fishing Season " + sm.getSeasonNumber() + " ===");
+                    long remaining = sm.getTimeRemaining();
+                    long days = remaining / (24 * 60 * 60 * 1000);
+                    long hours = (remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000);
+                    sendMini(player, "<gray>Time remaining: <yellow>" + days + "d " + hours + "h");
+                    sendMini(player, "<gray>Your score: <aqua>" + sm.getScore(player.getUniqueId()));
+                    var lb = sm.getLeaderboard();
+                    int rank = 1;
+                    for (var entry : lb.entrySet()) {
+                        if (rank > 5) break;
+                        String name = Bukkit.getOfflinePlayer(entry.getKey()).getName();
+                        if (name == null) name = "???";
+                        sendMini(player, "<yellow>" + rank + ". <white>" + name
+                                + " <dark_gray>— <aqua>" + entry.getValue() + " pts");
+                        rank++;
+                    }
+                } else {
+                    sendMini(player, "<red>Season system is disabled.");
+                }
+            }
             default -> sendHelp(player);
         }
         return true;
@@ -105,7 +159,7 @@ public class FishCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            sender.sendMessage("<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
+            sendMini(sender, "<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
             return;
         }
 
@@ -113,9 +167,16 @@ public class FishCommand implements CommandExecutor {
 
         if ("self".equals(sub)) {
             // Kendi FishingData özetini göster
-            com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(sender.getUniqueId());
+            // v1.6.1 (bug #4 fix): CacheManager can be null when both xp-system.enabled
+            // and settings.discovery-enabled are false.
+            var cache = plugin.getCacheManager();
+            if (cache == null) {
+                sendMini(sender, "<red>XP/discovery system is disabled — no fishing data available.");
+                return;
+            }
+            com.phoenix.fish.data.FishingData data = cache.getData(sender.getUniqueId());
             if (data == null) {
-                sender.sendMessage("<red>Your FishingData is not loaded yet.");
+                sendMini(sender, "<red>Your FishingData is not loaded yet.");
                 return;
             }
             sendDebugSummary(sender, sender.getName(), data);
@@ -124,17 +185,23 @@ public class FishCommand implements CommandExecutor {
 
         if ("player".equals(sub)) {
             if (args.length < 3) {
-                sender.sendMessage("<yellow>Usage: <white>/pf debug player <name>");
+                sendMini(sender, "<yellow>Usage: <white>/pf debug player <name>");
                 return;
             }
             Player target = org.bukkit.Bukkit.getPlayerExact(args[2]);
             if (target == null) {
-                sender.sendMessage("<red>Player not found: <yellow>" + args[2]);
+                sendMini(sender, "<red>Player not found: <yellow>" + args[2]);
                 return;
             }
-            com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(target.getUniqueId());
+            // v1.6.1 (bug #4 fix): CacheManager null guard.
+            var cache = plugin.getCacheManager();
+            if (cache == null) {
+                sendMini(sender, "<red>XP/discovery system is disabled — no fishing data available.");
+                return;
+            }
+            com.phoenix.fish.data.FishingData data = cache.getData(target.getUniqueId());
             if (data == null) {
-                sender.sendMessage("<red>FishingData not loaded for <yellow>" + target.getName());
+                sendMini(sender, "<red>FishingData not loaded for <yellow>" + target.getName());
                 return;
             }
             sendDebugSummary(sender, target.getName(), data);
@@ -145,15 +212,15 @@ public class FishCommand implements CommandExecutor {
             // Elindeki oltanın resolved config'ini göster
             org.bukkit.inventory.ItemStack rod = sender.getInventory().getItemInMainHand();
             if (rod == null || rod.getType().isAir()) {
-                sender.sendMessage("<red>Your main hand is empty.");
+                sendMini(sender, "<red>Your main hand is empty.");
                 return;
             }
-            sender.sendMessage("<gold>=== Rod Debug ===");
-            sender.sendMessage("<gray>Material: <white>" + rod.getType());
+            sendMini(sender, "<gold>=== Rod Debug ===");
+            sendMini(sender, "<gray>Material: <white>" + rod.getType());
             int cmd = com.phoenix.fish.manager.ItemUtils.getCMD(rod);
-            sender.sendMessage("<gray>CustomModelData: <white>" + cmd);
+            sendMini(sender, "<gray>CustomModelData: <white>" + cmd);
             if (rod.hasItemMeta() && rod.getItemMeta().hasDisplayName()) {
-                sender.sendMessage("<gray>Display name: <white>"
+                sendMini(sender, "<gray>Display name: <white>"
                         + net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
                                 .serialize(rod.getItemMeta().displayName()));
             }
@@ -162,7 +229,7 @@ public class FishCommand implements CommandExecutor {
             if (rod.hasItemMeta()) {
                 Double luck = rod.getItemMeta().getPersistentDataContainer()
                         .get(luckKey, org.bukkit.persistence.PersistentDataType.DOUBLE);
-                sender.sendMessage("<gray>Luck PDC: <white>"
+                sendMini(sender, "<gray>Luck PDC: <white>"
                         + (luck != null ? String.format("%.2f", luck) : "<red>(none)"));
             }
             // ItemFixer'dan rod config resolve et
@@ -170,39 +237,39 @@ public class FishCommand implements CommandExecutor {
                 org.bukkit.configuration.ConfigurationSection rodSec =
                         plugin.getFishingListener().getItemFixer().findRodConfig(rod.getType(), cmd);
                 if (rodSec != null) {
-                    sender.sendMessage("<gray>Matched rod in rods.yml: <green>YES");
-                    sender.sendMessage("<gray>  luck-multiplier: <white>" + rodSec.getDouble("luck-multiplier", 1.0));
-                    sender.sendMessage("<gray>  fishing-level-requirement: <white>"
+                    sendMini(sender, "<gray>Matched rod in rods.yml: <green>YES");
+                    sendMini(sender, "<gray>  luck-multiplier: <white>" + rodSec.getDouble("luck-multiplier", 1.0));
+                    sendMini(sender, "<gray>  fishing-level-requirement: <white>"
                             + rodSec.getInt("fishing-level-requirement", 1));
-                    sender.sendMessage("<gray>  has minigame block: <white>"
+                    sendMini(sender, "<gray>  has minigame block: <white>"
                             + (rodSec.contains("minigame") ? "<green>YES" : "<red>NO"));
                 } else {
-                    sender.sendMessage("<gray>Matched rod in rods.yml: <red>NO (not a custom rod)");
+                    sendMini(sender, "<gray>Matched rod in rods.yml: <red>NO (not a custom rod)");
                 }
             }
             return;
         }
 
-        sender.sendMessage("<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
+        sendMini(sender, "<yellow>Usage: <white>/pf debug player <name> | /pf debug rod | /pf debug self");
     }
 
     private void sendDebugSummary(Player sender, String targetName, com.phoenix.fish.data.FishingData data) {
-        sender.sendMessage("<gold>=== Debug: <white>" + targetName + "</white> ===");
-        sender.sendMessage("<gray>Fishing level: <white>" + data.getCurrentLevel()
+        sendMini(sender, "<gold>=== Debug: <white>" + targetName + "</white> ===");
+        sendMini(sender, "<gray>Fishing level: <white>" + data.getCurrentLevel()
                 + " <dark_gray>(XP: <white>" + data.getCurrentXp() + "<dark_gray>)");
-        sender.sendMessage("<gray>Crafting level: <white>" + data.getCraftingLevel()
+        sendMini(sender, "<gray>Crafting level: <white>" + data.getCraftingLevel()
                 + " <dark_gray>(XP: <white>" + data.getCraftingXp() + "<dark_gray>)");
-        sender.sendMessage("<gray>Balance: <green>$" + String.format("%.2f", data.getBalance()));
-        sender.sendMessage("<gray>Skill points: <yellow>" + data.getSkillPoints());
-        sender.sendMessage("<gray>Fast Catcher: <white>" + data.getFastCatcher() + "/"
+        sendMini(sender, "<gray>Balance: <green>$" + String.format("%.2f", data.getBalance()));
+        sendMini(sender, "<gray>Skill points: <yellow>" + data.getSkillPoints());
+        sendMini(sender, "<gray>Fast Catcher: <white>" + data.getFastCatcher() + "/"
                 + data.getMaxSkillLevel());
-        sender.sendMessage("<gray>Master Hunter: <white>" + data.getMasterHunter() + "/"
+        sendMini(sender, "<gray>Master Hunter: <white>" + data.getMasterHunter() + "/"
                 + data.getMaxSkillLevel());
-        sender.sendMessage("<gray>Double Catch: <white>" + data.getDoubleCatch() + "/"
+        sendMini(sender, "<gray>Double Catch: <white>" + data.getDoubleCatch() + "/"
                 + data.getMaxSkillLevel());
-        sender.sendMessage("<gray>Lucky Bait: <white>" + data.getLuckyBait() + "/"
+        sendMini(sender, "<gray>Lucky Bait: <white>" + data.getLuckyBait() + "/"
                 + data.getMaxSkillLevel());
-        sender.sendMessage("<gray>Discovered fish: <white>" + data.getDiscoveredFish().size());
+        sendMini(sender, "<gray>Discovered fish: <white>" + data.getDiscoveredFish().size());
     }
 
     /**
@@ -223,14 +290,22 @@ public class FishCommand implements CommandExecutor {
             }
             target = org.bukkit.Bukkit.getPlayerExact(args[1]);
             if (target == null) {
-                sender.sendMessage("<red>Player not found: <yellow>" + args[1]);
+                sendMini(sender, "<red>Player not found: <yellow>" + args[1]);
                 return;
             }
         }
 
-        com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(target.getUniqueId());
+        com.phoenix.fish.data.FishingData data;
+        // v1.6.1 (bug #4 fix): CacheManager null guard — without this, /pf respec
+        // would NPE when both xp-system.enabled and settings.discovery-enabled are false.
+        var cache = plugin.getCacheManager();
+        if (cache == null) {
+            sendMini(sender, "<red>XP/discovery system is disabled — re-spec is not available.");
+            return;
+        }
+        data = cache.getData(target.getUniqueId());
         if (data == null) {
-            sender.sendMessage("<red>FishingData not loaded for <yellow>" + target.getName());
+            sendMini(sender, "<red>FishingData not loaded for <yellow>" + target.getName());
             return;
         }
 
@@ -240,7 +315,7 @@ public class FishCommand implements CommandExecutor {
             // Sadece non-admin için ücret kontrol et
             double balance = data.getBalance();
             if (balance < respecCost) {
-                sender.sendMessage("<red>Re-spec costs <yellow>$" + String.format("%.2f", respecCost)
+                sendMini(sender, "<red>Re-spec costs <yellow>$" + String.format("%.2f", respecCost)
                         + "<red> but you only have <yellow>$" + String.format("%.2f", balance));
                 return;
             }
@@ -248,10 +323,10 @@ public class FishCommand implements CommandExecutor {
         }
 
         int refunded = data.respecAllSkills();
-        sender.sendMessage("<green>✔ Re-spec complete for <white>" + target.getName()
+        sendMini(sender, "<green>✔ Re-spec complete for <white>" + target.getName()
                 + "<green>. <white>" + refunded + "<green> skill points refunded.");
         if (respecCost > 0) {
-            sender.sendMessage("<gray>Cost: <red>-$" + String.format("%.2f", respecCost));
+            sendMini(sender, "<gray>Cost: <red>-$" + String.format("%.2f", respecCost));
         }
     }
 
@@ -262,7 +337,7 @@ public class FishCommand implements CommandExecutor {
      */
     private void handleCatalogSearch(Player player, String[] args) {
         if (args.length < 3) {
-            player.sendMessage("<yellow>Usage: <white>/pf catalog search <query>");
+            sendMini(player, "<yellow>Usage: <white>/pf catalog search <query>");
             return;
         }
         // args[2...] birleşerek query
@@ -273,7 +348,7 @@ public class FishCommand implements CommandExecutor {
         }
         String q = query.toString().toLowerCase().trim();
         if (q.length() < 2) {
-            player.sendMessage("<red>Query too short (min 2 chars).");
+            sendMini(player, "<red>Query too short (min 2 chars).");
             return;
         }
 
@@ -289,16 +364,16 @@ public class FishCommand implements CommandExecutor {
         }
 
         if (matches.isEmpty()) {
-            player.sendMessage("<gray>No fish found for '<white>" + q + "<gray>'.");
+            sendMini(player, "<gray>No fish found for '<white>" + q + "<gray>'.");
             return;
         }
 
         // Listeyi chat'te göster
-        player.sendMessage("<gold>=== Fish search: '<white>" + q + "<gold>' (" + matches.size() + " results) ===");
+        sendMini(player, "<gold>=== Fish search: '<white>" + q + "<gold>' (" + matches.size() + " results) ===");
         for (com.phoenix.fish.model.CustomFish fish : matches) {
             String name = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
                     .plainText().serialize(fish.name());
-            player.sendMessage("<aqua>" + fish.id() + " <dark_gray>» <white>" + name
+            sendMini(player, "<aqua>" + fish.id() + " <dark_gray>» <white>" + name
                     + " <dark_gray>(rarity " + fish.rarity() + ")");
         }
     }

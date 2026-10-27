@@ -177,7 +177,22 @@ public class MinigameTask {
         this.effectiveProgressRate = this.progressRateBase + rodProgressBonus + baitProgressBonus;
 
         // tensionIncreaseRate: base × (1 - rodTensionResist)
-        this.effectiveTensionIncreaseRate = this.tensionIncreaseRateBase * (1.0 - rodTensionResist);
+        // v1.6.0 — Stamina skill çarpanı (opsiyonel, features.skill-stamina.enabled ise)
+        double staminaResist = 0.0;
+        if (plugin.getConfig().getBoolean("features.skill-stamina.enabled", false)) {
+            try {
+                FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                if (data != null && data.getStamina() > 0) {
+                    double perLevel = plugin.getConfig().getDouble(
+                            "features.skill-stamina.tension-resist-per-level", 0.10);
+                    staminaResist = Math.min(0.95, data.getStamina() * perLevel);
+                }
+            } catch (Throwable ignored) { }
+        }
+
+        this.effectiveTensionIncreaseRate = this.tensionIncreaseRateBase
+                * (1.0 - rodTensionResist)
+                * (1.0 - staminaResist);
 
         // effective fight strength: fish.fightStrength × rarityMult × (1 - baitFightReduction)
         this.effectiveFishFightStrength = fish.fightStrength() * rarityMult * (1.0 - baitFightReduction);

@@ -6,6 +6,7 @@ import com.phoenix.fish.command.FishTabCompleter;
 import com.phoenix.fish.data.CacheManager;
 import com.phoenix.fish.data.FishingData;
 import com.phoenix.fish.event.PhoenixFishReloadEvent;
+import com.phoenix.fish.listener.AchievementContractListener;
 import com.phoenix.fish.listener.CatalogListener;
 import com.phoenix.fish.listener.FishingListener;
 import com.phoenix.fish.listener.SellListener;
@@ -48,6 +49,11 @@ public final class PhoenixFish extends JavaPlugin {
     private SkillManager skillManager;
     private EconomyManager economyManager;
     private FishingModeManager fishingModeManager;
+    // v1.6.0 — Yeni manager
+    private com.phoenix.fish.manager.AchievementManager achievementManager;
+    private com.phoenix.fish.manager.MarketManager marketManager;
+    private com.phoenix.fish.manager.ContractManager contractManager;
+    private com.phoenix.fish.manager.SeasonManager seasonManager;
 
     private PhoenixFishAPI api;
 
@@ -86,6 +92,11 @@ public final class PhoenixFish extends JavaPlugin {
         this.tournamentManager = new TournamentManager(this);
         this.economyManager = new EconomyManager(this);
         this.skillManager = new SkillManager(this);
+        // v1.6.0 — AchievementManager + MarketManager
+        this.achievementManager = new com.phoenix.fish.manager.AchievementManager(this);
+        this.marketManager = new com.phoenix.fish.manager.MarketManager(this);
+        this.contractManager = new com.phoenix.fish.manager.ContractManager(this);
+        this.seasonManager = new com.phoenix.fish.manager.SeasonManager(this);
 
         this.fishingModeManager = new FishingModeManager(this);
 
@@ -105,6 +116,11 @@ public final class PhoenixFish extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new CatalogListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SkillListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SellListener(this), this);
+
+        // v1.6.1 — Achievement & Contract GUI'lerini item hırsızlığına karşı korur.
+        // Önceki sürümde bu GUI'ler Bukkit.createInventory(null, ...) ile açıldığı için
+        // oyuncular başarılmış PAPER/GOLD_INGOT gibi item'ları fare ile çekebiliyordu.
+        Bukkit.getPluginManager().registerEvents(new AchievementContractListener(this), this);
 
         registerCommands();
 
@@ -147,6 +163,20 @@ public final class PhoenixFish extends JavaPlugin {
         // while we're draining the queue. Then save cache, then flush records, then close DB.
         if (cacheManager != null) {
             cacheManager.shutdown();
+        }
+
+        // v1.6.0 — AchievementManager + MarketManager save
+        if (achievementManager != null) {
+            achievementManager.save();
+        }
+        if (marketManager != null) {
+            marketManager.shutdown();
+        }
+        if (contractManager != null) {
+            contractManager.shutdown();
+        }
+        if (seasonManager != null) {
+            seasonManager.shutdown();
         }
 
         if (cacheManager != null && database != null) {
@@ -204,6 +234,7 @@ public final class PhoenixFish extends JavaPlugin {
             saveResource("rods.yml", false);
             saveResource("custom_recipes.yml", false);
             saveResource("baits.yml", false);
+            saveResource("contract_templates.yml", false);
 
             // v1.3.5 — Dinamik dil desteği: her dil için fish_<dil>.yml dosyasını
             // jar'da ara ve varsa çıkar. Hardcoded "tr" kontrolü kalktı.
@@ -289,6 +320,63 @@ public final class PhoenixFish extends JavaPlugin {
         if (fish == null || player == null)
             return;
 
+        // v1.6.0 — Config-driven görsel efektler (features.minigame-effects.enabled ise)
+        if (getConfig().getBoolean("features.minigame-effects.enabled", true)) {
+            String rarityKey = "features.minigame-effects.rarity_" + fish.rarity();
+            org.bukkit.configuration.ConfigurationSection effectSec =
+                    getConfig().getConfigurationSection(rarityKey);
+            if (effectSec != null) {
+                // Particle
+                String particleStr = effectSec.getString("particle", "none");
+                if (!"none".equalsIgnoreCase(particleStr) && !particleStr.isEmpty()) {
+                    try {
+                        org.bukkit.Particle particle = org.bukkit.Particle.valueOf(particleStr.toUpperCase());
+                        int count = effectSec.getInt("particle_count", 10);
+                        player.getWorld().spawnParticle(particle, player.getLocation().add(0, 1, 0),
+                                count, 0.5, 0.5, 0.5, 0.05);
+                    } catch (IllegalArgumentException ignored) {
+                        // Invalid particle name — skip
+                    }
+                }
+                // Sound
+                String soundStr = effectSec.getString("sound", "");
+                if (!soundStr.isEmpty()) {
+                    try {
+                        org.bukkit.Sound sound = org.bukkit.Sound.valueOf(soundStr.toUpperCase());
+                        float volume = (float) effectSec.getDouble("sound_volume", 1.0);
+                        float pitch = (float) effectSec.getDouble("sound_pitch", 1.0);
+                        player.playSound(player, sound, volume, pitch);
+                    } catch (IllegalArgumentException ignored) { }
+                }
+                // Shake (knockback effect)
+                if (effectSec.getBoolean("shake", false)) {
+                    player.setVelocity(player.getVelocity().add(
+                            new org.bukkit.util.Vector(0, 0.15, 0)));
+                }
+                // Title
+                if (effectSec.getBoolean("title", false)) {
+                    String titleText = effectSec.getString("title_text", "");
+                    if (!titleText.isEmpty()) {
+                        Map<String, String> ph = Collections.singletonMap("%fish_name%",
+                                PlainTextComponentSerializer.plainText().serialize(fish.name()));
+                        Title.Times times = Title.Times.times(
+                                Duration.ofMillis(500), Duration.ofMillis(3000),
+                                Duration.ofMillis(1000));
+                        Title title = Title.title(
+                                net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                                        .deserialize(titleText),
+                                messageManager.getMessage(
+                                        fish.rarity() >= 5 ? "catch_subtitle_legendary" : "catch_subtitle_epic",
+                                        false, ph),
+                                times);
+                        player.showTitle(title);
+                    }
+                }
+                return;  // Config-driven efektler uygulandı, eski kodu atla
+            }
+        }
+
+        // Eski davranış (config-driven efektler kapalıysa veya rarity için section yoksa)
         if (fish.rarity() >= 4) {
             Map<String, String> ph = Collections.singletonMap("%fish_name%",
                     PlainTextComponentSerializer.plainText().serialize(fish.name()));
@@ -347,6 +435,28 @@ public final class PhoenixFish extends JavaPlugin {
             catalogManager.init();
         }
 
+        // v1.6.0 — AchievementManager + MarketManager reload
+        if (achievementManager != null) {
+            // Definitions re-read from config
+            try {
+                achievementManager.save();
+                var field = achievementManager.getClass().getDeclaredField("enabled");
+                field.setAccessible(true);
+                field.setBoolean(achievementManager, getConfig().getBoolean("features.achievements.enabled", false));
+            } catch (Throwable ignored) { }
+        }
+        if (marketManager != null) {
+            try {
+                marketManager.save();
+                marketManager.applyRecovery();
+            } catch (Throwable ignored) { }
+        }
+
+        // v1.7.0 — ContractManager reload (re-reads contract_templates.yml)
+        if (contractManager != null) {
+            contractManager.reload();
+        }
+
         // v1.3.7 — Reload sonrası envanter fix.
         // Dil değiştiyse (örn. en → zh_cn), oyuncuların envanterindeki eski olta/yemler
         // hâlâ ESKİ dildeki display-name'i taşıyor. Yeni açılan /pcraft menüsü güncel veriyi
@@ -388,6 +498,9 @@ public final class PhoenixFish extends JavaPlugin {
 
         // Faz 0.9.0: invalidate XP formula cache on reload
         FishingData.invalidateXpCache();
+        // v1.6.1 (bug #3 fix): invalidate skill-max-level cache so config changes
+        // to xp-system.skill-max-level take effect on /pf reload.
+        FishingData.invalidateMaxSkillLevelCache();
 
         // Notify external consumers (e.g. PhoenixCraft) — Faz 1 / 1.3.2 (Madde 2)
         // They should invalidate caches and close any open GUIs showing stale data.
@@ -456,6 +569,23 @@ public final class PhoenixFish extends JavaPlugin {
 
     public FishingModeManager getFishingModeManager() {
         return fishingModeManager;
+    }
+
+    // v1.6.0 — AchievementManager getter
+    public com.phoenix.fish.manager.AchievementManager getAchievementManager() {
+        return achievementManager;
+    }
+    // v1.6.0 — MarketManager getter
+    public com.phoenix.fish.manager.MarketManager getMarketManager() {
+        return marketManager;
+    }
+    // v1.6.0 — ContractManager getter
+    public com.phoenix.fish.manager.ContractManager getContractManager() {
+        return contractManager;
+    }
+    // v1.6.0 — SeasonManager getter
+    public com.phoenix.fish.manager.SeasonManager getSeasonManager() {
+        return seasonManager;
     }
 
     public boolean isXpSystemEnabled() {

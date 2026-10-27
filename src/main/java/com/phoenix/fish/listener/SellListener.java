@@ -98,11 +98,19 @@ public class SellListener implements Listener {
         }
 
         if (clone.getAmount() <= 0) {
+            // Full transfer — clear the source slot.
             event.setCurrentItem(null);
-        } else {
-            // Could not fit in 0-44: leave the original stack in player inv (event already cancelled).
-            // No item lands in border slots.
+        } else if (clone.getAmount() < carried.getAmount()) {
+            // Partial transfer — reduce the source stack to whatever did NOT fit.
+            // Without this, the merged portion is duplicated into the GUI while the
+            // original stack keeps its full amount (dupe exploit).
+            ItemStack remaining = carried.clone();
+            remaining.setAmount(clone.getAmount());
+            event.setCurrentItem(remaining);
         }
+        // else: nothing transferred (no empty slot and no stackable match) — leave
+        // the original stack untouched. The event is already cancelled, so Bukkit
+        // will not move anything on its own.
     }
 
     @EventHandler

@@ -1,0 +1,257 @@
+# ============================================================
+# PhoenixFish - Daily Contracts Configuration (v1.8.0)
+# ============================================================
+# This file defines the TEMPLATE POOL for daily contracts.
+#
+# Flow:
+#   1. On daily reset, ContractManager shuffles all templates below.
+#   2. Takes the top `settings.pool-roll-size` templates (default 5).
+#   3. Assigns the first `settings.daily-contract-count` (default 3)
+#      to the player.
+#   4. For each assigned template, amount / money / xp are rolled
+#      within their min-max ranges → unique per player per day.
+#
+# Per-player progress is persisted in plugins/PhoenixFish/contracts.yml
+# (separate file). This file is the TEMPLATE source only.
+#
+# ────────────────────────────────────────────────────────────────
+#  Target types
+# ────────────────────────────────────────────────────────────────
+#   ANY              — any fish caught counts (value ignored)
+#   ANY_RARITY       — any fish of the given rarity counts
+#                      value: common | uncommon | rare | epic | legendary
+#                      (also accepts: 1, 2, 3, 4, 5)
+#   FISH_ID          — exact fish ID (from fish.yml) must match
+#                      value: "<fish_id>" e.g. "sea_bass", "cosmic_koi"
+#   WEIGHT_MILESTONE — counts only fish whose rolled weight (kg) is
+#                      >= the value. value: numeric kg threshold (e.g. 5.0)
+#                      The contract is satisfied once the player has
+#                      caught `amount` qualifying fish (NOT just one
+#                      heavy fish — count of qualifying catches).
+#
+# ────────────────────────────────────────────────────────────────
+#  Placeholders (display-name + description lines)
+# ────────────────────────────────────────────────────────────────
+#   %amount%   — rolled amount needed
+#   %target%   — human-readable target label
+#   %money%    — rolled money reward (whole number)
+#   %xp%       — rolled xp reward
+#   %value%    — raw target value (e.g. "5.0" for weight milestones)
+#
+# ────────────────────────────────────────────────────────────────
+#  v1.7.2 change — reward lines stripped from descriptions
+# ────────────────────────────────────────────────────────────────
+#  The GUI auto-generates a "Rewards:" block showing money / XP /
+#  items in a consistent format. DO NOT include reward info in
+#  description lines — it would duplicate the auto-generated block.
+#
+# ────────────────────────────────────────────────────────────────
+#  v1.8.0 balance pass — reward ranges bumped ~30%
+# ────────────────────────────────────────────────────────────────
+#  Contract rewards were tuned to stay competitive with raw fish
+#  selling income (which was rebalanced in fish.yml). Target daily
+#  contract income: $500-$2000 for common-tier, up to $15k for
+#  legendary-tier.
+# ============================================================
+
+settings:
+  enabled: true
+  daily-contract-count: 3       # contracts assigned per player per day
+  pool-roll-size: 5             # how many templates to roll before picking
+  reset-hour: 0                 # 0-23 server-local hour for daily reset
+  announce-on-reset: true       # send "new contracts" message on reset
+  auto-generate-defaults: true  # if file missing or templates empty,
+                                # extract/rewrite defaults from jar
+  gui:
+    title: "<dark_gray>» <gold><bold>Daily Contracts</bold></gold> <dark_gray>«"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+    slots: [10, 12, 14, 16, 22]   # up to 5 contract slots (first N used)
+    icons:
+      active: PAPER                       # in-progress contract
+      completed-claimable: LIME_CONCRETE  # done, reward not yet claimed
+      completed-claimed: GREEN_STAINED_GLASS  # done, reward already claimed
+
+# ────────────────────────────────────────────────────────────────
+#  Contract Templates
+# ────────────────────────────────────────────────────────────────
+# Add as many as you want. The system will randomly pick from these.
+# Duplicate IDs are not allowed — last one wins.
+templates:
+
+  # ════════════ Common-tier contracts ════════════
+  # Target income: $200-$450 per contract (8-15 catches × ~$15/catch + contract reward)
+  common_angler:
+    display-name: "<yellow>Common Angler"
+    description:
+      - "<gray>Catch <white>%amount%</gray> common-rarity fish."
+    target:
+      type: ANY_RARITY
+      value: common
+    amount: { min: 8, max: 15 }
+    rewards:
+      money: { min: 200, max: 320 }
+      xp: { min: 20, max: 40 }
+    icon:
+      material: COD
+      custom-model-data: 0
+
+  plentiful_haul:
+    display-name: "<yellow>Plentiful Haul"
+    description:
+      - "<gray>Catch <white>%amount%</gray> fish of any kind."
+    target:
+      type: ANY
+      value: ""
+    amount: { min: 15, max: 25 }
+    rewards:
+      money: { min: 260, max: 450 }
+      xp: { min: 25, max: 50 }
+    icon:
+      material: SALMON
+      custom-model-data: 0
+
+  freshwater_specialist:
+    display-name: "<yellow>Freshwater Specialist"
+    description:
+      - "<gray>Catch <white>%amount%</gray> common fish — small bounty."
+    target:
+      type: ANY_RARITY
+      value: common
+    amount: { min: 12, max: 20 }
+    rewards:
+      money: { min: 230, max: 360 }
+      xp: { min: 22, max: 45 }
+    icon:
+      material: TROPICAL_FISH
+      custom-model-data: 0
+
+  # ════════════ Uncommon-tier contracts ════════════
+  # Target income: $520-$840 per contract
+  uncommon_hunter:
+    display-name: "<gold>Uncommon Hunter"
+    description:
+      - "<gray>Catch <white>%amount%</gray> uncommon-rarity fish."
+    target:
+      type: ANY_RARITY
+      value: uncommon
+    amount: { min: 5, max: 10 }
+    rewards:
+      money: { min: 520, max: 840 }
+      xp: { min: 50, max: 90 }
+    icon:
+      material: PUFFERFISH
+      custom-model-data: 0
+
+  # ════════════ Rare-tier contracts ════════════
+  # Target income: $1150-$1700 per contract + Diamond bonus
+  rare_specialist:
+    display-name: "<aqua>Rare Specialist"
+    description:
+      - "<gray>Catch <white>%amount%</gray> rare-rarity fish."
+    target:
+      type: ANY_RARITY
+      value: rare
+    amount: { min: 3, max: 6 }
+    rewards:
+      money: { min: 1150, max: 1700 }
+      xp: { min: 100, max: 160 }
+      items:
+        - { material: DIAMOND, amount: 1 }
+    icon:
+      material: TROPICAL_FISH
+      custom-model-data: 0
+
+  # ════════════ Epic-tier contracts ════════════
+  # Target income: $3200-$4500 per contract + Enchanted Book bonus
+  epic_pursuit:
+    display-name: "<light_purple>Epic Pursuit"
+    description:
+      - "<gray>Catch <white>%amount%</gray> epic-rarity fish."
+    target:
+      type: ANY_RARITY
+      value: epic
+    amount: { min: 1, max: 3 }
+    rewards:
+      money: { min: 3200, max: 4500 }
+      xp: { min: 300, max: 450 }
+      items:
+        - { material: ENCHANTED_BOOK, amount: 1 }
+    icon:
+      material: NAUTILUS_SHELL
+      custom-model-data: 0
+
+  # ════════════ Legendary-tier contracts ════════════
+  # Target income: $10000-$15000 per contract + Nether Star bonus
+  legendary_quest:
+    display-name: "<gold><bold>Legendary Quest</bold></gold>"
+    description:
+      - "<gold>Catch <white>%amount%</white> legendary-rarity fish.</gold>"
+    target:
+      type: ANY_RARITY
+      value: legendary
+    amount: { min: 1, max: 2 }
+    rewards:
+      money: { min: 10000, max: 15000 }
+      xp: { min: 1000, max: 1500 }
+      items:
+        - { material: NETHER_STAR, amount: 1 }
+    icon:
+      material: HEART_OF_THE_SEA
+      custom-model-data: 0
+
+  # ════════════ Weight milestone contracts ════════════
+  # Counts fish whose rolled weight ≥ threshold. Requires the
+  # FishRewardHelper weight-passing patch to function.
+  heavy_hauler:
+    display-name: "<aqua>Heavy Hauler"
+    description:
+      - "<gray>Catch <white>%amount%</gray> fish weighing"
+      - "<gray>at least <white>%value% kg</gray>."
+    target:
+      type: WEIGHT_MILESTONE
+      value: 5.0
+    amount: { min: 3, max: 6 }
+    rewards:
+      money: { min: 900, max: 1400 }
+      xp: { min: 90, max: 150 }
+    icon:
+      material: IRON_BARS
+      custom-model-data: 0
+
+  trophy_hunter:
+    display-name: "<gold><bold>Trophy Hunter</bold></gold>"
+    description:
+      - "<gold>Catch <white>%amount%</white> fish weighing"
+      - "<gold>at least <white>%value% kg</white>."
+    target:
+      type: WEIGHT_MILESTONE
+      value: 10.0
+    amount: { min: 1, max: 3 }
+    rewards:
+      money: { min: 2600, max: 3800 }
+      xp: { min: 250, max: 380 }
+      items:
+        - { material: DIAMOND, amount: 1 }
+    icon:
+      material: GOLDEN_HOE
+      custom-model-data: 0
+
+  # ════════════ Specific-fish contract ════════════
+  # v1.8.0 FIX: target was "cod" (doesn't exist in fish.yml) → changed to "sea_bass"
+  cod_craze:
+    display-name: "<yellow>Sea Bass Craze"
+    description:
+      - "<gray>Catch <white>%amount%</gray> Sea Bass."
+    target:
+      type: FISH_ID
+      value: sea_bass
+    amount: { min: 10, max: 18 }
+    rewards:
+      money: { min: 280, max: 480 }
+      xp: { min: 30, max: 55 }
+    icon:
+      material: COD
+      custom-model-data: 0

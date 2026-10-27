@@ -77,7 +77,11 @@ public class CacheManager implements Listener {
     }
 
     private void loadOnlinePlayers() {
-        if (!plugin.isXpSystemEnabled())
+        // v1.6.1 (bug #5 fix): load players when EITHER xp-system OR discovery is enabled.
+        // Previously this was guarded by isXpSystemEnabled() only, so discovery-only mode
+        // (xp=false + discovery=true) had a DB but no cached data — getData() always
+        // returned null and discovery/contracts/economy/sell silently did nothing.
+        if (!plugin.isXpSystemEnabled() && !plugin.isDiscoveryEnabled())
             return;
         for (Player player : Bukkit.getOnlinePlayers()) {
             initiateLoad(player.getUniqueId());
@@ -135,14 +139,16 @@ public class CacheManager implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (!plugin.isXpSystemEnabled())
+        // v1.6.1 (bug #5 fix): same as loadOnlinePlayers — accept either flag.
+        if (!plugin.isXpSystemEnabled() && !plugin.isDiscoveryEnabled())
             return;
         initiateLoad(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        if (!plugin.isXpSystemEnabled())
+        // v1.6.1 (bug #5 fix): same guard so quit-time save runs in discovery-only mode too.
+        if (!plugin.isXpSystemEnabled() && !plugin.isDiscoveryEnabled())
             return;
 
         UUID uuid = event.getPlayer().getUniqueId();

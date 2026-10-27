@@ -1,6 +1,7 @@
 package com.phoenix.fish.listener;
 
 import com.phoenix.fish.PhoenixFish;
+import com.phoenix.fish.data.CacheManager;
 import com.phoenix.fish.data.FishingData;
 import com.phoenix.fish.manager.BaitManager;
 import com.phoenix.fish.manager.ItemFixer;
@@ -162,6 +163,49 @@ public class FishingListener implements Listener {
         if (fish == null)
             return;
 
+        // v1.6.0 — Day/Night + Depth filter
+        // Eğer features.day-night-fish veya features.depth-fish açık ise,
+        // balığın time/y-range şartlarını kontrol et. Uymuyorsa tekrar roll yap (max 3 deneme).
+        if (plugin.getConfig().getBoolean("features.day-night-fish.enabled", false)
+                || plugin.getConfig().getBoolean("features.depth-fish.enabled", false)) {
+            int attempts = 0;
+            while (!plugin.getFishManager().meetsConditions(fish, player) && attempts < 3) {
+                fish = plugin.getFishManager().rollRandomFish(luckMultiplier, bait, playerBiome);
+                if (fish == null) return;
+                attempts++;
+            }
+            // 3 deneme sonunda hâlâ uymuyorsa, balık yine de verilir (broken UX olmasın)
+        }
+
+        // v1.6.0 — Lucky Cast skill: bir üst rarelıkta balık şansı
+        if (plugin.getConfig().getBoolean("features.skill-lucky-cast.enabled", false)) {
+            try {
+                com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                if (data != null && data.getLuckyCast() > 0 && fish.rarity() < 5) {
+                    double chance = data.getLuckyCast() * plugin.getConfig().getDouble(
+                            "features.skill-lucky-cast.rarity-upgrade-chance-per-level", 0.02);
+                    if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() < chance) {
+                        // Bir üst rarelıkta balık bul
+                        int targetRarity = fish.rarity() + 1;
+                        for (com.phoenix.fish.model.CustomFish candidate :
+                                plugin.getFishManager().getAllFish()) {
+                            if (candidate.rarity() == targetRarity
+                                    && plugin.getFishManager().meetsConditions(candidate, player)) {
+                                fish = candidate;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable ignored) { }
+        }
+
+        // v1.6.0 — Big Catch skill: ağırlık çarpanı
+        // Bu FishRewardHelper.rollWeight'ta uygulanır ama orada data'ya erişim yok.
+        // Burada weight'i önceden etkileyemiyoruz çünkü rollWeight FishRewardHelper'da çağrılıyor.
+        // Çözüm: FishRewardHelper.awardCatch'ta data'dan bigCatch level'ını oku ve weight'e çarpan uygula.
+        // (Bu zaten FishRewardHelper'a eklendi ama rollWeight'tan sonra — şimdilik OK.)
+
         event.setCancelled(true);
 
         consumeBait(player, offHandItem, bait);
@@ -226,7 +270,13 @@ public class FishingListener implements Listener {
         if (plugin.isXpSystemEnabled()) {
             FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
             if (data != null && data.getLuckyBait() > 0) {
-                double chance = data.getLuckyBait() * 0.20;
+                // v1.8.0 — read per-level chance from config (was hardcoded 0.20).
+                // Default 0.10 keeps max-level (8) bait preservation at 80%.
+                double perLevel = plugin.getConfig().getDouble(
+                        "xp-system.skill-per-level.lucky-bait-chance-per-level", 0.10);
+                double chance = data.getLuckyBait() * perLevel;
+                // Hard cap at 90% — always a small chance to consume bait.
+                chance = Math.min(0.90, chance);
                 if (ThreadLocalRandom.current().nextDouble() < chance) {
                     player.sendActionBar(plugin.getMessageManager().getMessage("skills_bait_saved", false));
                     return;
@@ -306,7 +356,10 @@ public class FishingListener implements Listener {
                 ConfigurationSection rodSec = itemFixer.findRodByItem(item);
                 if (rodSec != null) {
                     int requiredLevel = rodSec.getInt("fishing-level-requirement", 1);
-                    FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                    // v1.6.1 (bug #4 fix): CacheManager can be null when both xp-system.enabled
+                    // and settings.discovery-enabled are false (or DB init failed). Guard to avoid NPE.
+                    CacheManager cache = plugin.getCacheManager();
+                    FishingData data = (cache != null) ? cache.getData(player.getUniqueId()) : null;
                     if (data == null || data.getCurrentLevel() < requiredLevel) {
                         event.setCancelled(true);
                         Map<String, String> rodPh = Map.of(

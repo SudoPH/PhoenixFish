@@ -105,6 +105,37 @@ public class SkillManager {
         inv.setItem(16, createItem(Material.GOLDEN_CARROT,
                 plugin.getMessageManager().getPlainMessage("skills_name_bait"), baitLore, "upgrade", "bait"));
 
+        // v1.6.0 — Yeni skill butonları (sadece ilgili feature açıkken göster)
+        if (plugin.getConfig().getBoolean("features.skill-big-catch.enabled", false)) {
+            List<String> bigLore = new ArrayList<>();
+            bigLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
+                    .replace("%level%", String.valueOf(data.getBigCatch()))
+                    .replace("%max%", String.valueOf(maxLevel)));
+            bigLore.add("<gray>+5% balık ağırlığı per level (daha ağır = daha pahalı)");
+            inv.setItem(19, createItem(Material.ANVIL,
+                    "<#DAA520>Big Catch", bigLore, "upgrade", "big"));
+        }
+
+        if (plugin.getConfig().getBoolean("features.skill-lucky-cast.enabled", false)) {
+            List<String> luckyLore = new ArrayList<>();
+            luckyLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
+                    .replace("%level%", String.valueOf(data.getLuckyCast()))
+                    .replace("%max%", String.valueOf(maxLevel)));
+            luckyLore.add("<gray>+2% bir üst rarelıkta balık şansı per level");
+            inv.setItem(21, createItem(Material.GHAST_TEAR,
+                    "<#55FFFF>Lucky Cast", luckyLore, "upgrade", "lucky"));
+        }
+
+        if (plugin.getConfig().getBoolean("features.skill-stamina.enabled", false)) {
+            List<String> staminaLore = new ArrayList<>();
+            staminaLore.add(plugin.getMessageManager().getPlainMessage("skills_level")
+                    .replace("%level%", String.valueOf(data.getStamina()))
+                    .replace("%max%", String.valueOf(maxLevel)));
+            staminaLore.add("<gray>+10% tension resistance per level (hat daha geç kopar)");
+            inv.setItem(23, createItem(Material.GOLDEN_APPLE,
+                    "<#FF6347>Stamina", staminaLore, "upgrade", "stamina"));
+        }
+
         player.openInventory(inv);
     }
 
@@ -121,7 +152,9 @@ public class SkillManager {
         }
 
         boolean validSkill = "fast".equals(skill) || "hunter".equals(skill)
-                || "double".equals(skill) || "bait".equals(skill);
+                || "double".equals(skill) || "bait".equals(skill)
+                // v1.6.0 — Yeni skill'ler
+                || "big".equals(skill) || "lucky".equals(skill) || "stamina".equals(skill);
         if (!validSkill) {
             plugin.getLogger().warning("Unknown skill upgrade requested: " + skill + " by " + player.getName());
             player.sendMessage(plugin.getMessageManager().getMessage("skills_invalid", true));

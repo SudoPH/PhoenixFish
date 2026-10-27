@@ -1,255 +1,411 @@
 # ============================================================
-#  PhoenixFish — Main Configuration
+#  PhoenixFish - Main Configuration
 # ============================================================
 #  Albion-style custom fishing system with optional XP,
 #  discovery, minigame, economy, tournaments and records.
 #
-#  ── MODULAR DESIGN ──────────────────────────────────────────
-#  Every feature below can be ENABLED or DISABLED independently.
-#  Disabled features consume ZERO CPU/memory — they're not loaded.
-#  Mix and match to fit your server's playstyle:
-#
-#    ✅ Sandbox server        → minigame: off, xp: off, economy: off
-#    ✅ Progression server     → all features: on
-#    ✅ Tournament-only server → tournament: on, everything else: off
-#    ✅ Vanilla+ server        → fishing-mode.default-mode: vanilla
-#
-#  After editing this file, restart the server OR run:
-#    /pf reload   — re-reads config, language files, fish/rods/baits/recipes
-#
-#  Supported languages: any code is accepted (en, tr, zh_cn, de, fr, ...).
-#  The plugin auto-extracts bundled language files from the jar if they
-#  are missing from the data folder. Missing message keys fall back to
-#  English automatically (setDefaults mechanism).
+#  * Language files (messages_tr.yml / messages_en.yml) are
+#    generated automatically on first startup.
+#  * After editing this file, restart the server (or use your
+#    reload method) for changes to take effect.
+#  * Supported languages: "tr" and "en"
 # ============================================================
 
 settings:
-  # ── GLOBAL LANGUAGE ─────────────────────────────────────
-  # Affects ALL player-facing messages, rod names, bait names, recipe names.
-  # Any language code is accepted. The plugin looks for:
-  #   messages_<lang>.yml  +  rods_<lang>.yml  +  baits_<lang>.yml
-  #   +  custom_recipes_<lang>.yml  +  fish_<lang>.yml
-  # If a file is missing, it falls back to the English version.
+  # Plugin language. Affects ALL player-facing messages.
+  # Valid values: "en" (English) or "tr" (Turkish)
   language: "en"
 
-  # ── FEATURE: Minigame ──────────────────────────────────
-  # The interactive fishing minigame (moving bar + tension line).
-  #   true  = players play the catching minigame
-  #   false = catches resolve instantly, no minigame UI
+  # Enable the interactive fishing minigame (moving bar + tension).
+  # true  = players play the catching minigame (plugin fishing mode)
+  # false = catches resolve instantly, no minigame UI
   minigame-enabled: true
 
-  # ── FEATURE: Discovery ─────────────────────────────────
-  # First-time catches are added to the player's catalog.
-  # Requires the XP/database system to be enabled.
-  #   true  = undiscovered fish show as "???" in the catalog until caught
-  #   false = everything is shown as discovered from the start
+  # Enable the fish discovery system (first-time catches are added
+  # to the player's catalog). Requires the XP/database system.
+  # true  = undiscovered fish show as "???" in the catalog until caught
+  # false = everything is shown as discovered from the start
   discovery-enabled: true
 
-  # ── FEATURE: Auto-fix Legacy Items ─────────────────────
-  # Automatically fixes outdated rod & bait items when a player
-  # opens a chest or barrel. Keep this ON after plugin updates
-  # that change item formats.
+  # Automatically fix legacy/outdated rod & bait items in a player's
+  # inventory when they open a chest or barrel.
+  # Keep this true after plugin updates that change item formats.
   fix-items-on-chest-open: true
 
 # ============================================================
-#  Weather & Environment Bonuses
+#  Weather & Environment System
 # ============================================================
-#  These values add BONUS luck on top of the base luck while fishing.
-#  Luck increases the chance of rarer fish.
+#  These values add BONUS luck on top of the base luck while
+#  fishing. Luck increases the chance of rarer fish.
 #  0.2 = +20%, 0.5 = +50%, 0 = disabled
-#  Set both to 0 to disable weather-based luck entirely.
 weather:
-  rain-luck-bonus: 0.2
-  storm-luck-bonus: 0.5
+  # Extra luck while it is raining.
+  rain-luck-bonus: 0.15
+
+  # Extra luck while there is a thunderstorm.
+  # Storm includes the rain bonus effect and greatly increases
+  # the chance of rare/legendary fish.
+  storm-luck-bonus: 0.4
 
 # ============================================================
 #  Sound System
 # ============================================================
 #  Sounds played for various plugin events.
-#  Use valid Bukkit Sound enum names (e.g. ENTITY_PLAYER_LEVELUP).
+#  Use valid Bukkit sound enum names (e.g. ENTITY_PLAYER_LEVELUP,
+#  UI_BUTTON_CLICK, BLOCK_NOTE_BLOCK_PLING).
 #  If a name is invalid, the default sound is used and a warning
 #  is printed in the console.
 sounds:
+  # Sound played when a bait is consumed
   bait_consume: "ENTITY_ITEM_PICKUP"
+
+  # Sound played when a player discovers a new fish species
   discover: "UI_TOAST_CHALLENGE_COMPLETE"
+
+  # Sound played when items are fixed (/phoenixfish fix)
   fix: "BLOCK_ANVIL_USE"
+
+  # Sound played when fish are sold successfully
   sell_success: "ENTITY_PLAYER_LEVELUP"
+
+  # Sound played when a player switches fishing mode
+  # (/phoenixfish toggle)
   mode_toggle: "UI_BUTTON_CLICK"
 
 # ============================================================
-#  FEATURE: Minigame Difficulty
+#  Minigame Settings
 # ============================================================
-#  Controls the difficulty and mechanics of the fishing minigame.
-#  Updates every 2 ticks (10 times per second).
+#  These values control the difficulty and mechanics of the
+#  fishing minigame.
+#  Note: The minigame updates every 2 ticks (10 times per second).
 #
-#  ── DIFFICULTY GUIDE ────────────────────────────────────
+#  --- DIFFICULTY GUIDE ---
 #  EASY:   rod-width: 3, progress-rate: 2.5, tension-increase-rate: 1.0
 #  MEDIUM: rod-width: 2, progress-rate: 1.5, tension-increase-rate: 1.5
 #  HARD:   rod-width: 1, progress-rate: 1.0, tension-increase-rate: 2.0
 minigame:
+  # The total width of the minigame area.
+  # (Lower = Easier to track the fish)
   area-width: 30
+
+  # The half-width of the player's catching bar.
+  # (3 means 7 characters wide total. Higher = Easier)
   rod-width: 2
+
+  # Chance for the fish to change direction (0.0 to 1.0).
+  # (Lower = Easier)
   fish-move-chance: 0.6
+
+  # How far the fish moves when it changes direction.
+  # (Lower = Easier to follow)
   fish-move-distance: 2
+
+  # How much progress is gained while the fish is inside the bar.
+  # (Higher = Easier. 10 seconds to win at 2.0)
   progress-rate: 2.0
+
+  # How much tension increases while the fish is OUTSIDE the bar.
+  # (Lower = Easier, line snaps slower)
   tension-increase-rate: 1.2
+
+  # How much tension decreases while the fish is INSIDE the bar.
+  # (Higher = Easier, recovers faster)
   tension-decrease-rate: 3.0
 
-  # ── v1.3.5: Per-Rarity Difficulty Multipliers ──────────
-  # Fish rarity: 1=Common, 2=Uncommon, 3=Rare, 4=Epic, 5=Legendary.
-  # The multiplier scales the fish's fightStrength value.
-  # Default 1.0 = old behavior (rarity has no effect on minigame).
-  # Recommended: Epic +60%, Legendary +100% harder.
+  # ─── v1.3.5 — Nadirlik bazlı zorluk çarpanı ───
+  # Balık nadirliği 1 (common) → 5 (legendary).
+  # Çarpan, balığın fightStrength değerini scales.
+  # Default 1.0 = eski davranış (nadirlik etkisi yok).
+  # Epik +60%, Efsanevi +100% zorluk önerilir:
   rarity-difficulty-multipliers:
-    1: 1.0
-    2: 1.0
-    3: 1.2
-    4: 1.6
-    5: 2.0
+    1: 1.0    # Common — baseline difficulty
+    2: 1.1    # Uncommon — +10% fight strength
+    3: 1.25   # Rare — +25% fight strength
+    4: 1.55   # Epic — +55% fight strength
+    5: 1.85   # Legendary — +85% fight strength
 
-  # ── v1.3.5: Per-Rarity Tension Cap ─────────────────────
-  # The line snaps when tension reaches this value.
-  # Default 100.0 = old behavior (snaps at 100%).
-  # Lower cap = less forgiving — epic/legendary fish forgive less.
+  # ─── v1.3.5 — Nadirlik başına tension cap ───
+  # Balığın tension bar'ı bu değere ulaşırsa hat kopar (oyuncu kaybeder).
+  # Default 100.0 = eski davranış.
+  # Epik ve efsanevi balıklarda daha düşük cap → daha az tolere ederler:
   rarity-tension-cap:
-    1: 100.0
-    2: 100.0
-    3: 100.0
-    4: 90.0
-    5: 80.0
+    1: 100.0  # Common — full bar tolerance
+    2: 100.0  # Uncommon — full bar tolerance
+    3: 95.0   # Rare — 5% less tolerance
+    4: 95.0   # Epic — 5% less tolerance
+    5: 88.0   # Legendary — 12% less tolerance
 
 # ============================================================
-#  FEATURE: XP & Leveling System (MODULAR MASTER SWITCH)
+#  XP & Leveling System
 # ============================================================
-#  Master switch for the entire XP subsystem.
 #  If disabled, the plugin runs in fishing-only mode:
-#    ❌ no levels  ❌ no skills  ❌ no database  ❌ no discovery progress
-#  If enabled, all sub-features below become active.
+#  no levels, no skills, no database, no discovery progress.
 xp-system:
+  # Master switch for levels, skills and the database.
   enabled: true
 
   database:
-    type: sqlite    # "sqlite" (single file, no setup) or "mysql"
+    # Database type: "sqlite" (single file, no setup) or "mysql"
+    type: sqlite
+
+    # MySQL credentials (ignored if type is sqlite).
+    # WARNING: Do not use default credentials on production servers!
     host: localhost
     port: 3306
     name: phoenix_db
     username: root
     password: ""
 
-    # ── SSL Settings (MySQL only) ─────────────────────────
-    # 1. PRODUCTION: use-ssl=true, verify-server-certificate=true
-    # 2. SELF-SIGNED DEV: use-ssl=true, verify-server-certificate=false
-    # 3. PLAINTEXT (localhost only!): use-ssl=false
+    # ============================================================
+    #  SSL ayarları
+    # ============================================================
+    #  Bu flag'ler JDBC URL'yi etkiler. Üç farklı mod mümkün:
+    #
+    #  1. PRODUCTION (use-ssl=true, verify-server-certificate=true)
+    #     SSL zorunlu, sertifika doğrulaması yapılır. En güvenli.
+    #     Üretim sunucuları için bu modu kullanın.
+    #
+    #  2. SELF-SIGNED DEV (use-ssl=true, verify-server-certificate=false)
+    #     SSL zorunlu ama sertifika doğrulanmaz. Self-signed cert'li
+    #     dev/test DB'leri için. Üretimde KULLANMAYIN — MITM riski.
+    #
+    #  3. PLAINTEXT (use-ssl=false)
+    #     SSL yok, trafik plaintext olarak gider. SADECE localhost
+    #     dev için. Üretimde ASLA kullanmayın — SQL trafiği dinlenebilir.
+    #
+    #  NOT: allowPublicKeyRetrieval MySQL 8+ caching_sha2_password
+    #  için gerekli. Mode 2 ve 3'te otomatik eklenir.
+    # ============================================================
     use-ssl: true
     verify-server-certificate: true
 
-  # Adds a luck bonus per fishing level.
-  # 0.02 = +2% per level. Level 50 → +100% extra luck.
-  # WARNING: High values break the late-game economy (rare fish too common).
-  level-luck-bonus: 0.02
+  # Adds a 2% (0.02) luck bonus per fishing level.
+  # Example: A level 50 player gets +100% (x1.0 extra) luck.
+  # Note: High values can break the late-game economy by making
+  # rare fish too common.
+  level-luck-bonus: 0.015
 
-  # ── FEATURE: Crafting XP Formula (Exponential) ─────────
-  # XP required to advance from level N to N+1:
-  #   requiredXp = base × level^exponent × tierMultiplier
-  # Creates a smooth curve — early levels fast, late levels slow.
+  # ============================================================
+  #  Crafting XP Formula (Faz 0.9.0 — Exponential)
+  # ============================================================
+  #  The XP required to advance from level N to N+1 is:
   #
-  # Casual server:    base: 30, exponent: 1.3
-  # Balanced (default): base: 50, exponent: 1.5
-  # Hardcore server:   base: 80, exponent: 1.8
+  #    requiredXp = base × level^exponent × tierMultiplier
+  #
+  #  This creates a SMOOTH CURVE — early levels are fast, later
+  #  levels take exponentially longer. This prevents players from
+  #  reaching max level in a few days.
+  #
+  #  --- HOW TO TUNE ---
+  #  Faster leveling (casual server):
+  #    base: 30, exponent: 1.3
+  #  Default (balanced — Option A):
+  #    base: 60, exponent: 1.5
+  #  Slower leveling (hardcore server):
+  #    base: 80, exponent: 1.8
+  #
+  #  --- ESTIMATED TIME TO MAX (Option A, 2hr/day) ---
+  #  Level 1→10:  ~1-2 days
+  #  Level 10→30: ~1-2 weeks
+  #  Level 30→60: ~1-2 months
+  #  Level 60→80: ~2-3 months
+  #  Level 80→100: ~3-6 months
+  #
+  #  --- XP TABLE (Option A) ---
+  #  Level 1→2:    50 × 1^1.5 × 1.0  =     50 XP
+  #  Level 5→6:    50 × 5^1.5 × 1.0  =    559 XP
+  #  Level 10→11:  50 × 10^1.5 × 1.5 =  2,372 XP
+  #  Level 20→21:  50 × 20^1.5 × 1.5 =  6,708 XP
+  #  Level 30→31:  50 × 30^1.5 × 2.5 = 20,540 XP
+  #  Level 50→51:  50 × 50^1.5 × 2.5 = 44,195 XP
+  #  Level 80→81:  50 × 80^1.5 × 6.0 = 214,662 XP
+  #  Level 99→100: 50 × 99^1.5 × 6.0 = 294,034 XP
+  # ============================================================
   crafting-xp:
+    # Base value of the XP formula. Higher = slower leveling.
+    # Default: 50
     base: 50
-    exponent: 1.5
-    global-multiplier: 1.0    # 2.0 = double XP weekend, 0.5 = half XP
 
-    # Multiplies required XP based on the player's level range.
-    # Makes early game fast and late game slow.
-    # To disable (flat formula): 1-100: 1.0
+    # Exponent of the XP formula. Higher = steeper curve.
+    # 1.0 = linear (old behavior — level × base)
+    # 1.5 = exponential (default — recommended)
+    # 2.0 = very steep (hardcore)
+    # Default: 1.5
+    exponent: 1.55
+
+    # Global XP multiplier. Applies to ALL crafting XP gains.
+    # 1.0 = normal, 2.0 = double XP weekend, 0.5 = half XP
+    # Default: 1.0
+    global-multiplier: 1.0
+
+    # ============================================================
+    #  Tier Multipliers
+    # ============================================================
+    #  Multiplies the required XP based on the player's current
+    #  level range. This makes early game fast and late game slow.
+    #
+    #  Format: "minLevel-maxLevel: multiplier"
+    #  The plugin finds the first matching range.
+    #
+    #  To DISABLE tier multipliers (use flat formula):
+    #    tier-multipliers:
+    #      1-100: 1.0
+    # ============================================================
     tier-multipliers:
-      1-10: 1.0     # Training — fast start
-      11-30: 1.5    # Early game — steady pace
-      31-60: 2.5    # Mid game — grind begins
-      61-80: 4.0    # Late game — hard
-      81-100: 6.0   # Endgame — takes months
+      1-10: 1.0    # Training — fast start, hook the player
+      11-30: 1.5   # Early game — steady pace
+      31-60: 2.5   # Mid game — grind begins
+      61-80: 4.0   # Late game — hard
+      81-100: 6.0  # Endgame — very hard, takes months
 
-  # ── FEATURE: Tier System (Albion-style) ────────────────
-  # When enabled, crafting level determines which tier of equipment
-  # you can craft. Higher tiers = better stats.
-  #   false = all items have base stats, no tier colors
-  #   true  = items are tiered by crafting level (see tiers below)
-  tier-system:
-    enabled: true
-    tiers:
-      1: { min-level: 1,   max-level: 9,   color: "<white>",                name: "Common" }
-      2: { min-level: 10,  max-level: 24,  color: "<green>",                 name: "Uncommon" }
-      3: { min-level: 25,  max-level: 39,  color: "<aqua>",                  name: "Rare" }
-      4: { min-level: 40,  max-level: 54,  color: "<light_purple>",         name: "Epic" }
-      5: { min-level: 55,  max-level: 69,  color: "<gold>",                  name: "Superior" }
-      6: { min-level: 70,  max-level: 84,  color: "<#FF8C00>",               name: "Mystic" }
-      7: { min-level: 85,  max-level: 94,  color: "<red>",                   name: "Legendary" }
-      8: { min-level: 95,  max-level: 100, color: "<gradient:#9D00FF:#00CED1>", name: "Divine" }
 
-  # Maximum level for each fishing skill (1-10, clamped by the plugin).
-  # Skills: Fast Catcher, Master Hunter, Double Catch, Lucky Bait.
-  skill-max-level: 5
+  # ============================================================
+  #  Fishing XP Formula (v1.8.0 — NEW, config-driven)
+  # ============================================================
+  #  XP required to advance fishing level N → N+1:
+  #    requiredXp = base × level^exponent
+  #  Defaults (base=100, exp=1.0) preserve the old hardcoded behavior.
+  #  Recommended balanced values: base=80, exponent=1.4
+  #    Level 1→2:    80 XP
+  #    Level 10→11:  2,009 XP
+  #    Level 50→51:  26,727 XP
+  #    Level 99→100: 75,096 XP
+  fishing-xp:
+    base: 80
+    exponent: 1.4
 
-  # ── v1.3.5: Config-Driven Skill Values ─────────────────
-  # These values were previously hardcoded in source. Now they're
-  # config-driven — changes take effect on /pf reload.
-  # Defaults match the old hardcoded values (backward compatible).
-  skill-per-level:
-    fast-catcher-progress-bonus: 0.5    # added to minigame progress-rate per level
-    master-hunter-luck-bonus: 0.02      # added to luck multiplier per level
-    double-catch-chance-per-level: 0.10  # chance to catch 2 fish per level
-    lucky-bait-chance-per-level: 0.20   # chance to not consume bait per level
-
-  # ── v1.5.0 (F-4): Skill Re-Spec ────────────────────────
-  # /pf respec           = reset YOUR skills, refund all skill points
-  # /pf respec <player>  = (Admin) reset another player's skills
+  # ============================================================
+  #  Tier System (Faz 0.9.0 — Albion-style)
+  # ============================================================
+  #  When enabled, crafting level determines which tier of
+  #  equipment you can craft. Higher tiers = better stats
+  #  (luck multiplier for rods, chance modifier for baits).
   #
-  # Cost charged from the player's PhoenixFish balance:
-  #   0.0 = free (default)
-  #   100.0 = costs $100 per re-spec
-  # Admins always re-spec for free.
+  #  Tier colors are used in item lore and GUI:
+  #    Tier 1: White    (Level 1-9)    — Luck 1.0-1.15
+  #    Tier 2: Green    (Level 10-24)  — Luck 1.2-1.45
+  #    Tier 3: Blue     (Level 25-39)  — Luck 1.45-1.6
+  #    Tier 4: Purple   (Level 40-54)  — Luck 1.6-1.8
+  #    Tier 5: Gold     (Level 55-69)  — Luck 1.8-1.95
+  #    Tier 6: Orange   (Level 70-84)  — Luck 1.95-2.15
+  #    Tier 7: Red      (Level 85-94)  — Luck 2.15-2.5
+  #    Tier 8: Rainbow  (Level 95-100) — Luck 2.5-2.7+
+  #
+  #  To DISABLE the tier system (all items are same quality):
+  #    tier-system.enabled: false
+  #  This makes all recipes available regardless of crafting level,
+  #  and all items have their base stats (no tier bonuses).
+  # ============================================================
+  tier-system:
+    # Master switch for the tier system.
+    # false = all items have base stats, no tier colors
+    # true  = items are tiered by crafting level
+    enabled: true
+
+    # Tier definitions (level ranges + colors)
+    # Color values are MiniMessage tags — can be customized.
+    tiers:
+      1:
+        min-level: 1
+        max-level: 9
+        color: "<white>"
+        name: "Common"
+      2:
+        min-level: 10
+        max-level: 24
+        color: "<green>"
+        name: "Uncommon"
+      3:
+        min-level: 25
+        max-level: 39
+        color: "<aqua>"
+        name: "Rare"
+      4:
+        min-level: 40
+        max-level: 54
+        color: "<light_purple>"
+        name: "Epic"
+      5:
+        min-level: 55
+        max-level: 69
+        color: "<gold>"
+        name: "Superior"
+      6:
+        min-level: 70
+        max-level: 84
+        color: "<#FF8C00>"
+        name: "Mystic"
+      7:
+        min-level: 85
+        max-level: 94
+        color: "<red>"
+        name: "Legendary"
+      8:
+        min-level: 95
+        max-level: 100
+        color: "<gradient:#9D00FF:#00CED1>"
+        name: "Divine"
+
+  # Maximum level for each fishing skill (1-10, clamped).
+  # Higher values let players spec deeper into one skill.
+  # Skills: Fast Catcher, Master Hunter, Double Catch, Lucky Bait.
+  skill-max-level: 8
+
+  # ─── v1.3.5 — Skill başına config-driven değerler ───
+  # Bu değerler eskiden hardcoded idi (MinigameTask.java, FishingListener.java,
+  # FishRewardHelper.java). Artık config'den okunur — reload'da anında etkili.
+  # Default değerler eski hardcoded değerlerle birebir aynıdır (geriye dönük uyumlu).
+  skill-per-level:
+    # Fast Catcher — her level başına progressRate'e eklenir (MinigameTask).
+    fast-catcher-progress-bonus: 0.4
+    # Master Hunter — her level başına luckMultiplier'a eklenir (FishingListener).
+    master-hunter-luck-bonus: 0.015
+    # Double Catch — her level başına ikinci balık şansı (FishRewardHelper).
+    double-catch-chance-per-level: 0.06
+    # Lucky Bait — her level başına yem tüketmeme şansı (FishingListener).
+    lucky-bait-chance-per-level: 0.10
+
+  # ─── v1.5.0 (F-4) — Skill re-spec ───
+  # /pf respec komutu ile tüm skill'leri sıfırlayıp puanları geri alabilirsin.
+  # 0 = ücretsiz (default). Pozitif değer = PhoenixFish bakiyesinden düşülür.
+  # Adminler (/pf respec <player>) her zaman ücretsiz.
   respec-cost: 0.0
 
 # ============================================================
-#  FEATURE: Economy System (Internal)
+#  Economy System (Internal)
 # ============================================================
 #  Sells custom fish for the plugin's internal balance.
-#  Final price = fish_price (from fish.yml) × fish_weight
-#
-#  This is NOT Vault — it uses PhoenixFish's own balance field
-#  stored in the player_professions database table.
-#
-#   false = fish cannot be sold, /pf sell is disabled, no balance
-#   true  = players can sell fish via /pf sell <all|hand|menu>
+#  Final price = fish_price (from fish.yml) * fish_weight
 economy:
+  # If false, fish cannot be sold and /phoenixfish sell is disabled.
   enabled: true
 
 # ============================================================
-#  FEATURE: Tournament System
+#  Tournament System
 # ============================================================
 #  Timed fishing competitions with rewards for the top players.
-#  Scoring: rarity-weighted (Common=1, Uncommon=2, Rare=5, Epic=12, Legendary=25)
-#
-#   false = admins cannot start tournaments via commands
-#   true  = tournaments can be started manually AND scheduled (see below)
+#  If disabled, admins cannot start tournaments via commands.
 tournament:
   enabled: true
+  # v1.8.0 — config-driven rarity points (was hardcoded in FishRewardHelper)
+  points-per-rarity:
+    1: 1     # Common — baseline
+    2: 2     # Uncommon — 2x common
+    3: 5     # Rare — 5x common
+    4: 12    # Epic — 12x common
+    5: 25    # Legendary — 25x common
 
-  # ── v1.5.0 (F-1): Scheduled Recurring Tournaments ──────
-  # Uncomment (remove the #) to enable automatic recurring tournaments.
-  # Multiple schedules can coexist — e.g. daily + weekly both active.
-  # The plugin calculates the delay until the next occurrence on startup.
+  # ─── v1.5.0 (F-1) — Otomatik tekrarlanan turnuva takvimi ───
+  # Yorum satırına alınmış örnek. Aktif etmek için satır başlarındaki "#" işaretini kaldırın.
+  # Çakışan schedule'lar güvenlidir — aynı anda birden fazla zamanlanmış turnuva olabilir.
   schedule:
-    # Daily tournament — runs every day at the specified time.
+    # Her gün 20:00'da başlayan 30 dakikalık turnuva
     # daily:
-    #   time: "20:00"           # 24-hour format (HH:MM)
+    #   time: "20:00"
     #   duration-minutes: 30
-
-    # Weekly tournament — runs on the specified day of the week.
+    # Her hafta Cumartesi 18:00'da başlayan 60 dakikalık turnuva
     # weekly:
-    #   day: SATURDAY            # MONDAY, TUESDAY, ... SUNDAY
+    #   day: SATURDAY   # MONDAY, TUESDAY, ... SUNDAY
     #   time: "18:00"
     #   duration-minutes: 60
 
@@ -258,10 +414,13 @@ tournament:
   # Commands are executed by the console.
   rewards:
     1:
-      # If an admin uses "/pf tournament addreward 1"
-      # while holding an item, the plugin auto-saves a
-      # Base64-encoded string here. Leave it ("") normally.
+      # If an admin uses "/phoenixfish tournament addreward 1"
+      # while holding an item, the plugin automatically saves a
+      # long encrypted string (Base64) here. Leave it ("") normally.
       item: ""
+
+      # Console commands executed for this rank.
+      # You can use both 'item' and 'commands' at the same time!
       commands:
         - "eco give %player% 1000"
     2:
@@ -274,56 +433,168 @@ tournament:
         - "eco give %player% 250"
 
 # ============================================================
-#  FEATURE: Fishing Mode (Vanilla / PhoenixFish switching)
+#  Fishing Mode System (Vanilla / PhoenixFish switching)
 # ============================================================
 #  Lets each player choose between the plugin's custom fishing
 #  (minigame, custom fish, weights, records, baits, skills) and
-#  Minecraft's vanilla fishing (loot tables, enchanted books, etc.)
+#  Minecraft's vanilla fishing (loot tables, enchanted books,
+#  name tags, saddles...).
 #
 #  Commands:
-#    /pf toggle                  → switch your own mode
-#    /pf toggle status           → show your current mode
-#    /pf toggle status <player>  → (Admin) view a player
-#    /pf toggle <player>         → (Admin) switch a player
-#    /pf toggle reset <player>   → (Admin) reset to default
-#
-#   false = nobody can switch, everyone uses default-mode
-#   true  = players can switch (subject to permission below)
+#    /phoenixfish toggle                  -> switch your own mode
+#    /phoenixfish toggle status           -> show your current mode
+#    /phoenixfish toggle status <player>  -> (Admin) view a player
+#    /phoenixfish toggle <player>         -> (Admin) switch a player
+#    /phoenixfish toggle reset <player>   -> (Admin) reset to default
 fishing-mode:
+  # Master switch for the whole feature.
+  # false = nobody can switch, everyone uses the plugin's
+  #         custom fishing (default-mode is ignored).
   enabled: true
 
   # Starting mode for players who have NOT made a choice yet:
   #   custom  = plugin fishing (custom fish, minigame, baits, skills...)
-  #   vanilla = vanilla Minecraft fishing (enchanted books, vanilla loot)
+  #   vanilla = vanilla Minecraft fishing (enchanted books, vanilla
+  #             loot table, no plugin interference at all)
   default-mode: custom
 
-  # If true, players need "phoenixfish.toggle" permission to switch.
-  # Admins with "phoenixfish.admin" can always switch and manage others.
+  # If true, players need the "phoenixfish.toggle" permission to
+  # switch modes. Admins with "phoenixfish.admin" can always switch
+  # and manage other players.
   require-permission: false
 
   # Cooldown between mode switches, in seconds (anti-spam).
   # 0 = disabled.
   toggle-cooldown: 5
 
-  # If true, a server-wide announcement is sent when a player switches.
+  # If true, a server-wide announcement is sent when a player
+  # switches mode (message key: toggle_broadcast).
   broadcast-change: false
 
 # ============================================================
-#  QUICK REFERENCE — Feature Toggle Summary
+#  v1.6.0 — MODULAR FEATURE TOGGLES
+#  Each feature below has its own master switch.
+#  disabled = zero CPU/RAM, never loaded.
 # ============================================================
-#  Feature                 │ Config Key                              │ Default
-#  ────────────────────────┼─────────────────────────────────────────┼─────────
-#  Minigame                │ settings.minigame-enabled               │ true
-#  Discovery               │ settings.discovery-enabled              │ true
-#  Auto-fix legacy items   │ settings.fix-items-on-chest-open        │ true
-#  XP & Leveling (master)  │ xp-system.enabled                       │ true
-#  Tier system             │ xp-system.tier-system.enabled           │ true
-#  Economy (sell fish)     │ economy.enabled                          │ true
-#  Tournaments             │ tournament.enabled                      │ true
-#  Scheduled tournaments   │ tournament.schedule.daily/weekly        │ disabled
-#  Fishing mode toggle     │ fishing-mode.enabled                    │ true
-#  Weather luck bonuses    │ weather.rain-luck-bonus / storm-luck    │ 0.2 / 0.5
-#  Skill re-spec           │ xp-system.respec-cost                   │ 0.0 (free)
-#  Per-rarity difficulty   │ minigame.rarity-difficulty-multipliers   │ 1.0 each
-#  Per-rarity tension cap  │ minigame.rarity-tension-cap              │ 100.0 each
-# ============================================================
+features:
+
+  # ── #2: Minigame Visual Effects ──────────────────────
+  minigame-effects:
+    enabled: true
+    rarity_1: { particle: "none", sound: "BLOCK_ANVIL_USE", shake: false, title: false }
+    rarity_2: { particle: "none", sound: "BLOCK_ANVIL_USE", shake: false, title: false }
+    rarity_3: { particle: "CRIT", particle_count: 10, sound: "ENTITY_PLAYER_LEVELUP", shake: false, title: false }
+    rarity_4: { particle: "END_ROD", particle_count: 20, sound: "UI_TOAST_CHALLENGE_COMPLETE", shake: true, title: true, title_text: "<gold><bold>EPIC CATCH!</bold></gold>" }
+    rarity_5: { particle: "TOTEM_OF_UNDYING", particle_count: 30, sound: "UI_TOAST_CHALLENGE_COMPLETE", shake: true, title: true, title_text: "<#9D00FF><bold>LEGENDARY CATCH!</bold></#9D00FF>" }
+
+  # ── #1: Minigame Difficulty Presets ───────────────────
+  minigame-presets:
+    enabled: false
+    difficulty: "medium"   # easy / medium / hard / hardcore / insane / custom
+    presets:
+      easy: { area-width: 30, rod-width: 3, fish-move-chance: 0.4, fish-move-distance: 1, progress-rate: 2.5, tension-increase-rate: 1.0, tension-decrease-rate: 4.0 }
+      medium: { area-width: 30, rod-width: 2, fish-move-chance: 0.6, fish-move-distance: 2, progress-rate: 2.0, tension-increase-rate: 1.2, tension-decrease-rate: 3.0 }
+      hard: { area-width: 35, rod-width: 1, fish-move-chance: 0.7, fish-move-distance: 3, progress-rate: 1.5, tension-increase-rate: 1.5, tension-decrease-rate: 2.5 }
+      hardcore: { area-width: 40, rod-width: 1, fish-move-chance: 0.8, fish-move-distance: 4, progress-rate: 1.0, tension-increase-rate: 2.0, tension-decrease-rate: 2.0 }
+      insane: { area-width: 45, rod-width: 1, fish-move-chance: 0.9, fish-move-distance: 5, progress-rate: 0.8, tension-increase-rate: 2.5, tension-decrease-rate: 1.5 }
+
+  # ── #3: Seasonal Fish ─────────────────────────────────
+  seasonal-fish:
+    enabled: false
+    mode: "realtime"   # "realtime" (real dates) or "minecraft" (world ticks)
+    season-duration-days: 7   # realtime mode: 7 days per season
+    season-duration-ticks: 168000   # minecraft mode: 7 MC-days per season
+
+  # ── #4: Day/Night Fish ────────────────────────────────
+  day-night-fish:
+    enabled: false
+    time-override: "auto"   # "auto" / "always-day" / "always-night"
+
+  # ── #5: Depth Fish ───────────────────────────────────
+  depth-fish:
+    enabled: false
+
+  # ── #6: Fish Mutations ────────────────────────────────
+  fish-mutations:
+    enabled: true
+    chance: 0.03   # 3% chance per catch
+    mutations:
+      shiny: { chance-weight: 0.70, price-multiplier: 3.5, weight-multiplier: 1.30, color: "<rainbow>", lore-prefix: "<rainbow>✦ SHINY ✦ " }
+      albino: { chance-weight: 0.20, price-multiplier: 2.5, weight-multiplier: 1.15, color: "<white>", lore-prefix: "<white>✦ ALBINO ✦ " }
+      golden: { chance-weight: 0.10, price-multiplier: 6.0, weight-multiplier: 1.50, color: "<gold>", lore-prefix: "<gold>✦ GOLDEN ✦ " }
+
+  # ── #7: Fishing Stats GUI ────────────────────────────
+  fishing-stats:
+    enabled: true
+
+  # ── #8: Dynamic Pricing ──────────────────────────────
+  dynamic-pricing:
+    enabled: true
+    decay-per-sale: 0.97         # each sale drops price 3%
+    recovery-per-hour: 0.02      # faster recovery so casual players aren't punished
+    min-multiplier: 0.40         # slightly higher floor to keep common fish viable
+    max-multiplier: 1.50         # cap idle appreciation
+    save-interval-minutes: 5
+
+  # ── #9: Contracts (Daily Quests) ─────────────────────
+  contracts:
+    enabled: true
+
+  # ── #10: Fishing Seasons ──────────────────────────────
+  seasons:
+    enabled: false
+    duration-days: 30
+    scoring-formula: "rarity * weight"
+    end-rewards:
+      1: { money: 10000, commands: ["lp user %player% permission set vip.fisher"] }
+      2: { money: 5000 }
+      3: { money: 2500 }
+    participation-reward: { money: 100 }
+    announce-end: true
+
+  # ── #11: Discovery Rewards ────────────────────────────
+  discovery-rewards:
+    enabled: false
+    default-reward: { xp: 50, money: 100, commands: [] }
+
+  # ── #11b: Achievement System ──────────────────────────
+  achievements:
+    enabled: false
+    list:
+      first-catch: { type: "TOTAL_CATCHS", target: 1, tier: "bronze", reward-commands: ["give %player% fishing_rod 1"] }
+      apprentice-fisher: { type: "TOTAL_CATCHS", target: 50, tier: "bronze", reward-commands: ["eco give %player% 500"] }
+      master-fisher: { type: "TOTAL_CATCHS", target: 500, tier: "silver", reward-commands: ["eco give %player% 2000"] }
+      rare-hunter: { type: "RARITY_COUNT", target: "rarity:3:10", tier: "silver", reward-commands: ["eco give %player% 1000"] }
+      epic-hunter: { type: "RARITY_COUNT", target: "rarity:4:5", tier: "gold", reward-commands: ["eco give %player% 3000"] }
+      legendary-master: { type: "RARITY_COUNT", target: "rarity:5:1", tier: "diamond", reward-commands: ["eco give %player% 10000"] }
+      species-collector: { type: "DISCOVERY_COUNT", target: 25, tier: "gold", reward-commands: ["eco give %player% 5000"] }
+      mutation-hunter: { type: "MUTATION_COUNT", target: 5, tier: "diamond", reward-commands: ["eco give %player% 10000"] }
+
+  # ── #12: Discovery Progress Bar ───────────────────────
+  discovery-progress:
+    enabled: false
+    actionbar: false
+    milestone-title: true
+    milestone-interval: 5
+
+  # ── #13: Skill — Big Catch ────────────────────────────
+  skill-big-catch:
+    enabled: true
+    weight-bonus-per-level: 0.04
+    max-level-cap: 8
+
+  # ── #14: Skill — Lucky Cast ──────────────────────────
+  skill-lucky-cast:
+    enabled: true
+    rarity-upgrade-chance-per-level: 0.015
+    max-upgrade: 1
+
+  # ── #15: Skill — Stamina ─────────────────────────────
+  skill-stamina:
+    enabled: true
+    tension-resist-per-level: 0.08
+    max-level-cap: 8
+
+  # ── #16: PlaceholderAPI ──────────────────────────────
+  placeholder-api:
+    enabled: true

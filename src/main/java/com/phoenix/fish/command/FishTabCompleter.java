@@ -59,7 +59,13 @@ public class FishTabCompleter implements TabCompleter {
             subs.add("givebait");
             subs.add("giverod");
             subs.add("reload");
+            // v1.5.1 — Yeni admin komutları
+            subs.add("debug");
         }
+        // v1.5.1 — /pf respec herkes için (kendi skill'lerini sıfırlayabilir)
+        subs.add("respec");
+        // v1.6.0 — /pf achievements
+        subs.add("achievements");
 
         Collections.sort(subs);
         return subs;
@@ -99,10 +105,29 @@ public class FishTabCompleter implements TabCompleter {
             case "addcraft":
                 return List.of("1", "5", "10", "50");
 
+            // v1.5.1 — /pf catalog search → "search" öner
+            case "catalog":
+                return List.of("search");
+
+            // v1.5.1 — /pf debug → "player", "rod", "self" öner (admin only)
+            case "debug":
+                if (player.hasPermission("phoenixfish.admin")) {
+                    return List.of("player", "rod", "self");
+                }
+                return Collections.emptyList();
+
+            // v1.5.1 — /pf respec → online oyuncu isimleri öner (admin için)
+            case "respec":
+                if (player.hasPermission("phoenixfish.admin")) {
+                    List<String> names = getOnlinePlayerNames();
+                    Collections.sort(names);
+                    return names;
+                }
+                return Collections.emptyList();
+
             case "reload":
             case "fix":
             case "fixall":
-            case "catalog":
             case "skills":
             default:
                 return Collections.emptyList();
@@ -132,9 +157,40 @@ public class FishTabCompleter implements TabCompleter {
                 }
                 return Collections.emptyList();
 
+            // v1.5.1 — /pf catalog search <query> → balık ID'leri + isimleri öner
+            case "catalog":
+                if (arg2.equals("search")) {
+                    return filterByPrefix(getFishSearchTerms(), prefix);
+                }
+                return Collections.emptyList();
+
+            // v1.5.1 — /pf debug player <name> → online oyuncu isimleri öner
+            case "debug":
+                if (arg2.equals("player") && player.hasPermission("phoenixfish.admin")) {
+                    return filterByPrefix(getOnlinePlayerNames(), prefix);
+                }
+                return Collections.emptyList();
+
             default:
                 return Collections.emptyList();
         }
+    }
+
+    /**
+     * v1.5.1 — /pf catalog search için tab completion terimleri.
+     * Balık ID'leri + plain text isimleri döndürür.
+     */
+    private List<String> getFishSearchTerms() {
+        if (plugin.getFishManager() == null) {
+            return Collections.emptyList();
+        }
+        List<String> terms = new ArrayList<>();
+        var plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText();
+        for (var fish : plugin.getFishManager().getAllFish()) {
+            terms.add(fish.id());
+            terms.add(plain.serialize(fish.name()));
+        }
+        return terms;
     }
 
     private List<String> getRodIds() {

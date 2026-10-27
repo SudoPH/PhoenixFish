@@ -27,7 +27,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <white>x1.1"
     crafting-level-requirement: 1
-    xp-reward: 5
+    xp-reward: 8
     shape:
       - "  S"
       - " ST"
@@ -52,7 +52,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <white>x1.2"
     crafting-level-requirement: 10
-    xp-reward: 15
+    xp-reward: 20
     shape:
       - "  I"
       - " IR"
@@ -78,7 +78,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <gold>x1.35"
     crafting-level-requirement: 20
-    xp-reward: 30
+    xp-reward: 35
     shape:
       - "  G"
       - " GR"
@@ -104,7 +104,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <aqua>x1.5"
     crafting-level-requirement: 35
-    xp-reward: 60
+    xp-reward: 80
     shape:
       - "  D"
       - " DR"
@@ -130,7 +130,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <dark_red>x1.7"
     crafting-level-requirement: 50
-    xp-reward: 100
+    xp-reward: 150
     shape:
       - "  N"
       - " NR"
@@ -156,7 +156,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <dark_aqua>x1.85"
     crafting-level-requirement: 65
-    xp-reward: 150
+    xp-reward: 250
     shape:
       - "NSN"
       - "SRP"
@@ -186,7 +186,7 @@ recipes:
         - ""
         - "<dark_gray>Luck Multiplier: <gold>x2.0"
     crafting-level-requirement: 80
-    xp-reward: 250
+    xp-reward: 400
     shape:
       - " C "
       - "CRC"
@@ -238,7 +238,7 @@ recipes:
         - "<gray>A simple worm found in the dirt."
         - "<dark_gray>» <white>Slightly attracts common fish."
     crafting-level-requirement: 1
-    xp-reward: 2
+    xp-reward: 3
     shape:
       - " D "
       - "DDD"
@@ -257,7 +257,7 @@ recipes:
         - "<gray>A leftover piece of bread."
         - "<dark_gray>» <white>Cheap bait for desperate fish."
     crafting-level-requirement: 1
-    xp-reward: 2
+    xp-reward: 3
     shape:
       - " B "
       - "BBB"
@@ -281,7 +281,7 @@ recipes:
         - "<gray>Crushed minnows mixed with bone meal."
         - "<dark_gray>» <white>Slightly better than a worm."
     crafting-level-requirement: 2
-    xp-reward: 3
+    xp-reward: 5
     shape:
       - " C "
       - "CBC"
@@ -303,7 +303,7 @@ recipes:
         - "<gray>Wet kelp woven into a fragrant wrap."
         - "<dark_gray>» <aqua>Attracts uncommon fish."
     crafting-level-requirement: 3
-    xp-reward: 4
+    xp-reward: 5
     shape:
       - "K K"
       - "KSK"
@@ -346,7 +346,7 @@ recipes:
         - "<gray>An iridescent glow mesmerizes fish."
         - "<dark_gray>» <aqua>Attracts uncommon fish."
     crafting-level-requirement: 5
-    xp-reward: 5
+    xp-reward: 8
     shape:
       - " S "
       - "SGS"
@@ -409,7 +409,7 @@ recipes:
         - "<gray>Woven silk that entangles rare prey."
         - "<dark_gray>» <red>A premium bait for rare fish."
     crafting-level-requirement: 30
-    xp-reward: 25
+    xp-reward: 18
     shape:
       - " C "
       - "CSC"
@@ -430,7 +430,7 @@ recipes:
         - "<#00CED1>The pure magic of the seas."
         - "<dark_gray>» <gold>Attracts epic fish."
     crafting-level-requirement: 50
-    xp-reward: 40
+    xp-reward: 30
     shape:
       - " P "
       - "PCP"
@@ -451,7 +451,7 @@ recipes:
         - "<gold>Rare fish eggs shimmering with gold."
         - "<dark_gray>» <gold>Highly attractive to epic fish."
     crafting-level-requirement: 65
-    xp-reward: 60
+    xp-reward: 35
     shape:
       - " E "
       - "EGE"
@@ -472,7 +472,7 @@ recipes:
         - "<dark_purple>A parasitic creature from the deep void."
         - "<dark_gray>» <light_purple>Attracts legendary fish."
     crafting-level-requirement: 80
-    xp-reward: 100
+    xp-reward: 60
     shape:
       - " N "
       - "NSN"
@@ -493,7 +493,7 @@ recipes:
         - "<#C0C0C0>Draws energy from the moonlight."
         - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
     crafting-level-requirement: 100
-    xp-reward: 150
+    xp-reward: 75
     shape:
       - " P "
       - "PCP"
@@ -527,7 +527,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <white>x1.15"
         - "<dark_gray>Required Fishing Level: <white>1"
     crafting-level-requirement: 5
-    xp-reward: 8
+    xp-reward: 12
     shape:
       - "  I"
       - " IR"
@@ -553,7 +553,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <white>x1.3"
         - "<dark_gray>Required Fishing Level: <white>10"
     crafting-level-requirement: 15
-    xp-reward: 20
+    xp-reward: 30
     shape:
       - "  C"
       - " CR"
@@ -579,7 +579,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <gold>x1.45"
         - "<dark_gray>Required Fishing Level: <white>20"
     crafting-level-requirement: 25
-    xp-reward: 40
+    xp-reward: 50
     shape:
       - "  A"
       - " AR"
@@ -605,7 +605,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <aqua>x1.6"
         - "<dark_gray>Required Fishing Level: <white>35"
     crafting-level-requirement: 40
-    xp-reward: 80
+    xp-reward: 110
     shape:
       - "  P"
       - " PR"
@@ -631,7 +631,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <dark_red>x1.8"
         - "<dark_gray>Required Fishing Level: <white>50"
     crafting-level-requirement: 55
-    xp-reward: 130
+    xp-reward: 200
     shape:
       - "  S"
       - " SR"
@@ -657,7 +657,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <dark_aqua>x1.95"
         - "<dark_gray>Required Fishing Level: <white>65"
     crafting-level-requirement: 70
-    xp-reward: 200
+    xp-reward: 320
     shape:
       - "NSN"
       - "SRP"
@@ -687,7 +687,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <gold>x2.15"
         - "<dark_gray>Required Fishing Level: <white>80"
     crafting-level-requirement: 85
-    xp-reward: 350
+    xp-reward: 480
     shape:
       - " C "
       - "CRC"
@@ -714,7 +714,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <#9D00FF>x2.7"
         - "<dark_gray>Required Fishing Level: <white>100"
     crafting-level-requirement: 105
-    xp-reward: 600
+    xp-reward: 700
     shape:
       - " E "
       - "ERE"
@@ -744,7 +744,7 @@ recipes:
         - "<gray>A plump, juicy worm."
         - "<dark_gray>» <white>Greatly attracts common fish."
     crafting-level-requirement: 4
-    xp-reward: 4
+    xp-reward: 5
     shape:
       - " D "
       - "DBD"
@@ -766,7 +766,7 @@ recipes:
         - "<gray>Glows with an otherworldly light."
         - "<dark_gray>» <aqua>Strongly attracts uncommon fish."
     crafting-level-requirement: 8
-    xp-reward: 8
+    xp-reward: 12
     shape:
       - " S "
       - "SGS"
@@ -788,7 +788,7 @@ recipes:
         - "<gray>Dark magic infuses this flesh."
         - "<dark_gray>» <red>Powerfully attracts rare fish."
     crafting-level-requirement: 22
-    xp-reward: 20
+    xp-reward: 22
     shape:
       - " R "
       - "RFR"
@@ -810,7 +810,7 @@ recipes:
         - "<#00CED1>Distilled essence of the deep."
         - "<dark_gray>» <gold>Powerfully attracts epic fish."
     crafting-level-requirement: 55
-    xp-reward: 55
+    xp-reward: 45
     shape:
       - " P "
       - "PCP"
@@ -832,7 +832,7 @@ recipes:
         - "<gold>Golden eggs blessed by the sun."
         - "<dark_gray>» <gold>Iridescent attraction for epic fish."
     crafting-level-requirement: 70
-    xp-reward: 80
+    xp-reward: 50
     shape:
       - " E "
       - "EGE"
@@ -854,7 +854,7 @@ recipes:
         - "<dark_purple>A parasitic horror from the void."
         - "<dark_gray>» <light_purple>Irresistible to legendary fish."
     crafting-level-requirement: 85
-    xp-reward: 130
+    xp-reward: 90
     shape:
       - " N "
       - "NSN"
@@ -883,7 +883,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <#FF8C00>x1.38"
         - "<dark_gray>Required Fishing Level: <white>25"
     crafting-level-requirement: 30
-    xp-reward: 30
+    xp-reward: 45
     shape:
       - "  C"
       - " CR"
@@ -909,7 +909,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <white>x1.55"
         - "<dark_gray>Required Fishing Level: <white>40"
     crafting-level-requirement: 45
-    xp-reward: 55
+    xp-reward: 100
     shape:
       - "  Q"
       - " QR"
@@ -935,7 +935,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <#9B30FF>x1.75"
         - "<dark_gray>Required Fishing Level: <white>55"
     crafting-level-requirement: 60
-    xp-reward: 100
+    xp-reward: 175
     shape:
       - "  A"
       - " AR"
@@ -961,7 +961,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <#FF7F50>x1.9"
         - "<dark_gray>Required Fishing Level: <white>70"
     crafting-level-requirement: 75
-    xp-reward: 160
+    xp-reward: 280
     shape:
       - "  B"
       - " BR"
@@ -987,7 +987,7 @@ recipes:
         - "<dark_gray>Luck Multiplier: <#00FF7F>x2.25"
         - "<dark_gray>Required Fishing Level: <white>85"
     crafting-level-requirement: 90
-    xp-reward: 280
+    xp-reward: 420
     shape:
       - " S "
       - "SRS"
@@ -1014,7 +1014,7 @@ recipes:
         - "<gray>Damp moss that fish love."
         - "<dark_gray>» <white>Attracts common fish."
     crafting-level-requirement: 15
-    xp-reward: 7
+    xp-reward: 5
     shape:
       - " M "
       - "MMM"
@@ -1034,7 +1034,7 @@ recipes:
         - "<gray>Sweet and luminous."
         - "<dark_gray>» <aqua>Attracts uncommon fish."
     crafting-level-requirement: 25
-    xp-reward: 12
+    xp-reward: 7
     shape:
       - " G "
       - "GBG"
@@ -1056,7 +1056,7 @@ recipes:
         - "<gray>From the crimson forests."
         - "<dark_gray>» <red>Attracts rare fish."
     crafting-level-requirement: 35
-    xp-reward: 18
+    xp-reward: 12
     shape:
       - " W "
       - "WNW"
@@ -1078,7 +1078,7 @@ recipes:
         - "<gray>Telepathically lures fish."
         - "<dark_gray>» <red>Attracts rare fish."
     crafting-level-requirement: 40
-    xp-reward: 25
+    xp-reward: 15
     shape:
       - " E "
       - "ESE"
@@ -1100,7 +1100,7 @@ recipes:
         - "<gray>Smolders with nether heat."
         - "<dark_gray>» <gold>Attracts epic fish."
     crafting-level-requirement: 55
-    xp-reward: 35
+    xp-reward: 25
     shape:
       - " B "
       - "BGB"
@@ -1122,7 +1122,7 @@ recipes:
         - "<gray>A protected morsel."
         - "<dark_gray>» <gold>Strongly attracts epic fish."
     crafting-level-requirement: 70
-    xp-reward: 50
+    xp-reward: 30
     shape:
       - " S "
       - "SCS"
@@ -1144,7 +1144,7 @@ recipes:
         - "<gray>Death itself in bait form."
         - "<dark_gray>» <light_purple>Attracts legendary fish."
     crafting-level-requirement: 85
-    xp-reward: 90
+    xp-reward: 55
     shape:
       - " W "
       - "WBW"
@@ -1166,7 +1166,7 @@ recipes:
         - "<gray>Whispers from the deep dark."
         - "<dark_gray>» <light_purple>Irresistible to legendary fish."
     crafting-level-requirement: 90
-    xp-reward: 120
+    xp-reward: 65
     shape:
       - " E "
       - "ESE"
@@ -1188,7 +1188,7 @@ recipes:
         - "<white>Condensed stellar energy."
         - "<dark_gray>» <light_purple>The ultimate bait for mythical fish."
     crafting-level-requirement: 95
-    xp-reward: 180
+    xp-reward: 100
     shape:
       - " N "
       - "NSN"

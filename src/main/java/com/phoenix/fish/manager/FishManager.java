@@ -65,6 +65,66 @@ public class FishManager {
         return fishMap.values();
     }
 
+    // v1.6.0 — Per-fish config sections (time, y-range, seasons okumak için)
+    private final java.util.Map<String, org.bukkit.configuration.ConfigurationSection> fishConfigs =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * v1.6.0 — Balığın fish.yml'deki orijinal ConfigurationSection'unu döndürür.
+     * time, y-range, seasons alanlarını okumak için kullanılır.
+     */
+    public org.bukkit.configuration.ConfigurationSection getFishConfig(String fishId) {
+        if (fishId == null) return null;
+        return fishConfigs.get(fishId.toLowerCase());
+    }
+
+    /**
+     * v1.6.0 — Balığın time/depth/season şartlarını kontrol eder.
+     * Eğer features kapalıysa veya balığın şartı yoksa true döner.
+     * player null ise true döner (backward-compatible).
+     */
+    public boolean meetsConditions(CustomFish fish, org.bukkit.entity.Player player) {
+        if (player == null || fish == null) return true;
+
+        org.bukkit.configuration.ConfigurationSection fishSec = getFishConfig(fish.id());
+        if (fishSec == null) return true;  // config yok → her zaman uygun
+
+        // Day/Night check
+        if (plugin.getConfig().getBoolean("features.day-night-fish.enabled", false)) {
+            String timeOverride = plugin.getConfig().getString("features.day-night-fish.time-override", "auto");
+            String fishTime = fishSec.getString("time", "");
+            if (!fishTime.isEmpty()) {
+                boolean isDay;
+                if ("always-day".equalsIgnoreCase(timeOverride)) {
+                    isDay = true;
+                } else if ("always-night".equalsIgnoreCase(timeOverride)) {
+                    isDay = false;
+                } else {
+                    // auto — dünya zamanına bak
+                    long worldTime = player.getWorld().getTime();
+                    isDay = worldTime < 13000;
+                }
+                if ("DAY".equalsIgnoreCase(fishTime) && !isDay) return false;
+                if ("NIGHT".equalsIgnoreCase(fishTime) && isDay) return false;
+            }
+        }
+
+        // Depth check
+        if (plugin.getConfig().getBoolean("features.depth-fish.enabled", false)) {
+            if (fishSec.contains("y-range")) {
+                java.util.List<Integer> yRange = fishSec.getIntegerList("y-range");
+                if (yRange.size() >= 2) {
+                    int minY = yRange.get(0);
+                    int maxY = yRange.get(1);
+                    int playerY = player.getLocation().getBlockY();
+                    if (playerY < minY || playerY > maxY) return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void loadFish() {
         // v1.3.5 — Dinamik dil desteği: messages yüklenirken dil ayarlanmış olabilir.
         // fish_<dil>.yml dosyasını ara, yoksa fish.yml'a (İngilizce) düş.
@@ -103,6 +163,7 @@ public class FishManager {
 
         List<CustomFish> newList = new ArrayList<>();
         Map<String, CustomFish> newMap = new ConcurrentHashMap<>();
+        fishConfigs.clear();  // v1.6.0 — reload'da eski config'leri temizle
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection fishSec = section.getConfigurationSection(key);
@@ -161,6 +222,8 @@ public class FishManager {
                         maxWeight, biomes, price, item);
                 newList.add(fish);
                 newMap.put(key.toLowerCase(), fish);
+                // v1.6.0 — Balığın config section'ını da sakla (time/y-range/seasons okumak için)
+                fishConfigs.put(key.toLowerCase(), fishSec);
 
             } catch (Exception e) {
                 String msg = plugin.getMessageManager().getPlainMessage("fish_load_error");

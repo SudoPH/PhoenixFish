@@ -42,7 +42,79 @@ public final class FishRewardHelper {
         int amountToGive = calculateMultiCatchAmount(plugin, player);
 
         double weight = rollWeight(fish);
+
+        // v1.6.0 — Big Catch skill: weight çarpanı (istatistikten ÖNCE uygula)
+        if (plugin.getConfig().getBoolean("features.skill-big-catch.enabled", false)) {
+            try {
+                com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                if (data != null && data.getBigCatch() > 0) {
+                    double perLevel = plugin.getConfig().getDouble(
+                            "features.skill-big-catch.weight-bonus-per-level", 0.05);
+                    weight *= (1.0 + (data.getBigCatch() * perLevel));
+                }
+            } catch (Throwable ignored) { }
+        }
+
         String formattedWeight = String.format(Locale.US, "%.2f", weight);
+
+        // v1.6.0 — İstatistik güncelleme
+        if (plugin.getConfig().getBoolean("features.fishing-stats.enabled", true)) {
+            try {
+                com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                if (data != null) {
+                    data.setTotalCatches(data.getTotalCatches() + amountToGive);
+                    data.setCurrentStreak(data.getCurrentStreak() + 1);
+                    if (data.getCurrentStreak() > data.getBestStreak()) {
+                        data.setBestStreak(data.getCurrentStreak());
+                    }
+                    if (weight > data.getBiggestWeight()) {
+                        data.setBiggestWeight(weight);
+                        data.setBiggestFishName(fish.id());
+                    }
+                    if (fish.rarity() > data.getRarestCatchRarity()) {
+                        data.setRarestCatchRarity(fish.rarity());
+                        data.setRarestCatchName(fish.id());
+                    }
+                }
+            } catch (Throwable ignored) { }
+        }
+
+        // v1.6.0 — Balık mutasyonu (Shiny/Albino/Golden)
+        String mutationType = null;
+        if (plugin.getConfig().getBoolean("features.fish-mutations.enabled", false)) {
+            double mutationChance = plugin.getConfig().getDouble("features.fish-mutations.chance", 0.01);
+            if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() < mutationChance) {
+                // Mutasyon oldu — hangi tür?
+                org.bukkit.configuration.ConfigurationSection mutationsSec =
+                        plugin.getConfig().getConfigurationSection("features.fish-mutations.mutations");
+                if (mutationsSec != null) {
+                    double roll = java.util.concurrent.ThreadLocalRandom.current().nextDouble();
+                    double cumulative = 0;
+                    for (String mutKey : mutationsSec.getKeys(false)) {
+                        double weight_mut = mutationsSec.getDouble(mutKey + ".chance-weight", 0);
+                        cumulative += weight_mut;
+                        if (roll < cumulative) {
+                            mutationType = mutKey;
+                            break;
+                        }
+                    }
+                }
+                if (mutationType != null) {
+                    // Weight ve fiyat çarpanı uygula
+                    double weightMult = plugin.getConfig().getDouble(
+                            "features.fish-mutations.mutations." + mutationType + ".weight-multiplier", 1.0);
+                    weight *= weightMult;
+                    formattedWeight = String.format(Locale.US, "%.2f", weight);
+                    // İstatistik
+                    try {
+                        com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
+                        if (data != null) {
+                            data.setMutationCount(data.getMutationCount() + 1);
+                        }
+                    } catch (Throwable ignored) { }
+                }
+            }
+        }
 
         FishCaughtEvent caughtEvent = new FishCaughtEvent(player, fish, weight);
 
@@ -80,6 +152,29 @@ public final class FishRewardHelper {
 
         applyWeightToItem(plugin, caughtItem, weight, formattedWeight);
 
+        // v1.6.0 — Mutasyon prefix'i item lore'una ekle
+        if (mutationType != null) {
+            try {
+                final String finalMutationType = mutationType;  // lambda için final kopya
+                String prefix = plugin.getConfig().getString(
+                        "features.fish-mutations.mutations." + mutationType + ".lore-prefix",
+                        "<gold>✦ MUTATED ✦ ");
+                caughtItem.editMeta(meta -> {
+                    java.util.List<net.kyori.adventure.text.Component> lore = meta.lore();
+                    if (lore == null) lore = new java.util.ArrayList<>();
+                    java.util.List<net.kyori.adventure.text.Component> newLore = new java.util.ArrayList<>();
+                    newLore.add(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                            .deserialize(prefix));
+                    newLore.addAll(lore);
+                    meta.lore(newLore);
+                    // PDC'ye mutasyon tipini kaydet — /pf fix sonrası korunur
+                    meta.getPersistentDataContainer().set(
+                            new org.bukkit.NamespacedKey(plugin, "fish_mutation"),
+                            org.bukkit.persistence.PersistentDataType.STRING, finalMutationType);
+                });
+            } catch (Throwable ignored) { }
+        }
+
         Map<Integer, ItemStack> overflow = player.getInventory().addItem(caughtItem);
         if (!overflow.isEmpty()) {
             Location location = player.getLocation();
@@ -95,6 +190,24 @@ public final class FishRewardHelper {
         plugin.playCatchEffects(player, fish);
 
         plugin.getRecordManager().checkRecords(player, fish, weight, formattedWeight);
+
+        // v1.6.0 — Achievement kontrolü
+        if (plugin.getAchievementManager() != null && plugin.getAchievementManager().isEnabled()) {
+            plugin.getAchievementManager().checkAchievements(player, fish, amountToGive, mutationType != null);
+        }
+
+        // v1.6.0 — Contract kontrolü
+        // v1.7.1/v1.8.0 — pass weight so WEIGHT_MILESTONE contracts can match
+        if (plugin.getContractManager() != null && plugin.getContractManager().isEnabled()) {
+            plugin.getContractManager().checkDailyReset(player);
+            plugin.getContractManager().checkCatch(player, fish.id(), amountToGive, weight);
+        }
+
+        // v1.6.0 — Season score
+        if (plugin.getSeasonManager() != null && plugin.getSeasonManager().isEnabled()) {
+            int seasonPoints = calculateTournamentPoints(fish) * amountToGive;
+            plugin.getSeasonManager().addScore(player, seasonPoints);
+        }
 
         if (plugin.getTournamentManager().isActive()) { 
             int points = calculateTournamentPoints(fish);
@@ -124,7 +237,13 @@ public final class FishRewardHelper {
             return 1;
         }
 
-        double chance = data.getDoubleCatch() * 0.10;
+        // v1.8.0 — read per-level chance from config (was hardcoded 0.10).
+        // Default 0.06 keeps max-level (8) double-catch at 48%.
+        double perLevel = plugin.getConfig().getDouble(
+                "xp-system.skill-per-level.double-catch-chance-per-level", 0.06);
+        double chance = data.getDoubleCatch() * perLevel;
+        // Hard cap at 75% — never let double-catch become near-guaranteed.
+        chance = Math.min(0.75, chance);
         if (ThreadLocalRandom.current().nextDouble() < chance) {
             return 2;
         }
@@ -136,16 +255,23 @@ public final class FishRewardHelper {
         return ThreadLocalRandom.current().nextDouble(fish.minWeight(), fish.maxWeight());
     }
 
-    // M-21 FIX: rarity-weighted tournament points.
+    /**
+     * v1.8.0 — Tournament points per rarity, now config-driven.
+     * Reads from `tournament.points-per-rarity.<rarity>` (1-5).
+     * Defaults preserve the old hardcoded values (1/2/5/12/25) so
+     * existing configs keep working.
+     */
     private static int calculateTournamentPoints(CustomFish fish) {
-        return switch (fish.rarity()) {
-            case 1 -> 1;   // common
-            case 2 -> 2;   // uncommon
-            case 3 -> 5;   // rare
-            case 4 -> 12;  // epic
-            case 5 -> 25;  // legendary
+        String key = "tournament.points-per-rarity." + fish.rarity();
+        int defaultPoints = switch (fish.rarity()) {
+            case 1 -> 1;
+            case 2 -> 2;
+            case 3 -> 5;
+            case 4 -> 12;
+            case 5 -> 25;
             default -> 1;
         };
+        return PhoenixFish.getInstance().getConfig().getInt(key, defaultPoints);
     }
 
     private static void applyWeightToItem(PhoenixFish plugin, ItemStack item,

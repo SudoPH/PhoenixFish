@@ -107,8 +107,8 @@ rods:
       - "<dark_gray>Required Fishing Level: <aqua>35"
     minigame:
       bar-width-bonus: 2
-      progress-rate-bonus: 0.3
-      tension-resistance: 0.10
+      progress-rate-bonus: 0.25
+      tension-resistance: 0.08
       fish-slow-chance: 0.85
 
   # Tier 5 Rod
@@ -116,7 +116,7 @@ rods:
     display-name: "<#5C5C5C><bold>Netherite Rod</bold></#5C5C5C>"
     material: FISHING_ROD
     custom-model-data: 20005
-    luck-multiplier: 1.7
+    luck-multiplier: 1.65
     fishing-level-requirement: 50
     lore:
       - "<dark_gray>» <dark_red>Superior"
@@ -127,16 +127,16 @@ rods:
       - "<dark_gray>Required Fishing Level: <dark_red>50"
     minigame:
       bar-width-bonus: 2
-      progress-rate-bonus: 0.4
-      tension-resistance: 0.15
-      fish-slow-chance: 0.8
+      progress-rate-bonus: 0.35
+      tension-resistance: 0.12
+      fish-slow-chance: 0.80
 
   # Tier 6 Rod
   ocean_rod:
     display-name: "<#00CED1><bold>Ocean's Wrath</bold></#00CED1>"
     material: FISHING_ROD
     custom-model-data: 20006
-    luck-multiplier: 1.85
+    luck-multiplier: 1.8
     fishing-level-requirement: 65
     lore:
       - "<dark_gray>» <dark_aqua>Mystic"
@@ -147,8 +147,8 @@ rods:
       - "<dark_gray>Required Fishing Level: <dark_aqua>65"
     minigame:
       bar-width-bonus: 3
-      progress-rate-bonus: 0.5
-      tension-resistance: 0.20
+      progress-rate-bonus: 0.40
+      tension-resistance: 0.15
       fish-slow-chance: 0.75
 
   # Tier 7 Rod
@@ -156,7 +156,7 @@ rods:
     display-name: "<#FFD700><bold>Legendary Rod</bold></#FFD700>"
     material: FISHING_ROD
     custom-model-data: 20007
-    luck-multiplier: 2.0
+    luck-multiplier: 1.95
     fishing-level-requirement: 80
     lore:
       - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
@@ -167,16 +167,16 @@ rods:
       - "<dark_gray>Required Fishing Level: <gold>80"
     minigame:
       bar-width-bonus: 3
-      progress-rate-bonus: 0.7
-      tension-resistance: 0.25
-      fish-slow-chance: 0.7
+      progress-rate-bonus: 0.55
+      tension-resistance: 0.20
+      fish-slow-chance: 0.70
 
   # Tier 8 Rod
   cosmic_rod:
     display-name: "<#9D00FF><bold>Cosmic Rod</bold></#9D00FF>"
     material: FISHING_ROD
     custom-model-data: 20008
-    luck-multiplier: 2.5
+    luck-multiplier: 2.4
     fishing-level-requirement: 100
     lore:
       - "<dark_gray>» <#9D00FF><bold>Divine</bold></#9D00FF>"
@@ -187,9 +187,9 @@ rods:
       - "<dark_gray>Required Fishing Level: <#9D00FF>100"
     minigame:
       bar-width-bonus: 4
-      progress-rate-bonus: 1.0
-      tension-resistance: 0.30
-      fish-slow-chance: 0.6
+      progress-rate-bonus: 0.75
+      tension-resistance: 0.25
+      fish-slow-chance: 0.60
 
   # ==========================================
   # ENHANCED RODS (Faz 0.8.0 — Tiered Equipment)
@@ -241,7 +241,7 @@ rods:
     display-name: "<#55FFFF><italic>Prismatic Diamond Rod</italic></#55FFFF>"
     material: FISHING_ROD
     custom-model-data: 21004
-    luck-multiplier: 1.6
+    luck-multiplier: 1.55
     fishing-level-requirement: 35
     lore:
       - "<dark_gray>» <aqua>Enhanced Epic"
@@ -254,7 +254,7 @@ rods:
     display-name: "<#5C5C5C><bold><italic>Infernal Netherite Rod</italic></bold></#5C5C5C>"
     material: FISHING_ROD
     custom-model-data: 21005
-    luck-multiplier: 1.8
+    luck-multiplier: 1.7
     fishing-level-requirement: 50
     lore:
       - "<dark_gray>» <dark_red>Enhanced Superior"
@@ -267,7 +267,7 @@ rods:
     display-name: "<#00CED1><bold><italic>Tidal Ocean's Wrath</italic></bold></#00CED1>"
     material: FISHING_ROD
     custom-model-data: 21006
-    luck-multiplier: 1.95
+    luck-multiplier: 1.85
     fishing-level-requirement: 65
     lore:
       - "<dark_gray>» <dark_aqua>Enhanced Mystic"
@@ -280,7 +280,7 @@ rods:
     display-name: "<#FFD700><bold><italic>Mythic Legendary Rod</italic></bold></#FFD700>"
     material: FISHING_ROD
     custom-model-data: 21007
-    luck-multiplier: 2.15
+    luck-multiplier: 2.05
     fishing-level-requirement: 80
     lore:
       - "<dark_gray>» <gold><bold>Enhanced Legendary</bold></gold>"
@@ -293,7 +293,7 @@ rods:
     display-name: "<#9D00FF><bold><italic>Celestial Cosmic Rod</italic></bold></#9D00FF>"
     material: FISHING_ROD
     custom-model-data: 21008
-    luck-multiplier: 2.7
+    luck-multiplier: 2.5
     fishing-level-requirement: 100
     lore:
       - "<dark_gray>» <#9D00FF><bold>Enhanced Divine</bold></#9D00FF>"
@@ -310,7 +310,7 @@ rods:
     display-name: "<#FF8C00><italic>Copper Rod</italic></#FF8C00>"
     material: FISHING_ROD
     custom-model-data: 20009
-    luck-multiplier: 1.38
+    luck-multiplier: 1.32
     fishing-level-requirement: 25
     lore:
       - "<dark_gray>» <#FF8C00>Transitional"
@@ -323,7 +323,7 @@ rods:
     display-name: "<white><italic>Quartz Rod</italic></white>"
     material: FISHING_ROD
     custom-model-data: 20010
-    luck-multiplier: 1.55
+    luck-multiplier: 1.45
     fishing-level-requirement: 40
     lore:
       - "<dark_gray>» <white>Transitional"
@@ -336,7 +336,7 @@ rods:
     display-name: "<#9B30FF><italic>Amethyst Rod</italic></#9B30FF>"
     material: FISHING_ROD
     custom-model-data: 20011
-    luck-multiplier: 1.75
+    luck-multiplier: 1.62
     fishing-level-requirement: 55
     lore:
       - "<dark_gray>» <#9B30FF>Transitional"
@@ -349,7 +349,7 @@ rods:
     display-name: "<#FF7F50><italic>Coral Rod</italic></#FF7F50>"
     material: FISHING_ROD
     custom-model-data: 20012
-    luck-multiplier: 1.9
+    luck-multiplier: 1.78
     fishing-level-requirement: 70
     lore:
       - "<dark_gray>» <#FF7F50>Transitional"
@@ -362,7 +362,7 @@ rods:
     display-name: "<#00FF7F><italic>Echo Rod</italic></#00FF7F>"
     material: FISHING_ROD
     custom-model-data: 20013
-    luck-multiplier: 2.25
+    luck-multiplier: 2.05
     fishing-level-requirement: 85
     lore:
       - "<dark_gray>» <#00FF7F>Transitional"
