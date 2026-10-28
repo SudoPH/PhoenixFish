@@ -4,7 +4,7 @@
 
 [![PhoenixFish Demo](https://img.youtube.com/vi/JEfE1KNi5do/maxresdefault.jpg)](https://www.youtube.com/watch?v=JEfE1KNi5do)
 
-It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities, XP progression, skill progression, environmental fishing, fish weights, personal and server records, a built-in economy, selling, tournaments, and extensive configuration options.
+It completely overhauls the vanilla fishing experience with an interactive fishing minigame, custom fish, rods, bait, rarities and mutations, XP progression, a skill tree, seasonal and environmental fishing, fish weights, personal and server records, a built-in economy with a dynamic market, daily contracts, fishing seasons, tournaments, achievements and extensive configuration options.
 
 Not everyone wants custom fishing all the time, so every player can **switch between PhoenixFish and vanilla fishing** with a single command and still catch vanilla treasure and enchanted books.
 
@@ -18,17 +18,22 @@ Not everyone wants custom fishing all the time, so every player can **switch bet
 * [Fishing Minigame](#fishing-minigame)
 * [Fishing Mode Toggle](#fishing-mode-toggle)
 * [Custom Fish & Rods](#custom-fish--rods)
+* [Fish Mutations](#fish-mutations)
 * [Custom Bait](#custom-bait)
 * [Rarity System](#rarity-system)
+* [Environmental Fishing](#environmental-fishing)
 * [XP & Fishing Levels](#xp--fishing-levels)
 * [Skill Tree](#skill-tree)
 * [Weight System](#weight-system)
 * [Record System](#record-system)
-* [Environmental Fishing](#environmental-fishing)
 * [Fishing Catalog](#fishing-catalog)
+* [Achievements & Discovery](#achievements--discovery)
 * [Economy & Selling](#economy--selling)
+* [Daily Contracts](#daily-contracts)
+* [Fishing Seasons](#fishing-seasons)
 * [Tournament System](#tournament-system)
 * [PlaceholderAPI](#placeholderapi)
+* [Modular Features](#modular-features)
 * [Performance](#performance)
 * [Installation](#installation)
 * [Getting Started](#getting-started)
@@ -58,6 +63,34 @@ Players need to:
 * Successfully secure their catch
 
 If the line tension reaches 100%, the line breaks and the fish escapes.
+
+#### Difficulty presets
+
+Switch the difficulty of the minigame with one line instead of editing several values:
+
+```yaml
+features:
+  minigame-presets:
+    enabled: true
+    difficulty: "medium"   # easy | medium | hard | hardcore | insane
+```
+
+#### Visual effects
+
+Every rarity tier (1 to 5) can have its own particle burst, sound, screen shake and title announcement, so a Legendary catch feels like one:
+
+```yaml
+features:
+  minigame-effects:
+    enabled: true
+    rarity_5:
+      particle: "TOTEM_OF_UNDYING"
+      particle_count: 30
+      sound: "UI_TOAST_CHALLENGE_COMPLETE"
+      shake: true
+      title: true
+      title_text: "<#9D00FF><bold>LEGENDARY CATCH!</bold></#9D00FF>"
+```
 
 ---
 
@@ -124,9 +157,15 @@ Create unlimited custom fish and fishing rods with configurable:
 * Lore
 * Custom Model Data
 * Luck multipliers
-* Biome restrictions
+* Biome, season, time of day and depth restrictions
 
-Fish can be configured to appear only in specific biomes while unrestricted fish remain available everywhere.
+---
+
+### 🧬 Fish Mutations
+
+Fish can mutate when they are caught. There are three variants: **Shiny ✦**, **Albino ✦** and **Golden ✦**. Each has its own color, lore prefix and price multiplier (up to 10×), and is stored safely in the item's PersistentDataContainer.
+
+Catching mutated fish also counts toward the **Mutation Hunter** achievement.
 
 ---
 
@@ -153,6 +192,66 @@ Each rarity can have its own:
 * Visual effects
 
 Legendary catches can trigger custom **Title** and **Subtitle** effects.
+
+---
+
+### 🌍 Environmental Fishing
+
+Fishing can be affected by the environment, and fish can be limited to specific conditions.
+
+#### 🌧️ Weather
+
+Weather provides configurable fishing bonuses:
+
+| Weather      | Effect                                          |
+| ------------ | ----------------------------------------------- |
+| Rain         | +20% catch luck                                 |
+| Thunderstorm | +50% catch luck and increased rare fish chances |
+
+Configuration:
+
+```yaml
+rain-luck-bonus: 0.2
+storm-luck-bonus: 0.5
+```
+
+#### 🌲 Biomes
+
+Fish can be restricted to specific Minecraft biomes through `fish.yml`:
+
+```yaml
+biomes:
+  - SNOWY_PLAINS
+  - ICE_SPIKES
+```
+
+Example use cases:
+
+* ❄️ Ice Fish → `SNOWY_PLAINS`, `ICE_SPIKES`
+* 🌋 Lava Fish → Nether biomes such as `BASALT_DELTAS`
+
+#### 🍂 Seasons, time of day and depth
+
+Fish can also be limited by the season, the time of day and the height at which the player is fishing. Each of these can be switched on or off separately (see [Modular Features](#modular-features)).
+
+```yaml
+# Seasons when this fish can spawn: SPRING, SUMMER, AUTUMN, WINTER.
+# Leave empty or remove to allow every season.
+seasons: [WINTER]
+
+# Time of day: DAY, NIGHT or ALL
+time: NIGHT
+
+# Optional override for servers with a fixed time: "auto", "always-day" or "always-night"
+time-override: "always-night"
+
+# Height range [min_y, max_y] the player must be in (inclusive)
+y-range: [0, 30]
+```
+
+The season can follow real-world dates or the Minecraft world time, whichever you prefer.
+
+Fish without any restrictions can be caught anywhere, at any time.
 
 ---
 
@@ -190,14 +289,17 @@ Players can spend their earned Skill Points through:
 /phoenixfish skills
 ```
 
-Available skills include:
+Available skills:
 
-| Skill             | Effect                                                |
-| ----------------- | ----------------------------------------------------- |
-| **Fast Catcher**  | Increases minigame progress speed by 0.5% per level.  |
-| **Master Hunter** | Increases rare/epic fish chance by 2% per level.      |
-| **Double Catch**  | Gives a 10% chance per level to catch 2 fish at once. |
-| **Lucky Bait**    | Gives a 20% chance per level to avoid consuming bait. |
+| Skill             | Effect                                                         |
+| ----------------- | -------------------------------------------------------------- |
+| **Fast Catcher**  | Increases minigame progress speed by 0.5% per level.           |
+| **Master Hunter** | Increases rare/epic fish chance by 2% per level.               |
+| **Double Catch**  | Gives a 10% chance per level to catch 2 fish at once.          |
+| **Lucky Bait**    | Gives a 20% chance per level to avoid consuming bait.          |
+| **Big Catch**     | Gives +5% fish weight per level, so heavier and pricier fish.  |
+| **Lucky Cast**    | Gives a +10% chance per level to upgrade a catch to the next rarity. |
+| **Stamina**       | Gives +10% minigame tension resistance per level, so the line snaps later. |
 
 Each skill can be upgraded up to **Level 5** by default. The maximum can be changed (1 to 10) in `config.yml`:
 
@@ -205,6 +307,10 @@ Each skill can be upgraded up to **Level 5** by default. The maximum can be chan
 xp-system:
   skill-max-level: 5
 ```
+
+#### Respec
+
+`/phoenixfish respec` refunds all of your skill points for a configurable cost, so players can experiment without regret.
 
 ---
 
@@ -297,47 +403,6 @@ Record data persists across server restarts and is written asynchronously to min
 
 ---
 
-### 🌍 Environmental Fishing
-
-Fishing can be affected by the environment.
-
-#### 🌧️ Weather
-
-Weather provides configurable fishing bonuses:
-
-| Weather      | Effect                                          |
-| ------------ | ----------------------------------------------- |
-| Rain         | +20% catch luck                                 |
-| Thunderstorm | +50% catch luck and increased rare fish chances |
-
-Configuration:
-
-```yaml
-rain-luck-bonus: 0.2
-storm-luck-bonus: 0.5
-```
-
-#### 🌲 Biomes
-
-Fish can be restricted to specific Minecraft biomes through `fish.yml`.
-
-Example:
-
-```yaml
-biomes:
-  - SNOWY_PLAINS
-  - ICE_SPIKES
-```
-
-Example use cases:
-
-* ❄️ Ice Fish → `SNOWY_PLAINS`, `ICE_SPIKES`
-* 🌋 Lava Fish → Nether biomes such as `BASALT_DELTAS`
-
-Fish without biome restrictions can still be caught anywhere.
-
----
-
 ### 📖 Fishing Catalog
 
 PhoenixFish includes an interactive **Fishing Catalog**.
@@ -355,10 +420,23 @@ The Catalog allows players to:
 * Browse custom rods
 * Track discovered fish
 * View undiscovered fish as `???`
+* Search by fish name or ID with `/phoenixfish catalog search <query>`
 * Navigate through multiple pages
 * Sell fish directly through the Catalog
 
 Fish are automatically revealed after being caught for the first time.
+
+---
+
+### 🏅 Achievements & Discovery
+
+Open the achievements menu with `/phoenixfish achievements`.
+
+**8 built-in achievements** with tiered rewards: First Catch, Apprentice Fisher, Master Fisher, Rare Hunter, Epic Hunter, Legendary Master, Species Collector and Mutation Hunter.
+
+**Discovery rewards:** the first catch of a species gives XP, money and optional console commands, which makes completing the catalog worthwhile.
+
+**Discovery progress:** an Action Bar progress display and milestone titles track how much of the catalog a player has completed.
 
 ---
 
@@ -384,7 +462,36 @@ Selling commands:
 
 A **Sell** button is also available in the Fishing Catalog.
 
-Fish prices are calculated using their base price and individual weight. If a player's inventory is full, extra items are dropped at their feet instead of being lost.
+Fish prices are calculated using their base price, individual weight and mutation. If a player's inventory is full, extra items are dropped at their feet instead of being lost.
+
+#### Dynamic fish market
+
+With the dynamic market switched on, prices follow supply and demand:
+
+* Every sale lowers the price of that fish.
+* The market recovers every hour.
+* A price never drops below **30%** or rises above **150%** of its base price.
+
+---
+
+### 📜 Daily Contracts
+
+Daily contracts give players a reason to log in every day.
+
+* Quests are created from templates, with randomized amounts, money and XP
+* Progress is saved per player
+* A click-to-claim menu: `/phoenixfish contracts`
+* **10 built-in templates** from Common to Legendary tiers (`contract_templates.yml`)
+
+---
+
+### 🗓️ Fishing Seasons
+
+Competitive seasons that last several weeks.
+
+* A leaderboard for the whole server
+* Rewards based on rank, plus participation bonuses
+* `/phoenixfish season` shows the current season and the leaderboard
 
 ---
 
@@ -440,20 +547,76 @@ Rewards are distributed to the **top 3 players** when the tournament ends. Playe
 
 ### 🔌 PlaceholderAPI
 
-PhoenixFish registers **22 placeholders** for [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/), so you can use them in scoreboards, holograms, Skript and any other plugin that supports PlaceholderAPI. PlaceholderAPI is optional: without it PhoenixFish works as usual, just without placeholders.
+PhoenixFish provides placeholders for [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/), so you can use them in scoreboards, holograms, Skript and any other plugin that supports PlaceholderAPI. PlaceholderAPI is optional: without it PhoenixFish works as usual, just without placeholders.
 
-| Category     | Placeholders                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------- |
-| Progression  | `level`, `xp`, `xp_required`, `xp_progress_percent`, `total_xp`, `skillpoints`                                |
-| Economy      | `balance`                                                                                                     |
-| Crafting     | `crafting_level`, `crafting_xp`                                                                               |
-| Skills       | `skill_fast`, `skill_hunter`, `skill_double`, `skill_bait`                                                    |
-| Discovery    | `discovered_count`, `total_fish_count`, `discovered_percent`                                                  |
-| Records      | `pb_<fish_id>`, `sr_<fish_id>`                                                                                |
-| Fishing mode | `mode`                                                                                                        |
-| Tournament   | `tournament_active`, `tournament_score`, `tournament_leader`, `tournament_leader_score`, `tournament_time_left` |
+| Placeholder                      | Returns                         |
+| -------------------------------- | ------------------------------- |
+| `%phoenixfish_level%`            | Fishing level                   |
+| `%phoenixfish_xp%`               | Current XP                      |
+| `%phoenixfish_xp_needed%`        | XP needed for the next level    |
+| `%phoenixfish_balance%`          | Balance of the built-in economy |
+| `%phoenixfish_total_catches%`    | Total catches                   |
+| `%phoenixfish_discovered%`       | Discovered species              |
+| `%phoenixfish_discovered_total%` | Total species in the catalog    |
+| `%phoenixfish_biggest_weight%`   | Heaviest fish caught            |
+| `%phoenixfish_mutation_count%`   | Mutated fish caught             |
+| `%phoenixfish_skill_<skill>%`    | Level of a skill                |
+| `%phoenixfish_skill_points%`     | Unspent skill points            |
+| `%phoenixfish_season%`           | Current season                  |
 
-Use them as `%phoenixfish_<placeholder>%`, for example `%phoenixfish_level%`.
+---
+
+### ⚙️ Modular Features
+
+Every major feature has its own switch in the `features` section of `config.yml`. A feature that is switched off does not run at all: it has no listeners, no scheduled tasks, no cached data and it is hidden from the menus, so it costs no CPU or memory.
+
+```yaml
+# Example values. See your generated config.yml for the defaults.
+features:
+  minigame-effects:
+    enabled: true
+  minigame-presets:
+    enabled: false
+    difficulty: "medium"
+  seasonal-fish:
+    enabled: false
+  day-night-fish:
+    enabled: false
+  depth-fish:
+    enabled: false
+  fish-mutations:
+    enabled: false
+  dynamic-pricing:
+    enabled: false
+  contracts:
+    enabled: false
+  seasons:
+    enabled: false
+  discovery-rewards:
+    enabled: false
+  achievements:
+    enabled: false
+  discovery-progress:
+    enabled: false
+  skill-big-catch:
+    enabled: false
+    weight-bonus-per-level: 0.05
+  skill-lucky-cast:
+    enabled: false
+    rarity-upgrade-chance-per-level: 0.10
+  skill-stamina:
+    enabled: false
+    tension-resist-per-level: 0.10
+  placeholder-api:
+    enabled: true
+```
+
+Features can also be switched **live**, without a restart:
+
+```text
+/pf settings features fish-mutations true
+/pf settings list
+```
 
 ---
 
@@ -466,9 +629,10 @@ Almost every aspect of PhoenixFish can be configured, including:
 * Rod width
 * Fishing area width
 * Line tension
+* Difficulty presets
 * Fish rarities
 * Fish weights
-* Biome restrictions
+* Biome, season, time and depth restrictions
 * Weather bonuses
 * XP rewards
 * Fishing levels
@@ -499,6 +663,7 @@ It uses:
 * Thread-safe caching
 * Asynchronous record persistence
 * Efficient player data management
+* Features that are switched off are not loaded at all
 
 Database and record operations are designed to minimize blocking on the main server thread.
 
@@ -543,9 +708,9 @@ If you want to use PhoenixFish placeholders in scoreboards, holograms or other p
 
 **PhoenixCraft** is a planned add-on that adds custom crafting recipes for fishing rods and bait. It is **not required** for the core fishing features. Until it is released, admins can give rods and bait with `/phoenixfish giverod` and `/phoenixfish givebait`.
 
-### 5. Restart the Server
+### 5. Start the Server
 
-Restart your server after installing the plugin.
+Start your server. All default files are created automatically.
 
 > ⚠️ **Do not use the server's `/reload`.** Reloading can cause issues with plugin state, database connections, and other plugin systems. To apply configuration changes without a restart, use PhoenixFish's own `/phoenixfish reload` (see [Commands & Permissions](#commands--permissions)).
 
@@ -559,7 +724,15 @@ After the first startup, configuration files will be generated in:
 plugins/PhoenixFish/
 ```
 
-Edit these files to customize fish, rods, bait, messages, fishing mechanics, economy, skills, weather, and other plugin features.
+Edit `config.yml` to choose your language and the features you want, then run `/pf reload`.
+
+### Updating
+
+1. Stop the server.
+2. **Back up** the `plugins/PhoenixFish` folder, and your MySQL database if you use one.
+3. Replace the jar and start the server.
+
+On the first start PhoenixFish upgrades the database automatically (adding any new columns) and keeps all player progress. Your existing `config.yml`, `fish.yml`, `baits.yml` and `rods.yml` are **not overwritten**, and new default files are added next to them. A customized `messages_en.yml` from older versions is still loaded.
 
 ---
 
@@ -621,37 +794,53 @@ Catch fish to:
 * Set Personal Best records
 * Compete for Server Records
 * Earn money by selling fish
-* Participate in tournaments
+* Complete daily contracts
+* Unlock achievements
+* Participate in tournaments and seasons
 
 ---
 
 ## Commands & Permissions
 
-| Command                                     | Description                                                             | Required Permission  |
-| ------------------------------------------- | ----------------------------------------------------------------------- | -------------------- |
-| `/phoenixfish`                              | Shows the help menu.                                                    | `phoenixfish.use`    |
-| `/phoenixfish skills`                       | Opens the Skill Tree.                                                   | `phoenixfish.use`    |
-| `/phoenixfish catalog`                      | Opens the Fishing Catalog.                                              | `phoenixfish.use`    |
-| `/phoenixfish toggle`                       | Switches between PhoenixFish and vanilla fishing.                       | `phoenixfish.toggle` |
-| `/phoenixfish toggle status [player]`       | Shows your (or another player's) fishing mode.                          | `phoenixfish.toggle` |
-| `/phoenixfish sell hand`                    | Sells the fish in your hand.                                            | `phoenixfish.use`    |
-| `/phoenixfish sell all`                     | Sells all supported fish in your inventory.                             | `phoenixfish.use`    |
-| `/phoenixfish sell menu`                    | Opens the fish selling menu.                                            | `phoenixfish.use`    |
-| `/phoenixfish fix`                          | Scans and fixes broken custom items in your inventory.                  | `phoenixfish.use`    |
-| `/phoenixfish toggle <player>`              | Toggles another player's fishing mode.                                  | `phoenixfish.admin`  |
-| `/phoenixfish toggle reset <player>`        | Resets a player's fishing mode to the default.                          | `phoenixfish.admin`  |
-| `/phoenixfish giverod <rod>`                | Gives a custom fishing rod to the player.                               | `phoenixfish.admin`  |
-| `/phoenixfish givebait <bait>`              | Gives custom bait to the player.                                        | `phoenixfish.admin`  |
-| `/phoenixfish addlevel <amount>`            | Modifies a player's fishing level (-1000 to 1000).                      | `phoenixfish.admin`  |
-| `/phoenixfish fixall`                       | Fixes broken fishing items across supported inventories and containers. | `phoenixfish.admin`  |
-| `/phoenixfish reload`                       | Reloads the configuration files without restarting the server.          | `phoenixfish.admin`  |
-| `/phoenixfish tournament start <minutes>`   | Starts a fishing tournament.                                            | `phoenixfish.admin`  |
-| `/phoenixfish tournament stop`              | Stops the active tournament.                                            | `phoenixfish.admin`  |
-| `/phoenixfish tournament addreward <place>` | Sets the held item as a tournament reward.                              | `phoenixfish.admin`  |
+Main command: `/phoenixfish` (aliases: `/pf`, `/pfish`). All commands support tab completion, including nested ones such as `/pf settings features <TAB>`.
+
+### Player commands
+
+| Command                                     | Description                                                      | Required Permission  |
+| ------------------------------------------- | ---------------------------------------------------------------- | -------------------- |
+| `/phoenixfish`                              | Shows the help menu.                                             | `phoenixfish.use`    |
+| `/phoenixfish skills`                       | Opens the Skill Tree.                                            | `phoenixfish.use`    |
+| `/phoenixfish respec`                       | Resets your skills and refunds the points.                       | `phoenixfish.use`    |
+| `/phoenixfish catalog`                      | Opens the Fishing Catalog.                                       | `phoenixfish.use`    |
+| `/phoenixfish catalog search <query>`       | Searches the catalog by fish name or ID.                         | `phoenixfish.use`    |
+| `/phoenixfish contracts`                    | Opens the daily contracts menu.                                  | `phoenixfish.use`    |
+| `/phoenixfish achievements`                 | Opens the achievements menu.                                     | `phoenixfish.use`    |
+| `/phoenixfish season`                       | Shows the current season and its leaderboard.                    | `phoenixfish.use`    |
+| `/phoenixfish toggle`                       | Switches between PhoenixFish and vanilla fishing.                | `phoenixfish.toggle` |
+| `/phoenixfish toggle status [player]`       | Shows your (or another player's) fishing mode.                   | `phoenixfish.toggle` |
+| `/phoenixfish sell <all\|hand\|menu>`       | Sells caught fish.                                               | `phoenixfish.use`    |
+| `/phoenixfish fix`                          | Updates old rods and bait in your inventory.                     | `phoenixfish.use`    |
+
+### Admin commands
+
+| Command                                      | Description                                                             | Required Permission            |
+| -------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------ |
+| `/phoenixfish reload`                        | Reloads the configuration and language files without a restart.         | `phoenixfish.admin`            |
+| `/phoenixfish settings language <code>`      | Switches the language live (`en`, `tr`, `zh_cn`).                       | `phoenixfish.settings`         |
+| `/phoenixfish settings features <name> <true\|false>` | Switches a feature on or off live.                             | `phoenixfish.settings`         |
+| `/phoenixfish settings list`                 | Shows the current language and all feature switches.                    | `phoenixfish.settings`         |
+| `/phoenixfish toggle <player>`               | Toggles another player's fishing mode.                                  | `phoenixfish.admin`            |
+| `/phoenixfish toggle reset <player>`         | Resets a player's fishing mode to the default.                          | `phoenixfish.admin`            |
+| `/phoenixfish giverod <rod>`                 | Gives a custom fishing rod to the player.                               | `phoenixfish.admin`            |
+| `/phoenixfish givebait <bait>`               | Gives custom bait to the player.                                        | `phoenixfish.admin`            |
+| `/phoenixfish addlevel <amount>`             | Modifies a player's fishing level (-1000 to 1000).                      | `phoenixfish.admin`            |
+| `/phoenixfish addcraft <amount>`             | Modifies a player's crafting level.                                     | `phoenixfish.admin`            |
+| `/phoenixfish fixall`                        | Fixes broken fishing items for all online and offline players.          | `phoenixfish.admin`            |
+| `/phoenixfish tournament <start\|stop>`      | Starts or stops a fishing tournament.                                   | `phoenixfish.tournament.admin` |
+| `/phoenixfish tournament addreward <place>`  | Sets the held item as a tournament reward.                              | `phoenixfish.tournament.admin` |
+| `/phoenixfish debug <self\|player\|rod>`     | Shows debug information about fishing data.                             | `phoenixfish.admin`            |
 
 > Offline players' supported items are automatically repaired the next time they join when applicable.
-
-Commands, rod names and bait names support tab completion.
 
 ### What `/phoenixfish reload` reloads
 
@@ -661,11 +850,13 @@ Commands, rod names and bait names support tab completion.
 
 ### Permission Defaults
 
-| Permission           | Default     | Description                                                                |
-| -------------------- | ----------- | -------------------------------------------------------------------------- |
-| `phoenixfish.use`    | All players | Basic commands                                                             |
-| `phoenixfish.toggle` | All players | Switch your own fishing mode                                               |
-| `phoenixfish.admin`  | OP only     | Admin commands, bypasses the toggle cooldown, manages other players' modes |
+| Permission                     | Default     | Description                                                                |
+| ------------------------------ | ----------- | -------------------------------------------------------------------------- |
+| `phoenixfish.use`              | All players | Basic commands                                                             |
+| `phoenixfish.toggle`           | All players | Switch your own fishing mode                                               |
+| `phoenixfish.admin`            | OP only     | Admin commands, bypasses the toggle cooldown, manages other players' modes |
+| `phoenixfish.settings`         | OP only     | Change the language and feature switches live                              |
+| `phoenixfish.tournament.admin` | OP only     | Manage tournaments                                                         |
 
 ### Aliases
 
@@ -678,7 +869,7 @@ Commands, rod names and bait names support tab completion.
 
 ## Database Support
 
-PhoenixFish supports both **SQLite** and **MySQL**.
+PhoenixFish supports both **SQLite** and **MySQL 8+**.
 
 ### SQLite
 
@@ -714,11 +905,11 @@ xp-system:
 
 Two options control the SSL connection:
 
-| `use-ssl` | `verify-server-certificate` | Behavior                                                        |
-| --------- | --------------------------- | --------------------------------------------------------------- |
-| `true`    | `true`                      | SSL required, certificate verified (recommended for production) |
+| `use-ssl` | `verify-server-certificate` | Behavior                                                          |
+| --------- | --------------------------- | ----------------------------------------------------------------- |
+| `true`    | `true`                      | SSL required, certificate verified (recommended for production)   |
 | `true`    | `false`                     | SSL required, certificate not verified (self-signed certificates) |
-| `false`   | n/a                         | No SSL (only for a database on the same machine)                |
+| `false`   | n/a                         | No SSL (only for a database on the same machine)                  |
 
 If the database cannot be read, PhoenixFish does not overwrite existing player data with an empty profile.
 
@@ -728,17 +919,16 @@ If the database cannot be read, PhoenixFish does not overwrite existing player d
 
 PhoenixFish uses several configuration files:
 
-| File                 | Purpose                                                                                            |
-| -------------------- | -------------------------------------------------------------------------------------------------- |
-| `config.yml`         | Main plugin configuration, XP, economy, skills, weather, fishing mode toggle, and general settings |
-| `fish.yml`           | Custom fish, weights, rarities, prices, and biome restrictions                                     |
-| `baits.yml`          | Custom bait definitions                                                                            |
-| `rods.yml`           | Custom fishing rod definitions                                                                     |
-| `custom_recipes.yml` | Custom crafting recipes                                                                            |
-| `messages_en.yml`    | English messages                                                                                   |
-| `messages_tr.yml`    | Turkish messages                                                                                   |
-| `fish_tr.yml`        | Turkish fish names                                                                                 |
-| `records.yml`        | Persistent fish records                                                                            |
+| File / folder           | Purpose                                                                                            |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `config.yml`            | Main plugin configuration, XP, economy, skills, weather, fishing mode toggle, feature switches and general settings |
+| `fish.yml`              | Custom fish, weights, rarities, prices, mutations and spawn conditions                             |
+| `baits.yml`             | Custom bait definitions                                                                            |
+| `rods.yml`              | Custom fishing rod definitions                                                                     |
+| `custom_recipes.yml`    | Custom crafting recipes                                                                            |
+| `contract_templates.yml`| Daily contract templates                                                                           |
+| `lang/<code>/`          | Language packs (see [Languages](#languages))                                                       |
+| `records.yml`           | Persistent fish records                                                                            |
 
 Almost every aspect of the plugin can be customized without modifying the source code.
 
@@ -746,25 +936,46 @@ Almost every aspect of the plugin can be customized without modifying the source
 
 ## Languages
 
-PhoenixFish currently includes:
+PhoenixFish translates **everything players read**: chat messages and menus, and also the names and descriptions of fish, bait, rods, contracts, achievements and skills.
 
-* 🇬🇧 English
-* 🇹🇷 Turkish
+| Code    | Language           |
+| ------- | ------------------ |
+| `en`    | English            |
+| `tr`    | Turkish            |
+| `zh_cn` | Simplified Chinese |
 
-Language files include configurable:
+Each language is a folder in `plugins/PhoenixFish/lang/` with 7 files:
 
-* Chat messages
-* Action Bar messages
-* Titles
-* Subtitles
-* GUI messages
-* Catalog messages
-* Economy messages
-* Tournament messages
-* Record notifications
-* Console messages
+```text
+plugins/PhoenixFish/lang/
+├── en/
+│   ├── messages.yml       # Chat and menu messages
+│   ├── fish.yml           # Fish names and lore
+│   ├── baits.yml          # Bait names and lore
+│   ├── rods.yml           # Rod names and lore
+│   ├── contracts.yml      # Contract templates
+│   ├── achievements.yml   # Achievement titles and lore
+│   └── skills.yml         # Skill names and descriptions
+├── tr/
+└── zh_cn/
+```
 
-The active language can be selected through `config.yml`.
+**Missing keys fall back to English**, so a partial translation never shows broken text.
+
+### Switch the language
+
+Set `language` in `config.yml` and run `/pf reload`, or switch it live:
+
+```text
+/pf settings language zh_cn
+```
+
+### Add your own language
+
+1. Copy `lang/en/` to `lang/<your_code>/`.
+2. Translate every value and keep the keys identical.
+3. Set `language: "<your_code>"` in `config.yml`.
+4. Run `/pf reload`. Any key you did not translate falls back to English.
 
 ---
 
