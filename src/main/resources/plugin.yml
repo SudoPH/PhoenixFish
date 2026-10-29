@@ -17,7 +17,7 @@ libraries:
 commands:
   phoenixfish:
     description: Main command for PhoenixFish (toggle fishing mode, catalog, skills, sell, tournaments and admin tools).
-    usage: /phoenixfish <toggle | status | catalog | skills | sell | fix | tournament | giverod | givebait | addlevel>
+    usage: /phoenixfish <toggle | status | catalog | skills | sell | fix | tournament | giverod | givebait | addlevel | settings>
     aliases: [pfish, pf]
 
 permissions:
@@ -36,5 +36,13 @@ permissions:
 
   # ---------- Admin permissions ----------
   phoenixfish.admin:
-    description: Admin tools - fixall, giverod, givebait, viewing/switching/resetting other players' fishing mode.
+    description: Admin tools - fixall, giverod, givebait, viewing/switching/resetting other players' fishing mode, /pf reload, /pf settings.
+    default: op
+    children:
+      # v1.8.5 — phoenixfish.admin implies phoenixfish.settings
+      - phoenixfish.settings
+  # v1.8.5 — /pf settings (language + feature toggles). Granted to op by default,
+  # and inherited by anyone with phoenixfish.admin via the children: list above.
+  phoenixfish.settings:
+    description: Allows using /pf settings to switch language and toggle features live.
     default: op

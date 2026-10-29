@@ -1,0 +1,266 @@
+# ============================================================
+#  PhoenixFish — Simplified Chinese Fish Definitions (zh_cn)
+# ============================================================
+#  v1.8.8 — Flat layout for backward compat with v1.3.5–v1.8.2 servers.
+#  Contains FULLY TRANSLATED display-name + lore for 32 fish species.
+#  Gameplay data (rarity, weight, price, biomes, material, cmd) stays
+#  in the root-level fish.yml (data file).
+# ============================================================
+
+fishes:
+  sea_bass:
+    display-name: <#55FF55>鲈鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>活泼美味的鱼类，
+    - <gray>栖息于近岸水域。
+    - ''
+    - <dark_gray>层级：<white>1
+  anchovy:
+    display-name: <#55FF55>凤尾鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>广受喜爱的鱼类，
+    - <gray>常以大群游动。
+    - ''
+    - <dark_gray>层级：<white>1
+  sardine:
+    display-name: <#55FF55>沙丁鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>银色的小鱼，
+    - <gray>常以密集鱼群游动。
+    - ''
+    - <dark_gray>层级：<white>1
+  pufferfish:
+    display-name: <#55FF55>河豚</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>受威胁时会膨胀。
+    - <gray>请小心处理。
+    - ''
+    - <dark_gray>层级：<white>1
+  wild_salmon:
+    display-name: <#55FF55>野生鲑鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>强壮的游泳者，
+    - <gray>在河海之间洄游。
+    - ''
+    - <dark_gray>层级：<white>1
+  mackerel:
+    display-name: <#55FF55>鲭鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>流线型的快速鱼类，
+    - <gray>钓鱼者珍视。
+    - ''
+    - <dark_gray>层级：<white>1
+  herring:
+    display-name: <#55FF55>鲱鱼</#55FF55>
+    lore:
+    - <dark_gray>» <gray>普通
+    - <gray>小型海洋鱼类，
+    - <gray>可结成巨大鱼群。
+    - ''
+    - <dark_gray>层级：<white>1
+  eel:
+    display-name: <#55FFFF>鳗鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>滑腻的蛇形鱼类，
+    - <gray>栖息于近海水域。
+    - ''
+    - <dark_gray>层级：<white>2
+  grouper:
+    display-name: <#55FFFF>石斑鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>体型大、行动缓慢，
+    - <gray>常潜伏于珊瑚礁附近。
+    - ''
+    - <dark_gray>层级：<white>2
+  bonito:
+    display-name: <#55FFFF>鲣鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>金枪鱼近亲，
+    - <gray>是敏捷的掠食者。
+    - ''
+    - <dark_gray>层级：<white>2
+  clownfish:
+    display-name: <#55FFFF>小丑鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>色彩斑斓的珊瑚礁居民，
+    - <gray>与海葵共生。
+    - ''
+    - <dark_gray>层级：<white>2
+  tuna:
+    display-name: <#55FFFF>金枪鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>强壮的海洋游泳者，
+    - <gray>体型可巨大。
+    - ''
+    - <dark_gray>层级：<white>2
+  pike:
+    display-name: <#55FFFF>梭子鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>凶猛的淡水掠食者，
+    - <gray>牙齿锋利。
+    - ''
+    - <dark_gray>层级：<white>2
+  catfish:
+    display-name: <#55FFFF>鲶鱼</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>少见
+    - <gray>底栖鱼类，
+    - <gray>有标志性的胡须状触须。
+    - ''
+    - <dark_gray>层级：<white>2
+  swordfish:
+    display-name: <red>剑鱼</red>
+    lore:
+    - <dark_gray>» <red>稀有
+    - <gray>强大的掠食者，
+    - <gray>有长剑般的吻部。
+    - ''
+    - <dark_gray>层级：<white>3
+  shark:
+    display-name: <red>鲨鱼</red>
+    lore:
+    - <dark_gray>» <red>稀有
+    - <gray>海洋顶级掠食者。
+    - <gray>上钩后会剧烈挣扎。
+    - ''
+    - <dark_gray>层级：<white>3
+  bluefish:
+    display-name: <red>蓝鱼</red>
+    lore:
+    - <dark_gray>» <red>稀有
+    - <gray>凶猛的斗士，
+    - <gray>以强力下颚著称。
+    - ''
+    - <dark_gray>层级：<white>3
+  manta_ray:
+    display-name: <red>蝠鲼</red>
+    lore:
+    - <dark_gray>» <red>稀有
+    - <gray>优雅温顺的庞然大物，
+    - <gray>在温暖海域滑行。
+    - ''
+    - <dark_gray>层级：<white>3
+  barracuda:
+    display-name: <red>梭鱼</red>
+    lore:
+    - <dark_gray>» <red>稀有
+    - <gray>闪电般的掠食者，
+    - <gray>牙齿如剃刀般锋利。
+    - ''
+    - <dark_gray>层级：<white>3
+  anglerfish:
+    display-name: <gold>鮟鱇鱼</gold>
+    lore:
+    - <dark_gray>» <gold>史诗
+    - <gray>深海猎手，
+    - <gray>用发光诱饵引诱猎物。
+    - ''
+    - <dark_gray>层级：<white>4
+  sailfish:
+    display-name: <gold>旗鱼</gold>
+    lore:
+    - <dark_gray>» <gold>史诗
+    - <gray>海洋中最快的鱼，
+    - <gray>时速可达 110 公里。
+    - ''
+    - <dark_gray>层级：<white>4
+  electric_eel:
+    display-name: <gold>电鳗</gold>
+    lore:
+    - <dark_gray>» <gold>史诗
+    - <gray>能产生强大电击
+    - <gray>麻痹猎物。
+    - ''
+    - <dark_gray>层级：<white>4
+  sea_god:
+    display-name: <light_purple>海神</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>海洋深处的
+    - <gray>神话守护者。
+    - ''
+    - <dark_gray>层级：<white>5
+  kraken:
+    display-name: <light_purple>克拉肯</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>水手噩梦中的
+    - <gray>巨型海怪。
+    - ''
+    - <dark_gray>层级：<white>5
+  giant_tuna:
+    display-name: <light_purple>巨型金枪鱼</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>巨型金枪鱼，
+    - <gray>据说能让渔船相形见绌。
+    - ''
+    - <dark_gray>层级：<white>5
+  deep_sea_serpent:
+    display-name: <light_purple>深海巨蛇</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>统治深渊海沟的
+    - <gray>远古巨蛇。
+    - ''
+    - <dark_gray>层级：<white>5
+  golden_fish:
+    display-name: <light_purple>金鱼</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>稀有的金色变种，
+    - <gray>据说能向捕获者许愿。
+    - ''
+    - <dark_gray>层级：<white>5
+  leviathan:
+    display-name: <light_purple>利维坦</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>不可触及的深渊中
+    - <gray>的巨型统治者。
+    - ''
+    - <dark_gray>层级：<white>5
+  void_whale:
+    display-name: <light_purple>虚空鲸</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>游弋于世界之间
+    - <gray>虚空中的鲸鱼。
+    - ''
+    - <dark_gray>层级：<white>5
+  ancient_shark:
+    display-name: <light_purple>远古鲨鱼</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>史前鲨鱼物种，
+    - <gray>本以为早已灭绝。
+    - ''
+    - <dark_gray>层级：<white>5
+  abyssal_dragonfish:
+    display-name: <light_purple>深渊龙鱼</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>凶猛的深海鱼类，
+    - <gray>具生物发光獠牙。
+    - ''
+    - <dark_gray>层级：<white>5
+  world_eater:
+    display-name: <light_purple>吞噬世界者</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>传说
+    - <gray>能吞噬整个海洋的
+    - <gray>宇宙级存在。
+    - ''
+    - <dark_gray>层级：<white>5

@@ -1,0 +1,40 @@
+# ============================================================
+#  PhoenixFish — English Achievement Localization (en)
+# ============================================================
+#  Per-achievement display-name + lore for 8 entries.
+#  Missing keys auto-fallback to lang/en/achievements.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+achievements:
+  first-catch:
+    title: First Catch
+    lore:
+    - <gray>Catch your very first fish.
+  apprentice-fisher:
+    title: Apprentice Fisher
+    lore:
+    - <gray>Catch a total of 50 fish.
+  master-fisher:
+    title: Master Fisher
+    lore:
+    - <gray>Catch a total of 500 fish.
+  rare-hunter:
+    title: Rare Hunter
+    lore:
+    - <gray>Catch 10 Rare-rarity fish.
+  epic-hunter:
+    title: Epic Hunter
+    lore:
+    - <gray>Catch 5 Epic-rarity fish.
+  legendary-master:
+    title: Legendary Master
+    lore:
+    - <gray>Catch 1 Legendary-rarity fish.
+  species-collector:
+    title: Species Collector
+    lore:
+    - <gray>Discover 25 different fish species.
+  mutation-hunter:
+    title: Mutation Hunter
+    lore:
+    - <gray>Catch 5 mutated fish.

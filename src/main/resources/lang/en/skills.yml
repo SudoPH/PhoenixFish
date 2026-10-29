@@ -1,0 +1,29 @@
+# ============================================================
+#  PhoenixFish — English Skill Localization (en)
+# ============================================================
+#  Per-skill display-name + lore for 7 entries.
+#  Missing keys auto-fallback to lang/en/skills.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+skills:
+  fast:
+    name: <yellow>Fast Catcher
+    desc: <gray>Increases minigame catch speed.
+  hunter:
+    name: <red>Master Hunter
+    desc: <gray>Increases chance for Rare+ fish.
+  double:
+    name: <aqua>Double Catch
+    desc: <gray>Chance to catch 2 fish at once.
+  bait:
+    name: <gold>Lucky Bait
+    desc: <gray>Chance to not consume bait.
+  big:
+    name: <#DAA520>Big Catch
+    desc: <gray>+%pct%% fish weight per level (heavier = pricier).
+  lucky:
+    name: <#55FFFF>Lucky Cast
+    desc: <gray>+%pct%% chance to upgrade catch to next rarity per level.
+  stamina:
+    name: <#FF6347>Stamina
+    desc: <gray>+%pct%% minigame tension resistance per level (line snaps later).

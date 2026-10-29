@@ -1,25 +1,115 @@
-# ==========================================
-# PhoenixFish - Custom Fish Configuration
-# ==========================================
-# Total Fish: 30
-# All fish can be caught in every biome.
+# ============================================================
+#  PhoenixFish - Custom Fish Configuration
+# ============================================================
+#  Total Fish: 32
+#  All fish can be caught in every biome unless `biomes:` is set.
 #
-# rarity:
-#   1 = Common
-#   2 = Uncommon
-#   3 = Rare
-#   4 = Epic
-#   5 = Legendary
+#  rarity:
+#    1 = Common
+#    2 = Uncommon
+#    3 = Rare
+#    4 = Epic
+#    5 = Legendary
 #
-# weight = Spawn weight (artık double destekleniyor, ondalık değerler korunur)
-# base-speed = Movement speed
-# fight-strength = Fishing fight difficulty
-# xp-reward = XP reward
-# price = Base economy price (Final price = price * weight)
+#  weight          = Spawn weight (higher = more common). Decimal supported.
+#  base-speed      = Movement speed during the minigame
+#  fight-strength  = Fishing fight difficulty (tension multiplier)
+#  xp-reward       = XP granted on catch
+#  price           = Base economy price (final = price * rolled weight)
+#  biomes          = List of biome names the fish can spawn in.
+#                    Empty list [] = spawns in ALL biomes.
 #
-# biomes: []
-# = Fish can spawn everywhere
-# ==========================================
+#  ─── Conditional Spawning (v1.9.0) ──────────────────────────
+#  Per-fish conditions are checked in FishManager.meetsConditions()
+#  BEFORE a fish is rolled. If a condition fails, the fish is
+#  excluded from the candidate pool for that player. These checks
+#  run regardless of the global feature flags (features.day-night-fish,
+#  features.depth-fish, features.seasonal-fish) — the flags only
+#  control whether the GLOBAL system is on. Per-fish fields are
+#  always honored when present.
+#
+#  ─── seasons ─────────────────────────────────────────────────
+#  Seasons when this fish can spawn.
+#  Options: SPRING, SUMMER, AUTUMN, WINTER
+#  Leave empty [] or remove the line to allow spawning in ALL seasons.
+#
+#    seasons: [WINTER]                 # only in winter
+#    seasons: [SPRING, SUMMER]         # spring + summer only
+#    seasons: []                       # all seasons (default)
+#
+#  The current season is determined by SeasonManager. If the
+#  seasonal-fish feature is disabled OR SeasonManager is not
+#  loaded, the seasons check is skipped (fish spawns in any season).
+#
+#  ─── time ───────────────────────────────────────────────────
+#  Time of day restriction.
+#  Options: DAY, NIGHT, ALL
+#  Remove the line or set to ALL to allow spawning at any time.
+#
+#    time: DAY                         # only during Minecraft day (time < 13000)
+#    time: NIGHT                       # only during Minecraft night (time >= 13000)
+#    time: ALL                         # any time (default)
+#
+#  The check uses the player's current world time. On servers with
+#  permanent day/night, use `time-override` (below) to force one state.
+#
+#  ─── time-override ──────────────────────────────────────────
+#  Optional per-fish override for always-day / always-night servers.
+#  Options: "auto", "always-day", "always-night"
+#  When set, this fish's time check uses the override INSTEAD of the
+#  real world time. Useful for fish that should only spawn at "night"
+#  on a server that's permanently set to day.
+#
+#    time-override: "always-night"     # treat this fish as always-night
+#    time-override: "always-day"       # treat this fish as always-day
+#    time-override: "auto"             # use real world time (default)
+#
+#  If absent, the global `features.day-night-fish.time-override` is used.
+#
+#  ─── y-range ────────────────────────────────────────────────
+#  Y-axis height range for spawning [min_y, max_y].
+#  Enables deep-cave fishing (low Y) or sky fishing (high Y).
+#  The player's current Y coordinate must be within [min, max] inclusive.
+#
+#    y-range: [0, 30]                  # inline list (preferred)
+#    y-range:                          # block list form
+#      - 0
+#      - 30
+#    y-range: {min: 0, max: 30}        # inline map form
+#    y-range:                          # block map form
+#      min: 0
+#      max: 30
+#    y-range: 30                       # scalar = [-64, 30] (max only)
+#
+#  Remove the line to allow spawning at any Y level.
+#  Minecraft Y range: -64 (bedrock floor) to 320 (build limit).
+#
+#  ─── Worked Example ─────────────────────────────────────────
+#  Below is a complete example showing all 4 conditional fields:
+#
+#    deep_cave_eel:
+#      display-name: "<#55FFFF>Deep Cave Eel</#55FFFF>"
+#      material: COD
+#      custom-model-data: 10099
+#      weight: 20
+#      rarity: 2
+#      base-speed: 1.0
+#      fight-strength: 1.5
+#      xp-reward: 15
+#      min-weight: 0.5
+#      max-weight: 2.0
+#      biomes: []
+#      price: 8.0
+#      # ── Conditional spawning ──
+#      seasons: [WINTER]               # only in winter
+#      time: NIGHT                     # only at night
+#      time-override: "auto"           # use real world time
+#      y-range: [-64, 0]               # only below Y=0 (deep caves)
+#      lore:
+#        - "<dark_gray>» <aqua>Uncommon"
+#        - "<gray>A slippery eel that lives"
+#        - "<gray>in the deepest caves."
+# ============================================================
 
 fishes:
   # ==========================================
@@ -38,7 +128,7 @@ fishes:
     min-weight: 0.5
     max-weight: 2.5
     biomes: []
-    price: 4.0
+    price: 5.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>An active and delicious fish"
@@ -98,7 +188,7 @@ fishes:
     min-weight: 0.5
     max-weight: 2.0
     biomes: []
-    price: 7.0
+    price: 8.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>Slow but dangerous if not"
@@ -118,7 +208,7 @@ fishes:
     min-weight: 0.5
     max-weight: 4.0
     biomes: []
-    price: 6.0
+    price: 7.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A strong fish that swims"
@@ -138,7 +228,7 @@ fishes:
     min-weight: 0.3
     max-weight: 2.0
     biomes: []
-    price: 5.0
+    price: 6.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A fast-moving fish commonly"
@@ -158,7 +248,7 @@ fishes:
     min-weight: 0.1
     max-weight: 0.8
     biomes: []
-    price: 3.5
+    price: 4.0
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A small silver fish often"
@@ -178,7 +268,17 @@ fishes:
     min-weight: 0.3
     max-weight: 3.0
     biomes: []
-    price: 8.0
+    price: 9.0
+    # ─── Conditional spawning (v1.9.0) ────────────────────────
+    # Seasons when this fish can spawn. Options: [SPRING, SUMMER, AUTUMN, WINTER]
+    # Leave empty or remove to allow spawning in all seasons.
+    seasons: [SPRING, SUMMER, AUTUMN]
+    # Time of day restriction. Options: DAY, NIGHT, or ALL
+    time: NIGHT
+    # Optional time override for always-day servers. Options: "always-night" or "always-day"
+    time-override: "auto"
+    # Y-Axis height range for spawning [min_y, max_y]. Enables deep cave or sky fishing.
+    y-range: [40, 100]
     lore:
       - "<dark_gray>» <gray>Common"
       - "<gray>A slippery creature that"
@@ -202,7 +302,7 @@ fishes:
     min-weight: 2.0
     max-weight: 8.0
     biomes: []
-    price: 15.0
+    price: 20.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A large and strong prey"
@@ -222,7 +322,7 @@ fishes:
     min-weight: 1.5
     max-weight: 6.0
     biomes: []
-    price: 14.0
+    price: 18.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A very strong swimmer,"
@@ -242,7 +342,7 @@ fishes:
     min-weight: 0.2
     max-weight: 1.0
     biomes: []
-    price: 22.0
+    price: 25.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A colorful and agile fish"
@@ -262,7 +362,7 @@ fishes:
     min-weight: 5.0
     max-weight: 25.0
     biomes: []
-    price: 22.0
+    price: 35.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A powerful open-water swimmer"
@@ -282,7 +382,7 @@ fishes:
     min-weight: 1.0
     max-weight: 12.0
     biomes: []
-    price: 20.0
+    price: 30.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A fierce freshwater predator"
@@ -302,7 +402,7 @@ fishes:
     min-weight: 2.0
     max-weight: 20.0
     biomes: []
-    price: 18.0
+    price: 28.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A heavy bottom-dwelling fish"
@@ -322,7 +422,7 @@ fishes:
     min-weight: 8.0
     max-weight: 45.0
     biomes: []
-    price: 28.0
+    price: 45.0
     lore:
       - "<dark_gray>» <aqua>Uncommon"
       - "<gray>A dangerous predator armed"
@@ -346,7 +446,7 @@ fishes:
     min-weight: 15.0
     max-weight: 85.0
     biomes: []
-    price: 65.0
+    price: 80.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>The ruthless predator of the seas."
@@ -366,7 +466,7 @@ fishes:
     min-weight: 10.0
     max-weight: 40.0
     biomes: []
-    price: 55.0
+    price: 65.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>An aggressive and very fast"
@@ -386,7 +486,7 @@ fishes:
     min-weight: 20.0
     max-weight: 150.0
     biomes: []
-    price: 85.0
+    price: 100.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>A gentle giant that pulls"
@@ -406,7 +506,7 @@ fishes:
     min-weight: 4.0
     max-weight: 20.0
     biomes: []
-    price: 60.0
+    price: 75.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>A lightning-fast predator"
@@ -426,7 +526,7 @@ fishes:
     min-weight: 2.0
     max-weight: 15.0
     biomes: []
-    price: 75.0
+    price: 90.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>A terrifying deep-sea predator"
@@ -446,7 +546,7 @@ fishes:
     min-weight: 10.0
     max-weight: 60.0
     biomes: []
-    price: 90.0
+    price: 110.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>One of the fastest fish"
@@ -466,7 +566,7 @@ fishes:
     min-weight: 5.0
     max-weight: 25.0
     biomes: []
-    price: 100.0
+    price: 120.0
     lore:
       - "<dark_gray>» <red>Rare"
       - "<gray>A strange creature capable"
@@ -490,7 +590,7 @@ fishes:
     min-weight: 500.0
     max-weight: 2000.0
     biomes: []
-    price: 600.0
+    price: 2000.0
     lore:
       - "<dark_gray>» <#9D00FF><bold>Epic</bold></#9D00FF>"
       - "<#9D00FF>The legendary god of the deep."
@@ -511,7 +611,7 @@ fishes:
     min-weight: 250.0
     max-weight: 1200.0
     biomes: []
-    price: 500.0
+    price: 1500.0
     lore:
       - "<dark_gray>» <dark_purple><bold>Epic</bold></dark_purple>"
       - "<gray>An enormous monster with"
@@ -531,7 +631,7 @@ fishes:
     min-weight: 50.0
     max-weight: 300.0
     biomes: []
-    price: 300.0
+    price: 800.0
     lore:
       - "<dark_gray>» <#9D00FF><bold>Epic</bold></#9D00FF>"
       - "<#9D00FF>A massive tuna capable of"
@@ -551,7 +651,7 @@ fishes:
     min-weight: 100.0
     max-weight: 600.0
     biomes: []
-    price: 450.0
+    price: 1200.0
     lore:
       - "<dark_gray>» <dark_purple><bold>Epic</bold></dark_purple>"
       - "<gray>A massive serpent from"
@@ -575,7 +675,7 @@ fishes:
     min-weight: 1.0
     max-weight: 50.0
     biomes: []
-    price: 3000.0
+    price: 5000.0
     lore:
       - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
       - "<gold>It doesn't look like an ordinary fish..."
@@ -595,7 +695,7 @@ fishes:
     min-weight: 1000.0
     max-weight: 5000.0
     biomes: []
-    price: 5000.0
+    price: 10000.0
     lore:
       - "<dark_gray>» <light_purple><bold>Legendary</bold></light_purple>"
       - "<light_purple>The ancient titan of the abyss."
@@ -616,7 +716,7 @@ fishes:
     min-weight: 5000.0
     max-weight: 50000.0
     biomes: []
-    price: 12000.0
+    price: 25000.0
     lore:
       - "<dark_gray>» <black><bold>Legendary</bold></black>"
       - "<gray>A creature that swims between"
@@ -636,7 +736,7 @@ fishes:
     min-weight: 300.0
     max-weight: 2500.0
     biomes: []
-    price: 4000.0
+    price: 8000.0
     lore:
       - "<dark_gray>» <gold><bold>Legendary</bold></gold>"
       - "<gold>A prehistoric predator that"
@@ -656,7 +756,7 @@ fishes:
     min-weight: 500.0
     max-weight: 4000.0
     biomes: []
-    price: 6000.0
+    price: 12000.0
     lore:
       - "<dark_gray>» <light_purple><bold>Legendary</bold></light_purple>"
       - "<light_purple>A creature born in the"
@@ -676,7 +776,7 @@ fishes:
     min-weight: 10000.0
     max-weight: 75000.0
     biomes: []
-    price: 20000.0
+    price: 50000.0
     lore:
       - "<dark_gray>» <black><bold>Legendary</bold></black>"
       - "<gray>A monstrous entity said to"

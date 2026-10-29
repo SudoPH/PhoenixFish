@@ -1,0 +1,48 @@
+# ============================================================
+#  PhoenixFish — Turkish Contract Template Localization (tr)
+# ============================================================
+#  Per-contract template display-name + lore for 10 entries.
+#  Missing keys auto-fallback to lang/en/contracts.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+contracts:
+  common_angler:
+    display-name: <yellow>Yaygın Balıkçı
+    description:
+    - <gray><white>%amount%</gray> yaygın nadirlikte balık yakala.
+  plentiful_haul:
+    display-name: <yellow>Bol Av
+    description:
+    - <gray>Herhangi bir türden <white>%amount%</gray> balık yakala.
+  freshwater_specialist:
+    display-name: <yellow>Tatlı Su Uzmanı
+    description:
+    - <gray><white>%amount%</gray> yaygın balık yakala — küçük ödüllü.
+  uncommon_hunter:
+    display-name: <gold>Sıradan Avcı
+    description:
+    - <gray><white>%amount%</gray> sıradan nadirlikte balık yakala.
+  rare_specialist:
+    display-name: <aqua>Nadir Uzmanı
+    description:
+    - <gray><white>%amount%</gray> nadir nadirlikte balık yakala.
+  epic_pursuit:
+    display-name: <light_purple>Epik Av
+    description:
+    - <gray><white>%amount%</gray> epik nadirlikte balık yakala.
+  legendary_quest:
+    display-name: <light_purple>Efsanevi Görev
+    description:
+    - <gray><white>%amount%</white> efsanevi nadirlikte balık yakala.
+  heavy_hauler:
+    display-name: <gold>Ağır Yük Taşıyıcı
+    description:
+    - <gray>En az <white>%value% kg</white> ağırlığında <white>%amount%</gray> balık yakala.
+  trophy_hunter:
+    display-name: <gold>Kupa Avcısı
+    description:
+    - <gray>En az <white>%value% kg</white> ağırlığında <white>%amount%</gray> balık yakala.
+  cod_craze:
+    display-name: <yellow>Morina Çılgınlığı
+    description:
+    - <gray><white>%amount%</gray> morina yakala — boyut önemli değil.

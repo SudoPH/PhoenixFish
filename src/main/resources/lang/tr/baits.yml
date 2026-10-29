@@ -1,0 +1,149 @@
+# ============================================================
+#  PhoenixFish — Türkçe Yem Yerelleştirmesi (tr)
+# ============================================================
+#  28 yem girişi için görünen ad (display-name) + lore tanımları.
+#  Eksik anahtarlar, FileConfiguration.setDefaults aracılığıyla
+#  otomatik olarak lang/en/baits.yml dosyasına geri döner (fallback).
+# ============================================================
+
+baits:
+  worm:
+    display-name: <#8B4513>Yaygın Solucan</#8B4513>
+    lore:
+    - <gray>Toprakta bulunan sıradan bir solucan.
+    - <dark_gray>» <white>Sıradan balıkları hafifçe çeker.
+  bread_crust:
+    display-name: <#FFDAB9>Ekmek Kırıntısı</#FFDAB9>
+    lore:
+    - <gray>Ekmekten artmış ufak bir parça.
+    - <dark_gray>» <white>Umutsuz balıklar için ucuz bir yem.
+  minnow_bait:
+    display-name: <#A0A0A0>Küçük Balık Yemi</#A0A0A0>
+    lore:
+    - <gray>Kemik unuyla karıştırılmış ezilmiş küçük balıklar.
+    - <dark_gray>» <white>Solucandan biraz daha iyidir.
+  seaweed_wrap:
+    display-name: <#3CB371>Deniz Yosunu Sarma</#3CB371>
+    lore:
+    - <gray>Islak yosundan örülmüş, kokulu bir sarma.
+    - <dark_gray>» <aqua>Az bulunur balıkları çeker.
+  bug_paste:
+    display-name: <#DAA520>Böcek Macunu</#DAA520>
+    lore:
+    - <gray>Tatlı balın içinde bekletilmiş ezilmiş böcekler.
+    - <dark_gray>» <aqua>İnsanlara korkunç kokar, balıklar için ise vazgeçilmezdir.
+  glowing_bait:
+    display-name: <#FFFF00>Parlayan Yem</#FFFF00>
+    lore:
+    - <gray>Gökkuşağı yansımalı parıltısı balıkları büyüler.
+    - <dark_gray>» <aqua>Az bulunur balıkları çeker.
+  enchanted_dough:
+    display-name: <#FFB6C1>Büyülü Hamur</#FFB6C1>
+    lore:
+    - <gray>Bir tutam sihirle yoğrulup pişirilmiş hamur.
+    - <dark_gray>» <aqua>Az bulunur balıklar için güvenilir bir tercih.
+  bloodied_flesh:
+    display-name: <#8B0000>Kanlı Et</#8B0000>
+    lore:
+    - <gray>Yırtıcıları çıldırtan keskin bir koku.
+    - <dark_gray>» <red>Nadir balıkları çeker.
+  spider_silk:
+    display-name: <#F5F5DC>Örümcek İpeği</#F5F5DC>
+    lore:
+    - <gray>Nadir avları tuzağa düşüren örülmüş ipek.
+    - <dark_gray>» <red>Nadir balıklar için premium bir yem.
+  ocean_essence:
+    display-name: <#00CED1>Okyanus Özü</#00CED1>
+    lore:
+    - <#00CED1>Denizlerin saf büyüsü.
+    - <dark_gray>» <gold>Destansı balıkları çeker.
+  golden_roe:
+    display-name: <#FFD700>Altın Havyar</#FFD700>
+    lore:
+    - <gold>Altın gibi parıldayan nadir balık yumurtaları.
+    - <dark_gray>» <gold>Destansı balıklar için son derece caziptir.
+  void_leech:
+    display-name: <#9D00FF>Boşluk Sülüğü</#9D00FF>
+    lore:
+    - <dark_purple>Derin boşluktan gelen parazitik bir yaratık.
+    - <dark_gray>» <light_purple>Efsanevi balıkları çeker.
+  lunar_moth:
+    display-name: <#C0C0C0>Ay Güvesi</#C0C0C0>
+    lore:
+    - <#C0C0C0>Enerjisini ay ışığından çeker.
+    - <dark_gray>» <light_purple>Mitik balıklar için en üstün yem.
+  enhanced_worm:
+    display-name: <#8B4513>Güçlendirilmiş Solucan</#8B4513>
+    lore:
+    - <gray>Tombul ve sulu bir solucan.
+    - <dark_gray>» <white>Sıradan balıkları büyük ölçüde çeker.
+  enhanced_glowing_bait:
+    display-name: <#FFFF00>Güçlendirilmiş Parlayan Yem</#FFFF00>
+    lore:
+    - <gray>Öteki dünyaya ait bir ışıkla parlar.
+    - <dark_gray>» <aqua>Az bulunur balıkları güçlü biçimde çeker.
+  enhanced_bloodied_flesh:
+    display-name: <#8B0000>Güçlendirilmiş Kanlı Et</#8B0000>
+    lore:
+    - <gray>Kara büyü bu ete iyice işlemiş.
+    - <dark_gray>» <red>Nadir balıkları güçlü biçimde çeker.
+  enhanced_ocean_essence:
+    display-name: <#00CED1>Güçlendirilmiş Okyanus Özü</#00CED1>
+    lore:
+    - <#00CED1>Derinliklerin damıtılmış özü.
+    - <dark_gray>» <gold>Destansı balıkları güçlü biçimde çeker.
+  enhanced_golden_roe:
+    display-name: <#FFD700>Güçlendirilmiş Altın Havyar</#FFD700>
+    lore:
+    - <gold>Güneşin kutsadığı altın yumurtalar.
+    - <dark_gray>» <gold>Destansı balıklar için göz kamaştırıcı bir çekim gücü.
+  enhanced_void_leech:
+    display-name: <#9D00FF>Güçlendirilmiş Boşluk Sülüğü</#9D00FF>
+    lore:
+    - <dark_purple>Boşluktan gelen parazitik bir kâbus.
+    - <dark_gray>» <light_purple>Efsanevi balıklar için vazgeçilmezdir.
+  moss_bait:
+    display-name: <#6B8E23>Yosun Yemi</#6B8E23>
+    lore:
+    - <gray>Balıkların sevdiği nemli yosun.
+    - <dark_gray>» <white>Sıradan balıkları çeker.
+  glow_berry_bait:
+    display-name: <#FF8C00>Işıltı Meyvesi Yemi</#FF8C00>
+    lore:
+    - <gray>Tatlı ve ışıl ışıl.
+    - <dark_gray>» <aqua>Az bulunur balıkları çeker.
+  crimson_bait:
+    display-name: <#DC143C>Kızıl Yem</#DC143C>
+    lore:
+    - <gray>Kızıl ormanlardan gelir.
+    - <dark_gray>» <red>Nadir balıkları çeker.
+  ender_bait:
+    display-name: <#40E0D0>Ender Yemi</#40E0D0>
+    lore:
+    - <gray>Balıkları telepatik yolla cezbeder.
+    - <dark_gray>» <red>Nadir balıkları çeker.
+  blaze_bait:
+    display-name: <#FFA500>Blaze Yemi</#FFA500>
+    lore:
+    - <gray>Nether sıcağıyla için için yanar.
+    - <dark_gray>» <gold>Destansı balıkları çeker.
+  shulker_bait:
+    display-name: <#C9A0DC>Shulker Yemi</#C9A0DC>
+    lore:
+    - <gray>Korumalı bir lokma.
+    - <dark_gray>» <gold>Destansı balıkları güçlü biçimde çeker.
+  wither_bait:
+    display-name: <#4A4A4A>Wither Yemi</#4A4A4A>
+    lore:
+    - <gray>Yem halinde ölümün ta kendisi.
+    - <dark_gray>» <light_purple>Efsanevi balıkları çeker.
+  echo_bait:
+    display-name: <#FFFACD>Eko Yemi</#FFFACD>
+    lore:
+    - <gray>Derin karanlıktan gelen fısıltılar.
+    - <dark_gray>» <light_purple>Efsanevi balıklar için vazgeçilmezdir.
+  nether_star_bait:
+    display-name: <#F8F8FF>Nether Yıldızı Yemi</#F8F8FF>
+    lore:
+    - <white>Yoğunlaştırılmış yıldız enerjisi.
+    - <dark_gray>» <light_purple>Mitik balıklar için en üstün yem.

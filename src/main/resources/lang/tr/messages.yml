@@ -195,6 +195,14 @@ skills_name_fast: "<yellow>Hızlı Tutucu"
 skills_name_hunter: "<red>Usta Avcı"
 skills_name_double: "<aqua>Çift Av"
 skills_name_bait: "<gold>Şanslı Yem"
+# v1.6.2 (Fix #1) — Yeni skill i18n anahtarları (SkillManager.openMenu tarafından kullanılır).
+# %pct% config'den okunan per-level bonus yüzdesidir (default 5, 10, 10).
+skills_name_big: "<#DAA520>Büyük Av"
+skills_name_lucky: "<#55FFFF>Şanslı Atış"
+skills_name_stamina: "<#FF6347>Dayanıklılık"
+skills_big_desc: "<gray>Her seviye +%pct%% balık ağırlığı (daha ağır = daha pahalı)."
+skills_lucky_desc: "<gray>Her seviye +%pct%% yakalanan balığı bir üst rarelığa yükseltme şansı."
+skills_stamina_desc: "<gray>Her seviye +%pct%% minigame gerilim direnci (ip daha geç kopar)."
 
 # Ekonomi
 economy_disabled: "<red>Ekonomi sistemi devre dışı!</red>"
@@ -244,3 +252,19 @@ rod_level_required: "<red>Bu oltayı kullanmak için <yellow>%level%</yellow> ba
 # Mod İsimleri (Plain text olmalı - MiniMessage tag'leri kullanılmaz)
 mode_custom: "PhoenixFish"
 mode_vanilla: "Vanilla"
+# ──────────────────────────────────────────────────────────
+#  v1.8.5 — Yeni anahtarlar (/pf settings + Achievement/Contract/Skill i18n)
+# ──────────────────────────────────────────────────────────
+skills_effect_disabled: "<dark_red>(etki config'de devre dışı — puanlar yine de korunur)"
+achievements_disabled: "<red>Başarım sistemi devre dışı.</red>"
+achievements_menu_title: "<dark_gray>» <gold>Başımlar <dark_gray>(<white>%unlocked%/%total%</white>)"
+achievement_name_unlocked: "<gold><bold>%id%</bold></gold>"
+achievement_name_locked: "<gray><italic>%id%</italic></gray>"
+contracts_disabled: "<red>Sözleşme sistemi devre dışı.</red>"
+contracts_gui_title: "<dark_gray>» <gold>Günlük Sözleşmeler</gold>"
+contract_progress_pending: "<gray>İlerleme: <yellow>%current%<gray>/<white>%needed%"
+contract_progress_done: "<gray>İlerleme: <green>%current%<gray>/<white>%needed% <green>✔"
+contract_reward_money: "<gray>Ödül: <gold>$%money% <aqua>+%xp% XP"
+
+# v1.8.8 — Contract claim confirmation (used by ContractManager.handleSlotClick)
+contract_claimed: "<green><bold>✔ Reward Claimed!</bold></green> <white>%name%</white> <dark_gray>— <gold>$%money% <aqua>+ %xp% XP"

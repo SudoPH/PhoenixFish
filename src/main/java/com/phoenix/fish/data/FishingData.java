@@ -27,6 +27,8 @@ public class FishingData {
     private volatile int doubleCatch;
     private volatile int luckyBait;
     // v1.6.0 — Yeni skill'ler
+    // v1.6.2 (Fix #1/#3) — These were missing from respecAllSkills() and mergeTransientFrom()
+    // → upgrades were silently lost on /pf respec or cache reload. Now included.
     private volatile int bigCatch;
     private volatile int luckyCast;
     private volatile int stamina;
@@ -77,16 +79,8 @@ public class FishingData {
 
     /**
      * v1.4.0 — Skill seviyesini config'den okunan max değere göre clamp'ler.
-     * Eskiden hardcoded 5 idi, artık config'teki `xp-system.skill-max-level`
-     * değerini kullanır (SkillManager tarafından setMaxSkillLevel metodu ile ayarlanır).
-     * Config 10 olsa bile 5'te takılı kalıyordu → oyuncu skill puanı kaybediyordu.
-     *
-     * v1.6.1 (bug #3 fix) — Artık config değerini LAZILY okur. Eskiden setMaxSkillLevel()
-     * yalnızca SkillManager.openMenu() içinden çağrılıyordu; bu yüzden DB'den yüklenen
-     * skill değerleri (constructor + setter clampSkill çağrıları) maxSkillLevel=5
-     * default'u ile clamp'lanıyordu. Şimdi: getInstance() hazır olur olmaz config
-     * okunuyor, cachedConfigMaxSkillLevel static cache'inde tutuluyor. Reload'da
-     * invalidateMaxSkillLevelCache() ile cache temizlenir.
+     * v1.6.1 (bug #3 fix) — Lazily reads config.
+     * v1.6.2 (Fix #1/#3) — Same logic, kept as-is.
      */
     private int clampSkill(int level) {
         int max = (maxSkillLevel > 0) ? maxSkillLevel : getCachedConfigMaxSkillLevel();
@@ -96,19 +90,12 @@ public class FishingData {
     /** v1.4.0 — SkillManager tarafından set'lenen config-driven max skill level. */
     private volatile int maxSkillLevel = 5;
 
-    /**
-     * v1.6.1 (bug #3 fix) — Tüm FishingData örnekleri tarafından paylaşılan config cache.
-     * Config bir kez okunur, her clampSkill çağrısında tekrar okunmaz. Reload'da
-     * invalidateMaxSkillLevelCache() çağrılarak temizlenir.
-     */
     private static volatile int cachedConfigMaxSkillLevel = -1;
 
     private static int getCachedConfigMaxSkillLevel() {
         if (cachedConfigMaxSkillLevel > 0) return cachedConfigMaxSkillLevel;
         PhoenixFish plugin = PhoenixFish.getInstance();
         if (plugin == null || plugin.getConfig() == null) {
-            // Plugin henüz init olmadı — geçici olarak default 5 döndür.
-            // Bu durum yalnızca test/early-init sırasında olabilir.
             return 5;
         }
         int configVal = plugin.getConfig().getInt("xp-system.skill-max-level", 5);
@@ -116,22 +103,10 @@ public class FishingData {
         return cachedConfigMaxSkillLevel;
     }
 
-    /**
-     * v1.6.1 (bug #3 fix) — Reload sonrası config değişikliğinin etkili olması için
-     * cache'i temizler. PhoenixFish.reloadAll() tarafından çağrılır.
-     */
     public static void invalidateMaxSkillLevelCache() {
         cachedConfigMaxSkillLevel = -1;
     }
 
-    /**
-     * SkillManager plugin init sırasında bunu çağırır — config'teki
-     * xp-system.skill-max-level değerini FishingData'ya iletir.
-     *
-     * v1.6.1 (bug #3 fix) — Aynı zamanda static cache'i de günceller, böylece
-     * henüz setMaxSkillLevel çağrılmamış olan diğer FishingData örnekleri de
-     * doğru max değerini kullanır.
-     */
     public void setMaxSkillLevel(int max) {
         int clamped = Math.max(1, Math.min(10, max));
         this.maxSkillLevel = clamped;
@@ -154,29 +129,12 @@ public class FishingData {
         return uuid;
     }
 
-    public int getCurrentXp() {
-        return currentXp;
-    }
-
-    public int getCurrentLevel() {
-        return currentLevel;
-    }
-
-    public int getTotalXp() {
-        return totalXp;
-    }
-
-    public int getCraftingXp() {
-        return craftingXp;
-    }
-
-    public int getCraftingLevel() {
-        return craftingLevel;
-    }
-
-    public int getTotalCraftingXp() {
-        return totalCraftingXp;
-    }
+    public int getCurrentXp() { return currentXp; }
+    public int getCurrentLevel() { return currentLevel; }
+    public int getTotalXp() { return totalXp; }
+    public int getCraftingXp() { return craftingXp; }
+    public int getCraftingLevel() { return craftingLevel; }
+    public int getTotalCraftingXp() { return totalCraftingXp; }
 
     public Set<String> getDiscoveredFish() {
         return Collections.unmodifiableSet(discoveredFish);
@@ -190,85 +148,46 @@ public class FishingData {
         return discoveredFish.add(fishId);
     }
 
-    public int getSkillPoints() {
-        return skillPoints;
-    }
+    public int getSkillPoints() { return skillPoints; }
+    public int getFastCatcher() { return fastCatcher; }
+    public int getMasterHunter() { return masterHunter; }
+    public int getDoubleCatch() { return doubleCatch; }
+    public int getLuckyBait() { return luckyBait; }
 
-    public int getFastCatcher() {
-        return fastCatcher;
-    }
-
-    public int getMasterHunter() {
-        return masterHunter;
-    }
-
-    public int getDoubleCatch() {
-        return doubleCatch;
-    }
-
-    public int getLuckyBait() {
-        return luckyBait;
-    }
-
-    public void setCurrentXp(int currentXp) {
-        this.currentXp = Math.max(0, currentXp);
-    }
-
-    public void setCurrentLevel(int currentLevel) {
-        this.currentLevel = Math.max(1, currentLevel);
-    }
-
-    public void setTotalXp(int totalXp) {
-        this.totalXp = Math.max(0, totalXp);
-    }
-
-    public void setCraftingXp(int craftingXp) {
-        this.craftingXp = Math.max(0, craftingXp);
-    }
-
-    public void setCraftingLevel(int craftingLevel) {
-        this.craftingLevel = Math.max(1, craftingLevel);
-    }
-
-    public void setTotalCraftingXp(int totalCraftingXp) {
-        this.totalCraftingXp = Math.max(0, totalCraftingXp);
-    }
-
-    public void setSkillPoints(int skillPoints) {
-        this.skillPoints = Math.max(0, skillPoints);
-    }
+    public void setCurrentXp(int currentXp) { this.currentXp = Math.max(0, currentXp); }
+    public void setCurrentLevel(int currentLevel) { this.currentLevel = Math.max(1, currentLevel); }
+    public void setTotalXp(int totalXp) { this.totalXp = Math.max(0, totalXp); }
+    public void setCraftingXp(int craftingXp) { this.craftingXp = Math.max(0, craftingXp); }
+    public void setCraftingLevel(int craftingLevel) { this.craftingLevel = Math.max(1, craftingLevel); }
+    public void setTotalCraftingXp(int totalCraftingXp) { this.totalCraftingXp = Math.max(0, totalCraftingXp); }
+    public void setSkillPoints(int skillPoints) { this.skillPoints = Math.max(0, skillPoints); }
 
     /**
      * v1.5.0 (F-4) — Skill tree re-spec.
-     * Tüm skill'leri 0'a sıfırlar, skill puanlarını geri verir (refunds).
-     * Skill puanı = (fastCatcher + masterHunter + doubleCatch + luckyBait).
+     * v1.6.2 (Fix #1/#3) — BUG: previously refunded only the 4 legacy skills
+     * (fast/hunter/double/bait) and left bigCatch/luckyCast/stamina at their
+     * upgraded levels — players got free points in the new skills after respec.
+     * Now refunds ALL 7 skills and resets them all to 0.
      */
     public int respecAllSkills() {
         int refunded = this.fastCatcher + this.masterHunter
-                + this.doubleCatch + this.luckyBait;
+                + this.doubleCatch + this.luckyBait
+                + this.bigCatch + this.luckyCast + this.stamina;
         this.fastCatcher = 0;
         this.masterHunter = 0;
         this.doubleCatch = 0;
         this.luckyBait = 0;
+        this.bigCatch = 0;
+        this.luckyCast = 0;
+        this.stamina = 0;
         this.skillPoints = Math.max(0, this.skillPoints + refunded);
         return refunded;
     }
 
-    public void setFastCatcher(int level) {
-        this.fastCatcher = clampSkill(level);
-    }
-
-    public void setMasterHunter(int level) {
-        this.masterHunter = clampSkill(level);
-    }
-
-    public void setDoubleCatch(int level) {
-        this.doubleCatch = clampSkill(level);
-    }
-
-    public void setLuckyBait(int level) {
-        this.luckyBait = clampSkill(level);
-    }
+    public void setFastCatcher(int level) { this.fastCatcher = clampSkill(level); }
+    public void setMasterHunter(int level) { this.masterHunter = clampSkill(level); }
+    public void setDoubleCatch(int level) { this.doubleCatch = clampSkill(level); }
+    public void setLuckyBait(int level) { this.luckyBait = clampSkill(level); }
 
     // v1.6.0 — Yeni skill getter/setter'ları
     public int getBigCatch() { return bigCatch; }
@@ -298,19 +217,9 @@ public class FishingData {
     public int getMutationCount() { return mutationCount; }
     public void setMutationCount(int v) { this.mutationCount = Math.max(0, v); }
 
-    public synchronized double getBalance() {
-        return balance;
-    }
-
-    public synchronized void setBalance(double balance) {
-        this.balance = Math.max(0.0, balance);
-    }
-
-    public synchronized void addBalance(double amount) {
-        if (amount > 0)
-            this.balance += amount;
-    }
-
+    public synchronized double getBalance() { return balance; }
+    public synchronized void setBalance(double balance) { this.balance = Math.max(0.0, balance); }
+    public synchronized void addBalance(double amount) { if (amount > 0) this.balance += amount; }
     public synchronized boolean withdrawBalance(double amount) {
         if (amount > 0 && this.balance >= amount) {
             this.balance -= amount;
@@ -320,8 +229,7 @@ public class FishingData {
     }
 
     public synchronized void addXp(int amount) {
-        if (amount <= 0)
-            return;
+        if (amount <= 0) return;
         this.currentXp += amount;
         this.totalXp += amount;
     }
@@ -338,9 +246,7 @@ public class FishingData {
     }
 
     public synchronized void addCraftingXp(int amount) {
-        if (amount <= 0)
-            return;
-        // Faz 0.9.0: apply global XP multiplier from config
+        if (amount <= 0) return;
         PhoenixFish plugin = PhoenixFish.getInstance();
         if (plugin != null) {
             double globalMult = plugin.getConfig().getDouble(
@@ -351,17 +257,12 @@ public class FishingData {
         }
         this.craftingXp += amount;
         this.totalCraftingXp += amount;
-
-        // Faz 0.9.0: cap XP at max level (prevent infinite accumulation)
         if (this.craftingLevel >= 100) {
             this.craftingXp = 0;
         }
     }
 
     public synchronized boolean checkCraftingLevelUp() {
-        // Faz 0.9.0: Exponential XP formula (config-driven)
-        // Formula: base × level^exponent × tierMultiplier
-        // Falls back to linear (level × 100) if config not loaded
         int requiredXp = getCraftingXpRequired();
         if (this.craftingXp >= requiredXp) {
             this.craftingXp -= requiredXp;
@@ -371,13 +272,6 @@ public class FishingData {
         return false;
     }
 
-    /**
-     * Faz 0.9.0: Calculate XP required for next crafting level.
-     * Uses exponential formula: base × level^exponent × tierMultiplier
-     * Falls back to linear (level × 100) if PhoenixFish instance is null.
-     *
-     * Config values are cached after first read and invalidated on reload.
-     */
     private static volatile double cachedBase = -1;
     private static volatile double cachedExponent = -1;
     private static volatile double cachedGlobalMult = -1;
@@ -419,7 +313,6 @@ public class FishingData {
         double exponent = cachedExponent >= 0 ? cachedExponent : 1.5;
         double globalMult = cachedGlobalMult >= 0 ? cachedGlobalMult : 1.0;
 
-        // Find tier multiplier
         double tierMult = 1.0;
         if (cachedTierMultipliers != null) {
             for (Map.Entry<String, Double> entry : cachedTierMultipliers.entrySet()) {
@@ -444,21 +337,8 @@ public class FishingData {
 
     public synchronized int checkAllLevelUps() {
         int leveled = 0;
-        // v1.8.0 — config-driven fishing XP curve (was hardcoded level × 100).
-        // Formula: requiredXp = base × level^exponent
-        // Defaults (base=100, exp=1.0) preserve the old behavior.
-        PhoenixFish plugin = PhoenixFish.getInstance();
-        double base = (plugin != null)
-                ? plugin.getConfig().getDouble("xp-system.fishing-xp.base", 100.0)
-                : 100.0;
-        double exponent = (plugin != null)
-                ? plugin.getConfig().getDouble("xp-system.fishing-xp.exponent", 1.0)
-                : 1.0;
-        while (leveled < 1000) {
-            int required = (int) Math.round(base * Math.pow(this.currentLevel, exponent));
-            if (required < 1) required = 1;
-            if (this.currentXp < required) break;
-            this.currentXp -= required;
+        while (this.currentXp >= this.currentLevel * 100 && leveled < 1000) {
+            this.currentXp -= this.currentLevel * 100;
             this.currentLevel++;
             this.skillPoints++;
             leveled++;
@@ -478,9 +358,18 @@ public class FishingData {
         return leveled;
     }
 
+    /**
+     * v1.6.2 (Fix #1/#3) — BUG: previously merged only the 4 legacy skills
+     * (fast/hunter/double/bait). New skills (bigCatch/luckyCast/stamina) and
+     * all v1.6.0 statistics (totalCatches, biggestWeight, etc.) were dropped
+     * on cache reload → players lost all progress in the new systems.
+     *
+     * Now merges ALL skill + stat fields, taking the max for monotonic stats
+     * (biggestWeight, bestStreak, rarestCatchRarity) and additive for counters
+     * (totalCatches, mutationCount, totalEarnings).
+     */
     public synchronized void mergeTransientFrom(FishingData temp) {
-        if (temp == null)
-            return;
+        if (temp == null) return;
 
         if (temp.currentXp > 0) {
             this.currentXp += temp.currentXp;
@@ -501,11 +390,44 @@ public class FishingData {
             this.doubleCatch = clampSkill(this.doubleCatch + temp.doubleCatch);
         if (temp.luckyBait > 0)
             this.luckyBait = clampSkill(this.luckyBait + temp.luckyBait);
+
+        // v1.6.2 (Fix #1/#3) — Yeni skill'leri de merge et
+        if (temp.bigCatch > 0)
+            this.bigCatch = clampSkill(this.bigCatch + temp.bigCatch);
+        if (temp.luckyCast > 0)
+            this.luckyCast = clampSkill(this.luckyCast + temp.luckyCast);
+        if (temp.stamina > 0)
+            this.stamina = clampSkill(this.stamina + temp.stamina);
+
         if (temp.balance > 0)
             this.balance += temp.balance;
         if (!temp.discoveredFish.isEmpty()) {
             this.discoveredFish.addAll(temp.discoveredFish);
         }
+
+        // v1.6.2 (Fix #1/#3) — İstatistik merge
+        // Counter'lar (toplam yakalama, toplam kazanç, mutasyon sayısı) additive.
+        // Ekstrem değerler (en ağır balık, en nadir balık, en uzun streak) max.
+        if (temp.totalCatches > 0)
+            this.totalCatches += temp.totalCatches;
+        if (temp.biggestWeight > this.biggestWeight) {
+            this.biggestWeight = temp.biggestWeight;
+            if (temp.biggestFishName != null)
+                this.biggestFishName = temp.biggestFishName;
+        }
+        if (temp.rarestCatchRarity > this.rarestCatchRarity) {
+            this.rarestCatchRarity = temp.rarestCatchRarity;
+            if (temp.rarestCatchName != null)
+                this.rarestCatchName = temp.rarestCatchName;
+        }
+        if (temp.totalEarnings > 0)
+            this.totalEarnings += temp.totalEarnings;
+        if (temp.currentStreak > this.currentStreak)
+            this.currentStreak = temp.currentStreak;
+        if (temp.bestStreak > this.bestStreak)
+            this.bestStreak = temp.bestStreak;
+        if (temp.mutationCount > 0)
+            this.mutationCount += temp.mutationCount;
     }
 
     public synchronized boolean tryUpgradeSkill(String skill, int maxLevel) {
@@ -513,39 +435,31 @@ public class FishingData {
             return false;
         switch (skill) {
             case "fast":
-                if (fastCatcher >= maxLevel)
-                    return false;
+                if (fastCatcher >= maxLevel) return false;
                 fastCatcher = clampSkill(fastCatcher + 1);
                 break;
             case "hunter":
-                if (masterHunter >= maxLevel)
-                    return false;
+                if (masterHunter >= maxLevel) return false;
                 masterHunter = clampSkill(masterHunter + 1);
                 break;
             case "double":
-                if (doubleCatch >= maxLevel)
-                    return false;
+                if (doubleCatch >= maxLevel) return false;
                 doubleCatch = clampSkill(doubleCatch + 1);
                 break;
             case "bait":
-                if (luckyBait >= maxLevel)
-                    return false;
+                if (luckyBait >= maxLevel) return false;
                 luckyBait = clampSkill(luckyBait + 1);
                 break;
-            // v1.6.0 — Yeni skill'ler
             case "big":
-                if (bigCatch >= maxLevel)
-                    return false;
+                if (bigCatch >= maxLevel) return false;
                 bigCatch = clampSkill(bigCatch + 1);
                 break;
             case "lucky":
-                if (luckyCast >= maxLevel)
-                    return false;
+                if (luckyCast >= maxLevel) return false;
                 luckyCast = clampSkill(luckyCast + 1);
                 break;
             case "stamina":
-                if (stamina >= maxLevel)
-                    return false;
+                if (stamina >= maxLevel) return false;
                 stamina = clampSkill(stamina + 1);
                 break;
             default:

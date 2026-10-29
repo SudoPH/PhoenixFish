@@ -1,0 +1,29 @@
+# ============================================================
+#  PhoenixFish — Turkish Skill Localization (tr)
+# ============================================================
+#  Per-skill display-name + lore for 7 entries.
+#  Missing keys auto-fallback to lang/en/skills.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+skills:
+  fast:
+    name: <yellow>Hızlı Yakalayıcı
+    desc: <gray>Minigame yakalama hızını artırır.
+  hunter:
+    name: <red>Usta Avcı
+    desc: <gray>Nadir+ balık şansını artırır.
+  double:
+    name: <aqua>Çift Yakalama
+    desc: <gray>Tek seferde 2 balık yakalama şansı.
+  bait:
+    name: <gold>Şanslı Yem
+    desc: <gray>Yem tüketmeme şansı.
+  big:
+    name: <#DAA520>Büyük Yakalama
+    desc: <gray>Her seviye +%pct%% balık ağırlığı (daha ağır = daha pahalı).
+  lucky:
+    name: <#55FFFF>Şanslı Atış
+    desc: <gray>Her seviye +%pct%% yakalamayı bir sonraki nadirliğe yükseltme şansı.
+  stamina:
+    name: <#FF6347>Dayanıklılık
+    desc: <gray>Her seviye +%pct%% minigame gerilim direnci (misina daha geç kopar).

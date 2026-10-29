@@ -7,25 +7,27 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
- * PhoenixFish dil yöneticisi.
+ * PhoenixFish language manager — chat / GUI messages layer.
  *
- * <p><b>v1.3.5 — Dinamik dil desteği + İngilizce fallback:</b></p>
- * <ul>
- *   <li>Herhangi bir dil kodu kabul edilir (tr, en, zh_cn, de, fr, es, ...).</li>
- *   <li><code>messages_&lt;dil&gt;.yml</code> veri klasöründe yoksa, jar'dan çıkarılır.</li>
- *   <li>Yoksa İngilizce'ye fallback yapılır.</li>
- *   <li>Eksik anahtarlar her zaman İngilizce dosyadan otomatik tamamlanır
- *       (Bukkit {@link FileConfiguration#setDefaults} mekanizması ile).</li>
- * </ul>
+ * <p><b>v1.8.4 — BUGFIX:</b> the v1.8.3 refactor moved message files to
+ * the nested {@code /lang/<code>/messages.yml} layout (matching the new
+ * ContentLanguageManager), but this class still looked for the v1.8.2
+ * flat {@code /lang/messages_<code>.yml} filename. On a fresh install
+ * this caused every message lookup to fail with "Language configuration
+ * not loaded". Fixed by aligning this class's resolution order with
+ * ContentLanguageManager's: prefer {@code /lang/<code>/messages.yml},
+ * fall back to legacy {@code /lang/messages_<code>.yml} and root-level
+ * {@code messages_<code>.yml} for servers that customized files before
+ * v1.8.3.</p>
  */
 public class MessageManager {
 
@@ -53,58 +55,106 @@ public class MessageManager {
         loadLanguage();
     }
 
+    private String readRequestedLanguage() {
+        String lang = plugin.getConfig().getString("language", null);
+        if (lang == null || lang.trim().isEmpty()) {
+            lang = plugin.getConfig().getString("settings.language", "en");
+        }
+        if (lang == null) lang = "en";
+        return lang.trim().toLowerCase();
+    }
+
+    /**
+     * v1.8.4 — Resolve the actual file path for a language code.
+     * Search order (first existing wins):
+     *   1. {@code <dataFolder>/lang/<code>/messages.yml}  (v1.8.3 nested — preferred)
+     *   2. {@code <dataFolder>/lang/messages_<code>.yml}  (v1.8.2 flat in /lang/)
+     *   3. {@code <dataFolder>/messages_<code>.yml}        (v1.3.5 root)
+     *   4. Bundled jar resource {@code lang/<code>/messages.yml}  → extract to #1
+     *   5. Bundled jar resource {@code lang/messages_<code>.yml} → extract to #2
+     *   6. Bundled jar resource {@code messages_<code>.yml}       → extract to #3
+     */
+    private File resolveLanguageFile(String code) {
+        File dataFolder = plugin.getDataFolder();
+
+        File nested = new File(dataFolder, "lang/" + code + "/messages.yml");
+        if (nested.exists()) return nested;
+
+        File flatInLang = new File(dataFolder, "lang/messages_" + code + ".yml");
+        if (flatInLang.exists()) return flatInLang;
+
+        File legacyRoot = new File(dataFolder, "messages_" + code + ".yml");
+        if (legacyRoot.exists()) return legacyRoot;
+
+        if (extractBundledResource("lang/" + code + "/messages.yml", nested)) {
+            return nested;
+        }
+        if (extractBundledResource("lang/messages_" + code + ".yml", flatInLang)) {
+            return flatInLang;
+        }
+        if (extractBundledResource("messages_" + code + ".yml", legacyRoot)) {
+            return legacyRoot;
+        }
+        return null;
+    }
+
+    private boolean extractBundledResource(String resourcePath, File targetFile) {
+        if (targetFile.exists()) return true;
+        try (InputStream in = plugin.getResource(resourcePath)) {
+            if (in == null) return false;
+            File parent = targetFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+            plugin.saveResource(resourcePath, false);
+            plugin.getLogger().info("Extracted bundled language resource: " + resourcePath);
+            return targetFile.exists();
+        } catch (Exception e) {
+            plugin.getLogger().warning("Could not extract '" + resourcePath + "': " + e.getMessage());
+            return false;
+        }
+    }
+
     public void loadLanguage() {
         synchronized (configLock) {
-            String requestedLang = plugin.getConfig().getString("settings.language", "en");
-            if (requestedLang == null) requestedLang = "en";
-            requestedLang = requestedLang.trim().toLowerCase();
+            String requestedLang = readRequestedLanguage();
 
-            // Always re-extract bundled English + Turkish files (so admins can copy them
-            // as templates for new languages). saveResource(replace=false) → no-op if file exists.
-            plugin.saveResource("messages_en.yml", false);
-            plugin.saveResource("messages_tr.yml", false);
+            for (String code : new String[]{"en", "tr", "zh_cn"}) {
+                File target = new File(plugin.getDataFolder(), "lang/" + code + "/messages.yml");
+                extractBundledResource("lang/" + code + "/messages.yml", target);
+            }
 
             String resolvedLang = requestedLang;
-            File langFile = new File(plugin.getDataFolder(), "messages_" + resolvedLang + ".yml");
+            File langFile = resolveLanguageFile(resolvedLang);
 
-            // If the data-folder file doesn't exist, try extracting it from the jar
-            // (so server admins can ship custom languages inside the jar, or future
-            // PhoenixFish builds can bundle extra languages).
-            if (!langFile.exists()) {
-                String resourcePath = "messages_" + resolvedLang + ".yml";
-                try (InputStream in = plugin.getResource(resourcePath)) {
-                    if (in != null) {
-                        plugin.saveResource(resourcePath, false);
-                        plugin.getLogger().info("Extracted bundled language file: " + resourcePath);
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("Could not check/extract '" + resourcePath + "': " + e.getMessage());
-                }
-            }
-
-            // If still missing → fall back to English
-            if (!langFile.exists()) {
-                plugin.getLogger().warning("Language file 'messages_" + resolvedLang
-                        + ".yml' not found in data folder or jar! Falling back to English.");
+            if (langFile == null) {
+                plugin.getLogger().warning("Language file for '" + resolvedLang
+                        + "' not found in /lang/<code>/, /lang/, data folder root, or jar! "
+                        + "Falling back to English.");
                 resolvedLang = "en";
-                langFile = new File(plugin.getDataFolder(), "messages_en.yml");
-                if (!langFile.exists()) {
-                    plugin.saveResource("messages_en.yml", false);
-                }
+                langFile = resolveLanguageFile("en");
             }
 
-            // Load the resolved language file.
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(langFile);
+            if (langFile == null || !langFile.exists()) {
+                plugin.getLogger().severe("Could not load ANY language file — even English is missing. "
+                        + "All plugin messages will be empty until the issue is resolved.");
+                this.snapshot = new LangSnapshot(null, "", resolvedLang);
+                return;
+            }
 
-            // Attach the bundled English file as the default fallback for missing keys.
-            // This is the bug fix: previously, a missing key in messages_<lang>.yml would
-            // return Component.empty() (silent failure). Now it falls back to the English
-            // value automatically.
-            //
-            // v1.4.0 — Önce InputStream'i null check et, sonra InputStreamReader oluştur.
-            // Eğer jar'da messages_en.yml yoksa (özel build), InputStreamReader(null)
-            // constructor'u NPE fırlatırdı. Şimdi: null ise sessizce atla + severe log.
-            java.io.InputStream enStream = plugin.getResource("messages_en.yml");
+            FileConfiguration cfg;
+            try (InputStreamReader reader = new InputStreamReader(
+                    new FileInputStream(langFile), StandardCharsets.UTF_8)) {
+                cfg = YamlConfiguration.loadConfiguration(reader);
+            } catch (Exception e) {
+                plugin.getLogger().severe("Failed to load language file " + langFile + ": " + e.getMessage());
+                this.snapshot = new LangSnapshot(null, "", resolvedLang);
+                return;
+            }
+
+            InputStream enStream = plugin.getResource("lang/en/messages.yml");
+            if (enStream == null) enStream = plugin.getResource("lang/messages_en.yml");
+            if (enStream == null) enStream = plugin.getResource("messages_en.yml");
             if (enStream != null) {
                 try (InputStreamReader reader = new InputStreamReader(enStream, StandardCharsets.UTF_8)) {
                     FileConfiguration defaults = YamlConfiguration.loadConfiguration(reader);
@@ -113,15 +163,27 @@ public class MessageManager {
                     plugin.getLogger().warning("Could not load English fallback defaults: " + e.getMessage());
                 }
             } else {
-                plugin.getLogger().severe("Bundled messages_en.yml is missing from the jar — "
-                        + "no English fallback available! All missing keys will be empty.");
+                plugin.getLogger().severe("Bundled English messages file is missing from the jar — "
+                        + "no English fallback available! Missing keys will be empty.");
             }
 
-            String pfx = cfg != null ? cfg.getString("prefix", "") : "";
-            // Atomic publish: a single volatile write makes both fields visible together.
+            String pfx = cfg.getString("prefix", "");
             this.snapshot = new LangSnapshot(cfg, pfx, resolvedLang);
+
+            String source;
+            File parent = langFile.getParentFile();
+            if (parent != null && parent.getName().equals(resolvedLang)
+                    && parent.getParentFile() != null
+                    && parent.getParentFile().getName().equals("lang")) {
+                source = "/lang/" + resolvedLang + "/";
+            } else if (parent != null && parent.getName().equals("lang")) {
+                source = "/lang/ (v1.8.2 flat)";
+            } else {
+                source = "root (v1.3.5)";
+            }
             plugin.getLogger().info("Loaded language: " + resolvedLang
-                    + (requestedLang.equals(resolvedLang) ? "" : " (requested '" + requestedLang + "')"));
+                    + (requestedLang.equals(resolvedLang) ? "" : " (requested '" + requestedLang + "')")
+                    + " (source: " + source + ")");
         }
     }
 
@@ -155,10 +217,6 @@ public class MessageManager {
             return Component.text("Missing language configuration");
         }
 
-        // cfg.getString(key) now consults the defaults layer (English) if the key is
-        // missing from the user's chosen language file. So this branch is only hit
-        // if the key is missing from BOTH the user's file AND the English fallback
-        // — i.e. a truly unknown key.
         String message = snap.langConfig.getString(key);
         if (message == null) {
             plugin.getLogger().warning("Missing message key in language file (and English fallback): " + key);

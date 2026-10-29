@@ -24,7 +24,10 @@ public class SeasonManager {
 
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
-    private final boolean enabled;
+    // v1.6.2 (Fix #4) — was `final boolean`. Now volatile so reload() can update it.
+    private volatile boolean enabled;
+    // v1.6.2 (Fix #4) — Track the scheduled task so reload() can cancel it on disable.
+    private org.bukkit.scheduler.BukkitTask seasonCheckTask;
 
     /** Per-player season scores. */
     private final Map<UUID, Integer> scores = new ConcurrentHashMap<>();
@@ -45,6 +48,34 @@ public class SeasonManager {
     }
 
     public boolean isEnabled() { return enabled; }
+
+    /**
+     * v1.6.2 (Fix #4) — Re-reads the enabled flag and re-loads state on transition.
+     * Previously the field was final → /pf reload never propagated the new value,
+     * and the hourly season-check task was never cancelled on disable (it kept
+     * running silently and would call endSeason() even after the admin disabled
+     * seasons in config).
+     */
+    public synchronized void reload() {
+        boolean newEnabled = plugin.getConfig().getBoolean("features.seasons.enabled", false);
+        if (newEnabled == this.enabled) return;
+        if (newEnabled) {
+            this.enabled = true;
+            load();
+            scheduleSeasonCheck();
+            plugin.getLogger().info("SeasonManager enabled via reload — season " + seasonNumber);
+        } else {
+            save();
+            // Cancel the hourly check so endSeason() doesn't fire while disabled.
+            if (seasonCheckTask != null) {
+                try { seasonCheckTask.cancel(); } catch (Throwable ignored) { }
+                seasonCheckTask = null;
+            }
+            this.enabled = false;
+            scores.clear();
+            plugin.getLogger().info("SeasonManager disabled via reload — state saved, hourly check cancelled.");
+        }
+    }
 
     // =====================================================================
     //  Persistence
@@ -123,7 +154,8 @@ public class SeasonManager {
     private void scheduleSeasonCheck() {
         long durationDays = plugin.getConfig().getLong("features.seasons.duration-days", 30);
         long intervalTicks = 20L * 60 * 60; // Check every hour
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        // v1.6.2 (Fix #4) — store the task so reload() can cancel it on disable.
+        seasonCheckTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             long elapsed = System.currentTimeMillis() - seasonStartTime;
             long durationMs = durationDays * 24L * 60 * 60 * 1000;
             if (elapsed >= durationMs) {

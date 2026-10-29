@@ -1,0 +1,29 @@
+# ============================================================
+#  PhoenixFish — Simplified Chinese Skill Localization (zh_cn)
+# ============================================================
+#  Per-skill display-name + lore for 7 entries.
+#  Missing keys auto-fallback to lang/en/skills.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+skills:
+  fast:
+    name: <yellow>快手捕手
+    desc: <gray>增加小游戏的钓鱼速度。
+  hunter:
+    name: <red>大师猎人
+    desc: <gray>提高稀有+鱼的几率。
+  double:
+    name: <aqua>双重捕获
+    desc: <gray>一次钓到两条鱼的几率。
+  bait:
+    name: <gold>幸运鱼饵
+    desc: <gray>不消耗鱼饵的几率。
+  big:
+    name: <#DAA520>大鱼猎手
+    desc: <gray>每级 +%pct%% 鱼的重量（更重 = 更值钱）。
+  lucky:
+    name: <#55FFFF>幸运抛竿
+    desc: <gray>每级 +%pct%% 几率将钓获升级到下一稀有度。
+  stamina:
+    name: <#FF6347>耐力
+    desc: <gray>每级 +%pct%% 小游戏张力抗性（鱼线更晚断裂）。

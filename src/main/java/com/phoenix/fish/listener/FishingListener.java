@@ -150,8 +150,12 @@ public class FishingListener implements Listener {
 
         double luckMultiplier = calculateLuckMultiplier(player, rod);
 
+        // v1.9.1 — Use getEffectiveBait() which unifies the rod-bound bait
+        // path (v1.9.1) with the legacy off-hand bait path. Falls back to
+        // off-hand if no bait is bound to the rod. Returns null safely if
+        // no bait is active — no NPE risk.
         ItemStack offHandItem = player.getInventory().getItemInOffHand();
-        BaitManager.Bait bait = plugin.getBaitManager().getBaitFromItem(offHandItem);
+        BaitManager.Bait bait = plugin.getBaitManager().getEffectiveBait(player, rod);
 
         Location location = player.getLocation();
         if (location == null)
@@ -159,31 +163,28 @@ public class FishingListener implements Listener {
 
         Biome playerBiome = location.getBlock().getBiome();
 
-        CustomFish fish = plugin.getFishManager().rollRandomFish(luckMultiplier, bait, playerBiome);
+        // v1.6.2 (Fix #2) — Pass `player` to rollRandomFish so the new
+        // player-aware overload pre-filters the candidate pool by depth +
+        // day-night constraints BEFORE rolling. The old code rolled first,
+        // retried up to 3 times if the roll didn't satisfy conditions, and
+        // then silently gave the player an ineligible fish if all retries
+        // failed. The new path returns a constraint-satisfying fish in one
+        // shot (or falls back to the biome-only pool if the constrained pool
+        // is empty, so the catch never silently fails).
+        CustomFish fish = plugin.getFishManager().rollRandomFish(luckMultiplier, bait, playerBiome, player);
         if (fish == null)
             return;
 
-        // v1.6.0 — Day/Night + Depth filter
-        // Eğer features.day-night-fish veya features.depth-fish açık ise,
-        // balığın time/y-range şartlarını kontrol et. Uymuyorsa tekrar roll yap (max 3 deneme).
-        if (plugin.getConfig().getBoolean("features.day-night-fish.enabled", false)
-                || plugin.getConfig().getBoolean("features.depth-fish.enabled", false)) {
-            int attempts = 0;
-            while (!plugin.getFishManager().meetsConditions(fish, player) && attempts < 3) {
-                fish = plugin.getFishManager().rollRandomFish(luckMultiplier, bait, playerBiome);
-                if (fish == null) return;
-                attempts++;
-            }
-            // 3 deneme sonunda hâlâ uymuyorsa, balık yine de verilir (broken UX olmasın)
-        }
-
         // v1.6.0 — Lucky Cast skill: bir üst rarelıkta balık şansı
-        if (plugin.getConfig().getBoolean("features.skill-lucky-cast.enabled", false)) {
+        // v1.6.2 (Fix #3) — Config default changed from 0.02 to 0.10 per spec.
+        // v1.8.6 — Use SkillManager.isSkillEnabled() which checks the new
+        // features.skills.types.lucky-cast path with backward-compat fallback.
+        if (plugin.getSkillManager() != null && plugin.getSkillManager().isSkillEnabled("lucky")) {
             try {
                 com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
                 if (data != null && data.getLuckyCast() > 0 && fish.rarity() < 5) {
                     double chance = data.getLuckyCast() * plugin.getConfig().getDouble(
-                            "features.skill-lucky-cast.rarity-upgrade-chance-per-level", 0.02);
+                            "features.skill-lucky-cast.rarity-upgrade-chance-per-level", 0.10);
                     if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() < chance) {
                         // Bir üst rarelıkta balık bul
                         int targetRarity = fish.rarity() + 1;
@@ -199,12 +200,6 @@ public class FishingListener implements Listener {
                 }
             } catch (Throwable ignored) { }
         }
-
-        // v1.6.0 — Big Catch skill: ağırlık çarpanı
-        // Bu FishRewardHelper.rollWeight'ta uygulanır ama orada data'ya erişim yok.
-        // Burada weight'i önceden etkileyemiyoruz çünkü rollWeight FishRewardHelper'da çağrılıyor.
-        // Çözüm: FishRewardHelper.awardCatch'ta data'dan bigCatch level'ını oku ve weight'e çarpan uygula.
-        // (Bu zaten FishRewardHelper'a eklendi ama rollWeight'tan sonra — şimdilik OK.)
 
         event.setCancelled(true);
 
@@ -263,25 +258,67 @@ public class FishingListener implements Listener {
         return luckMultiplier;
     }
 
+    /**
+     * v1.9.1 — Consume the active bait after a catch.
+     *
+     * <p><b>Fixes applied:</b></p>
+     * <ul>
+     *   <li><b>Config-driven Lucky Bait chance:</b> The old code hardcoded
+     *       {@code 0.20} per level. Now reads from
+     *       {@code xp-system.skill-per-level.lucky-bait-chance-per-level}
+     *       (default 0.20) so the skill-per-level config actually matters.</li>
+     *   <li><b>Inventory update after consumption:</b> The old code called
+     *       {@code setItemInOffHand(null)} without refreshing the player's
+     *       inventory, causing client-side desync. Now schedules a
+     *       {@code player.updateInventory()} one tick later (Paper-recommended
+     *       pattern for inventory mutation inside events).</li>
+     *   <li><b>Rod-bound bait consumption:</b> If the active bait came from
+     *       the rod's PDC (not the off-hand stack), we don't consume an item
+     *       stack — the rod-bound bait is persistent. The off-hand stack is
+     *       only consumed if the bait came from the off-hand path.</li>
+     *   <li><b>Null-safe:</b> Guards against null bait, null off-hand item,
+     *       and air off-hand items.</li>
+     * </ul>
+     */
     private void consumeBait(Player player, ItemStack offHandItem, BaitManager.Bait bait) {
-        if (bait == null || offHandItem == null)
-            return;
+        if (bait == null) return;
 
+        // v1.9.1 — Lucky Bait skill check: chance to NOT consume the bait.
+        // Config-driven per-level chance (default 0.20 = 20% per level).
         if (plugin.isXpSystemEnabled()) {
             FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
             if (data != null && data.getLuckyBait() > 0) {
-                // v1.8.0 — read per-level chance from config (was hardcoded 0.20).
-                // Default 0.10 keeps max-level (8) bait preservation at 80%.
-                double perLevel = plugin.getConfig().getDouble(
-                        "xp-system.skill-per-level.lucky-bait-chance-per-level", 0.10);
-                double chance = data.getLuckyBait() * perLevel;
-                // Hard cap at 90% — always a small chance to consume bait.
-                chance = Math.min(0.90, chance);
+                double chancePerLevel = plugin.getConfig().getDouble(
+                        "xp-system.skill-per-level.lucky-bait-chance-per-level", 0.20);
+                double chance = data.getLuckyBait() * chancePerLevel;
                 if (ThreadLocalRandom.current().nextDouble() < chance) {
                     player.sendActionBar(plugin.getMessageManager().getMessage("skills_bait_saved", false));
                     return;
                 }
             }
+        }
+
+        // v1.9.1 — Determine the consumption source.
+        // If the bait is bound to the rod (rod_bait_id PDC key), we don't
+        // consume an item stack — the rod-bound bait is persistent until
+        // the player explicitly clears it. Only consume from the off-hand
+        // stack if the bait came from the off-hand path.
+        ItemStack rodItem = player.getInventory().getItemInMainHand();
+        BaitManager.Bait rodBoundBait = (rodItem != null)
+                ? plugin.getBaitManager().getBaitFromRod(rodItem) : null;
+
+        if (rodBoundBait != null && rodBoundBait.id().equals(bait.id())) {
+            // Bait came from the rod binding — no item stack to consume.
+            // The rod-bound bait persists across casts.
+            return;
+        }
+
+        // Bait came from the off-hand stack — decrement it.
+        if (offHandItem == null || offHandItem.getType().isAir()) {
+            // v1.9.1 — Defensive: the off-hand is empty but we resolved a
+            // bait. This can happen if the player swapped items between the
+            // cast start and now. Nothing to consume — bail safely.
+            return;
         }
 
         if (offHandItem.getAmount() > 1) {
@@ -290,6 +327,11 @@ public class FishingListener implements Listener {
         } else {
             player.getInventory().setItemInOffHand(null);
         }
+
+        // v1.9.1 — Schedule an inventory update one tick later to avoid
+        // client/server desync (Paper-recommended pattern for inventory
+        // mutation inside event handlers).
+        Bukkit.getScheduler().runTask(plugin, player::updateInventory);
 
         SoundUtils.playFromConfig(plugin, player, "sounds.bait_consume",
                 Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.5f);
@@ -308,14 +350,15 @@ public class FishingListener implements Listener {
             }
         }
 
-        ItemStack offHandItem = player.getInventory().getItemInOffHand();
+        // v1.9.1 — Use getEffectiveBait() for the minigame too, so rod-bound
+        // baits apply their minigame bonuses (fight-strength-reduction,
+        // fish-slow-bonus, progress-bonus) just like off-hand baits.
+        ItemStack rodItemForBait = player.getInventory().getItemInMainHand();
         BaitManager.Bait bait = null;
-        if (offHandItem != null && !offHandItem.getType().isAir()) {
-            try {
-                bait = plugin.getBaitManager().getBaitFromItem(offHandItem);
-            } catch (Throwable ignored) {
-                // BaitManager erişilemezse minigame eski davranışla çalışır (no bonus).
-            }
+        try {
+            bait = plugin.getBaitManager().getEffectiveBait(player, rodItemForBait);
+        } catch (Throwable ignored) {
+            // BaitManager erişilemezse minigame eski davranışla çalışır (no bonus).
         }
 
         MinigameTask task = new MinigameTask(plugin, player, fish, rodConfig, bait);
@@ -352,6 +395,45 @@ public class FishingListener implements Listener {
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             ItemStack item = player.getInventory().getItemInMainHand();
+
+            // v1.9.1 — Bait-equip handler: right-click a fishing rod while
+            // sneaking + holding a bait in the off-hand → bind the bait to
+            // the rod's PDC. Right-click a rod that already has a bait bound
+            // while sneaking → clear the bound bait (toggle behavior).
+            //
+            // This gives players an alternative to the off-hand bait path:
+            // they can "equip" a bait onto the rod once, and it persists
+            // across casts without consuming the off-hand stack.
+            if (item != null && item.getType() == Material.FISHING_ROD
+                    && player.isSneaking()) {
+                BaitManager bm = plugin.getBaitManager();
+                if (bm != null) {
+                    BaitManager.Bait existingRodBait = bm.getBaitFromRod(item);
+                    if (existingRodBait != null) {
+                        // Toggle off — clear the bound bait
+                        bm.clearBaitFromRod(item);
+                        event.setCancelled(true);
+                        player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                                .deserialize("<gray>Bait unequipped from your rod."));
+                        Bukkit.getScheduler().runTask(plugin, player::updateInventory);
+                    } else {
+                        // Try to equip from off-hand
+                        ItemStack offHand = player.getInventory().getItemInOffHand();
+                        BaitManager.Bait offHandBait = (offHand != null)
+                                ? bm.getBaitFromItem(offHand) : null;
+                        if (offHandBait != null) {
+                            if (bm.bindBaitToRod(item, offHandBait.id())) {
+                                event.setCancelled(true);
+                                player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                                        .deserialize("<green>✔ Bait equipped: <white>"
+                                                + offHandBait.id() + "</white> <gray>(sneak + right-click to remove)"));
+                                Bukkit.getScheduler().runTask(plugin, player::updateInventory);
+                            }
+                        }
+                    }
+                }
+            }
+
             if (item != null && item.getType() == Material.FISHING_ROD) {
                 ConfigurationSection rodSec = itemFixer.findRodByItem(item);
                 if (rodSec != null) {

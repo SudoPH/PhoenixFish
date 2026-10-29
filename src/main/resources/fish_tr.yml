@@ -1,0 +1,266 @@
+# ============================================================
+#  PhoenixFish — Turkish Fish Definitions (tr)
+# ============================================================
+#  v1.8.8 — Flat layout for backward compat with v1.3.5–v1.8.2 servers.
+#  Contains FULLY TRANSLATED display-name + lore for 32 fish species.
+#  Gameplay data (rarity, weight, price, biomes, material, cmd) stays
+#  in the root-level fish.yml (data file).
+# ============================================================
+
+fishes:
+  sea_bass:
+    display-name: <#55FF55>Levrek</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Aktif ve lezzetli bir balık,
+    - <gray>kıyı sularında yaşar.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  anchovy:
+    display-name: <#55FF55>Hamsi</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Sevilen bir balık, genellikle
+    - <gray>büyük sürüler hâlinde gezer.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  sardine:
+    display-name: <#55FF55>Sardalya</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Küçük, gümüş renkli bir balık,
+    - <gray>sıkı sürüler hâlinde yüzer.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  pufferfish:
+    display-name: <#55FF55>Balon Balığı</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Tehdit algıladığında şişer.
+    - <gray>Dikkatli kullan.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  wild_salmon:
+    display-name: <#55FF55>Yaban Somonu</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Güçlü bir yüzücü; nehirler ve
+    - <gray>denizler arasında göç eder.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  mackerel:
+    display-name: <#55FF55>Uskumru</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Hızlı, akıcı bir balık;
+    - <gray>balıkçılar tarafından çok değerlidir.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  herring:
+    display-name: <#55FF55>Palamut</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Yaygın
+    - <gray>Devasa sürüler oluşturan
+    - <gray>küçük bir deniz balığı.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  eel:
+    display-name: <#55FFFF>Yılan Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Kaygan, yılan benzeri bir balık;
+    - <gray>kıyı sularında bulunur.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  grouper:
+    display-name: <#55FFFF>Orkinos</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Resiflerde bekleyen büyük,
+    - <gray>yavaş hareket eden bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  bonito:
+    display-name: <#55FFFF>Palamut Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Tuna familyasıyla akraba,
+    - <gray>hızlı bir yırtıcı balık.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  clownfish:
+    display-name: <#55FFFF>Palyaço Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Anemonlar arasında yaşayan
+    - <gray>renkli bir resif balığı.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  tuna:
+    display-name: <#55FFFF>Ton Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Devasa boyutlara ulaşabilen
+    - <gray>güçlü bir okyanus yüzücüsü.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  pike:
+    display-name: <#55FFFF>Turna Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Keskin dişli saldırgan bir
+    - <gray>tatlı su yırtıcısı.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  catfish:
+    display-name: <#55FFFF>Sazan Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Sıradan
+    - <gray>Dipte yaşayan, bıyık benzeri
+    - <gray>uzantıları olan bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  swordfish:
+    display-name: <red>Kılıç Balığı</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Uzun, kılıç benzeri burnu olan
+    - <gray>güçlü bir yırtıcı.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  shark:
+    display-name: <red>Köpekbalığı</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Bir okyanus tepe yırtıcısı.
+    - <gray>Oltaya takıldığında sert direnir.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  bluefish:
+    display-name: <red>Lüfer</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Güçlü çenesiyle bilinen
+    - <gray>vahşi bir dövüşçü.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  manta_ray:
+    display-name: <red>Manta Vatoz</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Sıcak denizlerde süzülen zarif,
+    - <gray>uwen bir dev.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  barracuda:
+    display-name: <red>Barakuda</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Ustura keskinliğinde dişleri olan
+    - <gray>şimşek hızında bir yırtıcı.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  anglerfish:
+    display-name: <gold>Fener Balığı</gold>
+    lore:
+    - <dark_gray>» <gold>Epik
+    - <gray>Avını parlayan bir yemle
+    - <gray>cezbeden derin deniz avcısı.
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  sailfish:
+    display-name: <gold>Yelken Balığı</gold>
+    lore:
+    - <dark_gray>» <gold>Epik
+    - <gray>Okyanusun en hızlı balığı;
+    - <gray>110 km/s hıza ulaşır.
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  electric_eel:
+    display-name: <gold>Elektrik Yılanı</gold>
+    lore:
+    - <dark_gray>» <gold>Epik
+    - <gray>Avını sersemletmek için
+    - <gray>güçlü elektrik şokları üretir.
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  sea_god:
+    display-name: <light_purple>Deniz Tanrısı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Okyanus derinliklerinin
+    - <gray>efsanevi koruyucusu.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  kraken:
+    display-name: <light_purple>Kraken</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Gemicilerin kabuslarında
+    - <gray>beliren dev bir deniz canavarı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  giant_tuna:
+    display-name: <light_purple>Dev Ton Balığı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Balık teknelerini cüce bırakacak
+    - <gray>kadar dev bir ton balığı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  deep_sea_serpent:
+    display-name: <light_purple>Derin Deniz Yılanı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Uçurum derinliklerine hükmeden
+    - <gray>antik bir deniz yılanı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  golden_fish:
+    display-name: <light_purple>Altın Balık</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Yakalayanına dilek
+    - <gray>vereceği söylenen nadir altın balık.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  leviathan:
+    display-name: <light_purple>Leviathan</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Ulaşılamaz derinliklerin
+    - <gray>dev hükümdarı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  void_whale:
+    display-name: <light_purple>Boşluk Balinası</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Dünyalar arası boşlukta
+    - <gray>yüzen bir balina.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  ancient_shark:
+    display-name: <light_purple>Antik Köpekbalığı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Uzun süre önce nesli tükendiği
+    - <gray>sanılan tarih öncesi bir köpekbalığı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  abyssal_dragonfish:
+    display-name: <light_purple>Uçurum Ejderha Balığı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Biyolüminesans dişleri olan
+    - <gray>korkunç bir derin deniz balığı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  world_eater:
+    display-name: <light_purple>Dünya Yiyen</light_purple>
+    lore:
+    - <dark_gray>» <light_purple>Efsanevi
+    - <gray>Tüm okyanusları yutabilen
+    - <gray>kozmic bir varlık.
+    - ''
+    - '<dark_gray>Kademe: <white>5'

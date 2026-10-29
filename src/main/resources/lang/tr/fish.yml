@@ -1,0 +1,267 @@
+# ============================================================
+#  PhoenixFish — Türkçe Balık Yerelleştirmesi (tr)
+# ============================================================
+#  32 balık girişi için görünen ad (display-name) + lore tanımları.
+#  Eksik anahtarlar, FileConfiguration.setDefaults aracılığıyla
+#  otomatik olarak lang/en/fish.yml dosyasına geri döner (fallback).
+# ============================================================
+
+fishes:
+  sea_bass:
+    display-name: <#55FF55>Levrek</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Aktif ve lezzetli bir balık,
+    - <gray>kıyıların yakınlarında yaşar.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  anchovy:
+    display-name: <#55FF55>Hamsi</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Çok sevilen bir balık; genellikle
+    - <gray>büyük sürüler halinde dolaşır.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  sardine:
+    display-name: <#55FF55>Sardalya</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Küçük ama hızlı bir balık;
+    - <gray>parlak gümüş pulları vardır.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  pufferfish:
+    display-name: <#55FF55>Balon Balığı</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Yavaş ama doğru şekilde
+    - <gray>hazırlanmazsa tehlikelidir.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  wild_salmon:
+    display-name: <#55FF55>Yaban Somonu</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Güçlü akıntılara karşı
+    - <gray>yüzen güçlü bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  mackerel:
+    display-name: <#55FF55>Uskumru</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Genellikle büyük sürüler halinde
+    - <gray>dolaşan hızlı bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  herring:
+    display-name: <#55FF55>Palamut</#55FF55>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Genellikle devasa sürüler halinde
+    - <gray>dolaşan küçük gümüş bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  eel:
+    display-name: <#55FFFF>Yılan Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>İnanılmaz bir hızla kaçabilen,
+    - <gray>kaygan bir yaratık.
+    - ''
+    - '<dark_gray>Kademe: <white>1'
+  grouper:
+    display-name: <#55FFFF>Orkinos</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Kayaların gölgesinde saklanan,
+    - <gray>büyük ve güçlü bir av.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  bonito:
+    display-name: <#55FFFF>Palamut Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Çok güçlü bir yüzücü;
+    - <gray>genellikle sonbaharda avlanır.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  clownfish:
+    display-name: <#55FFFF>Palyaço Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Mercan resiflerini seven,
+    - <gray>renkli ve çevik bir balık.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  tuna:
+    display-name: <#55FFFF>Ton Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>İnanılmaz dayanıklılığa sahip,
+    - <gray>güçlü bir açık deniz yüzücüsü.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  pike:
+    display-name: <#55FFFF>Turna Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Jilet gibi keskin dişlere sahip,
+    - <gray>vahşi bir tatlı su avcısı.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  catfish:
+    display-name: <#55FFFF>Sazan Balığı</#55FFFF>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Şaşırtıcı bir güce sahip,
+    - <gray>ağır bir dip balığı.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  swordfish:
+    display-name: <red>Kılıç Balığı</red>
+    lore:
+    - <dark_gray>» <aqua>Az Bulunur
+    - <gray>Jilet gibi keskin bir gaga ile
+    - <gray>donanmış tehlikeli bir avcı.
+    - ''
+    - '<dark_gray>Kademe: <white>2'
+  shark:
+    display-name: <red>Köpekbalığı</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Denizlerin acımasız avcısı.
+    - <red>Dikkat et, misinayı koparabilir!
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  bluefish:
+    display-name: <red>Lüfer</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Keskin dişlere sahip,
+    - <gray>saldırgan ve çok hızlı bir avcı.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  manta_ray:
+    display-name: <red>Manta Vatoz</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Misinayı korkunç bir ağırlıkla
+    - <gray>çeken uysal bir dev.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  barracuda:
+    display-name: <red>Barakuda</red>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Ürkütücü çenelere sahip,
+    - <gray>şimşek hızında bir avcı.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  anglerfish:
+    display-name: <gold>Fener Balığı</gold>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Işıltılı bir yem taşıyan,
+    - <gray>ürkütücü bir derin deniz avcısı.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  sailfish:
+    display-name: <gold>Yelken Balığı</gold>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Okyanusta şimdiye dek görülmüş
+    - <gray>en hızlı balıklardan biri.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  electric_eel:
+    display-name: <gold>Elektrik Yılanı</gold>
+    lore:
+    - <dark_gray>» <red>Nadir
+    - <gray>Güçlü elektrik şokları
+    - <gray>verebilen tuhaf bir yaratık.
+    - ''
+    - '<dark_gray>Kademe: <white>3'
+  sea_god:
+    display-name: <light_purple>Deniz Tanrısı</light_purple>
+    lore:
+    - <dark_gray>» <#9D00FF><bold>Destansı</bold></#9D00FF>
+    - <#9D00FF>Derinliklerin efsanevi tanrısı.
+    - <gray>Bu koca yaratığı yakalamak için
+    - <gray>çok şanslı (ya da çılgın) olmalısın.
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  kraken:
+    display-name: <light_purple>Kraken</light_purple>
+    lore:
+    - <dark_gray>» <dark_purple><bold>Destansı</bold></dark_purple>
+    - <gray>Sayısız ürkütücü dokusu olan
+    - <dark_purple>devasa bir canavar.</dark_purple>
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  giant_tuna:
+    display-name: <light_purple>Dev Ton Balığı</light_purple>
+    lore:
+    - <dark_gray>» <#9D00FF><bold>Destansı</bold></#9D00FF>
+    - <#9D00FF>Devasa bir ton balığı;
+    - <gray>güçlü balıkçıları bile sürükleyebilir.
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  deep_sea_serpent:
+    display-name: <light_purple>Derin Deniz Yılanı</light_purple>
+    lore:
+    - <dark_gray>» <dark_purple><bold>Destansı</bold></dark_purple>
+    - <gray>Devasa bir yılan,
+    - <dark_purple>en karanlık derinliklerden.</dark_purple>
+    - ''
+    - '<dark_gray>Kademe: <white>4'
+  golden_fish:
+    display-name: <light_purple>Altın Balık</light_purple>
+    lore:
+    - <dark_gray>» <gold><bold>Efsanevi</bold></gold>
+    - <gold>Sıradan bir balığa benzemiyor...
+    - <gray>Efsaneye göre yakalayanına 3 dilek bahşedilir.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  leviathan:
+    display-name: <light_purple>Leviathan</light_purple>
+    lore:
+    - <dark_gray>» <light_purple><bold>Efsanevi</bold></light_purple>
+    - <light_purple>Uçurumların antik devi.
+    - <gray>Yalnızca en yetenekli balıkçılar
+    - <gray>bu korkunç çekime dayanabilir.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  void_whale:
+    display-name: <light_purple>Boşluk Balinası</light_purple>
+    lore:
+    - <dark_gray>» <black><bold>Efsanevi</bold></black>
+    - <gray>Yüzen bir yaratık —
+    - <black>gerçekliğin dokuları arasında.</black>
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  ancient_shark:
+    display-name: <light_purple>Antik Köpekbalığı</light_purple>
+    lore:
+    - <dark_gray>» <gold><bold>Efsanevi</bold></gold>
+    - <gold>Tarih öncesi bir avcı —
+    - <gray>aslında soyu tükenmiş olmalıydı.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  abyssal_dragonfish:
+    display-name: <light_purple>Uçurum Ejderha Balığı</light_purple>
+    lore:
+    - <dark_gray>» <light_purple><bold>Efsanevi</bold></light_purple>
+    - <light_purple>Dünyanın altındaki karanlıkta
+    - <gray>doğan bir yaratık.
+    - ''
+    - '<dark_gray>Kademe: <white>5'
+  world_eater:
+    display-name: <light_purple>Dünya Yiyen</light_purple>
+    lore:
+    - <dark_gray>» <black><bold>Efsanevi</bold></black>
+    - <gray>Canavar bir varlık;
+    - <black>koca okyanusları yuttuğu söylenir.</black>
+    - ''
+    - '<dark_gray>Kademe: <white>5'

@@ -177,9 +177,11 @@ public class MinigameTask {
         this.effectiveProgressRate = this.progressRateBase + rodProgressBonus + baitProgressBonus;
 
         // tensionIncreaseRate: base × (1 - rodTensionResist)
-        // v1.6.0 — Stamina skill çarpanı (opsiyonel, features.skill-stamina.enabled ise)
+        // v1.6.0 — Stamina skill çarpanı (opsiyonel)
+        // v1.8.6 — Use SkillManager.isSkillEnabled() which checks the new
+        // features.skills.types.stamina path with backward-compat fallback.
         double staminaResist = 0.0;
-        if (plugin.getConfig().getBoolean("features.skill-stamina.enabled", false)) {
+        if (plugin.getSkillManager() != null && plugin.getSkillManager().isSkillEnabled("stamina")) {
             try {
                 FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
                 if (data != null && data.getStamina() > 0) {

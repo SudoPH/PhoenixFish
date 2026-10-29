@@ -1,0 +1,49 @@
+# ============================================================
+#  PhoenixFish — 简体中文契约模板本地化 (zh_cn)
+# ============================================================
+#  共 10 个条目的契约模板显示名称与描述（lore）。
+#  缺失的键将通过 FileConfiguration.setDefaults
+#  自动回退到 lang/en/contracts.yml。
+# ============================================================
+
+contracts:
+  common_angler:
+    display-name: <yellow>普通钓客
+    description:
+    - <gray>钓到 <white>%amount%</white> 条普通品质的鱼。
+  plentiful_haul:
+    display-name: <yellow>满载而归
+    description:
+    - <gray>钓到 <white>%amount%</white> 条任意种类的鱼。
+  freshwater_specialist:
+    display-name: <yellow>淡水专家
+    description:
+    - <gray>钓到 <white>%amount%</white> 条淡水鱼 — 小额赏金。
+  uncommon_hunter:
+    display-name: <gold>罕见猎手
+    description:
+    - <gray>钓到 <white>%amount%</white> 条罕见品质的鱼。
+  rare_specialist:
+    display-name: <aqua>稀有专家
+    description:
+    - <gray>钓到 <white>%amount%</white> 条稀有品质的鱼。
+  epic_pursuit:
+    display-name: <light_purple>史诗追逐
+    description:
+    - <gray>钓到 <white>%amount%</white> 条史诗品质的鱼。
+  legendary_quest:
+    display-name: <light_purple>传说任务
+    description:
+    - <gray>钓到 <white>%amount%</white> 条传说品质的鱼。
+  heavy_hauler:
+    display-name: <gold>重鱼搬运者
+    description:
+    - <gray>钓到 <white>%amount%</white> 条至少 <white>%value% kg</white> 重的鱼。
+  trophy_hunter:
+    display-name: <gold>战利品猎手
+    description:
+    - <gray>钓到 <white>%amount%</white> 条至少 <white>%value% kg</white> 重的鱼。
+  cod_craze:
+    display-name: <yellow>鳕鱼狂热
+    description:
+    - <gray>钓到 <white>%amount%</white> 条鳕鱼 — 任何尺寸都算。

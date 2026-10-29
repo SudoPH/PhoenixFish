@@ -10,7 +10,7 @@ prefix: "<dark_gray>[<gradient:#9D00FF:#00CED1>PhoenixFish</gradient>] "
 
 # 稀有度名称
 rarity_1: "普通"
-rarity_2: " uncommon"
+rarity_2: "罕见"
 rarity_3: "稀有"
 rarity_4: "史诗"
 rarity_5: "传说"
@@ -25,7 +25,7 @@ catch_subtitle_legendary: "<white>奇迹发生！钓到了 %fish_name%！</white
 fish_bite: "<gold>鱼咬钩了！快收线！</gold>"
 fish_caught_single: "<aqua>你钓到了一条 %fish_name%！</aqua>"
 fish_caught_multiple: "<aqua>太棒了！你一次钓到了 %amount%x %fish_name%！</aqua>"
-fish_discovered: "<gradient:#9D00FF:#00CED1>发现新物种！</gradient> <white>%fish_name%<white> 已加入图鉴！"
+fish_discovered: "<gradient:#9D00FF:#00CED1>发现新物种！</gradient> <white>%fish_name% 已加入图鉴！"
 
 # 小游戏（Minigame）
 minigame_win_single: "<green><bold>✓ 钓到了！🐟</bold></green>"
@@ -80,6 +80,14 @@ skills_name_fast: "<yellow>快手捕手"
 skills_name_hunter: "<red>大师猎人"
 skills_name_double: "<aqua>双重捕获"
 skills_name_bait: "<gold>幸运鱼饵"
+# v1.6.2 (Fix #1) — 新技能 i18n 键值（由 SkillManager.openMenu 使用）。
+# %pct% 是从配置读取的每级加成百分比（默认 5, 10, 10）。
+skills_name_big: "<#DAA520>大鱼猎手"
+skills_name_lucky: "<#55FFFF>幸运抛竿"
+skills_name_stamina: "<#FF6347>耐力"
+skills_big_desc: "<gray>每级 +%pct%% 鱼的重量（更重 = 更值钱）。"
+skills_lucky_desc: "<gray>每级 +%pct%% 几率将钓获升级到下一稀有度。"
+skills_stamina_desc: "<gray>每级 +%pct%% 小游戏张力抗性（鱼线更晚断裂）。"
 
 # AddLevel 命令
 addlevel_xp_disabled: "<red>此命令需要启用 XP 系统！</red>"
@@ -163,3 +171,20 @@ plugin_disabled: "<gray>PhoenixFish 已禁用。</gray>"
 plugin_version: "<gray>版本：%version%</gray>"
 plugin_resource_save_error: "<red>资源保存失败：%error%</red>"
 fish_section_not_found: "<red>fish.yml 中找不到 'fishes' 节！</red>"
+
+# ──────────────────────────────────────────────────────────
+#  v1.8.5 — 新增键 (/pf settings + 成就/契约/技能 i18n)
+# ──────────────────────────────────────────────────────────
+skills_effect_disabled: "<dark_red>（效果在配置中已禁用 — 点数仍会保留）"
+achievements_disabled: "<red>成就系统已禁用。</red>"
+achievements_menu_title: "<dark_gray>» <gold>成就 <dark_gray>（<white>%unlocked%/%total%</white>）"
+achievement_name_unlocked: "<gold><bold>%id%</bold></gold>"
+achievement_name_locked: "<gray><italic>%id%</italic></gray>"
+contracts_disabled: "<red>契约系统已禁用。</red>"
+contracts_gui_title: "<dark_gray>» <gold>每日契约</gold>"
+contract_progress_pending: "<gray>进度：<yellow>%current%<gray>/<white>%needed%"
+contract_progress_done: "<gray>进度：<green>%current%<gray>/<white>%needed% <green>✔"
+contract_reward_money: "<gray>奖励：<gold>$%money% <aqua>+%xp% 经验"
+
+# v1.8.8 — 契约奖励领取确认（由 ContractManager.handleSlotClick 使用）
+contract_claimed: "<green><bold>✔ 奖励已领取！</bold></green> <white>%name%</white> <dark_gray>— <gold>$%money% <aqua>+ %xp% 经验"

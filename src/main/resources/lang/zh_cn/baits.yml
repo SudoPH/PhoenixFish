@@ -1,0 +1,149 @@
+# ============================================================
+#  PhoenixFish — 简体中文鱼饵本地化 (zh_cn)
+# ============================================================
+#  共 28 个条目的鱼饵显示名称与描述（lore）。
+#  缺失的键将通过 FileConfiguration.setDefaults
+#  自动回退到 lang/en/baits.yml。
+# ============================================================
+
+baits:
+  worm:
+    display-name: <#8B4513>普通蚯蚓</#8B4513>
+    lore:
+    - <gray>泥土中随处可见的普通蚯蚓。
+    - <dark_gray>» <white>略微吸引普通鱼类。
+  bread_crust:
+    display-name: <#FFDAB9>面包皮</#FFDAB9>
+    lore:
+    - <gray>吃剩的面包块。
+    - <dark_gray>» <white>供饥饿鱼儿使用的廉价鱼饵。
+  minnow_bait:
+    display-name: <#A0A0A0>小鱼饵</#A0A0A0>
+    lore:
+    - <gray>捣碎的小鱼混以骨粉制成。
+    - <dark_gray>» <white>比蚯蚓略胜一筹。
+  seaweed_wrap:
+    display-name: <#3CB371>海藻包</#3CB371>
+    lore:
+    - <gray>湿海带编织而成，香气扑鼻。
+    - <dark_gray>» <aqua>吸引罕见鱼类。
+  bug_paste:
+    display-name: <#DAA520>虫膏</#DAA520>
+    lore:
+    - <gray>浸泡在甜蜂蜜中的虫浆。
+    - <dark_gray>» <aqua>人类闻着奇臭无比，鱼儿却无法抗拒。
+  glowing_bait:
+    display-name: <#FFFF00>发光饵</#FFFF00>
+    lore:
+    - <gray>流光溢彩的光芒令鱼儿着迷。
+    - <dark_gray>» <aqua>吸引罕见鱼类。
+  enchanted_dough:
+    display-name: <#FFB6C1>附魔面团</#FFB6C1>
+    lore:
+    - <gray>掺入一丝魔力烘焙而成的面团。
+    - <dark_gray>» <aqua>对付罕见鱼类的可靠选择。
+  bloodied_flesh:
+    display-name: <#8B0000>血肉</#8B0000>
+    lore:
+    - <gray>令捕食者疯狂的刺鼻气味。
+    - <dark_gray>» <red>吸引稀有鱼类。
+  spider_silk:
+    display-name: <#F5F5DC>蛛丝</#F5F5DC>
+    lore:
+    - <gray>能缠住稀有猎物的编织丝线。
+    - <dark_gray>» <red>稀有鱼类的顶级鱼饵。
+  ocean_essence:
+    display-name: <#00CED1>海洋精华</#00CED1>
+    lore:
+    - <#00CED1>大海的纯粹魔力。
+    - <dark_gray>» <gold>吸引史诗鱼类。
+  golden_roe:
+    display-name: <#FFD700>金鱼子</#FFD700>
+    lore:
+    - <gold>闪耀金光的稀有鱼卵。
+    - <dark_gray>» <gold>对史诗鱼类的吸引力极强。
+  void_leech:
+    display-name: <#9D00FF>虚空水蛭</#9D00FF>
+    lore:
+    - <dark_purple>来自深邃虚空的寄生生物。
+    - <dark_gray>» <light_purple>吸引传说鱼类。
+  lunar_moth:
+    display-name: <#C0C0C0>月蛾</#C0C0C0>
+    lore:
+    - <#C0C0C0>从月光中汲取能量。
+    - <dark_gray>» <light_purple>神话鱼类的终极鱼饵。
+  enhanced_worm:
+    display-name: <#8B4513>强化蚯蚓</#8B4513>
+    lore:
+    - <gray>肥美多汁的蚯蚓。
+    - <dark_gray>» <white>显著吸引普通鱼类。
+  enhanced_glowing_bait:
+    display-name: <#FFFF00>强化发光饵</#FFFF00>
+    lore:
+    - <gray>散发着超凡脱俗的光芒。
+    - <dark_gray>» <aqua>强力吸引罕见鱼类。
+  enhanced_bloodied_flesh:
+    display-name: <#8B0000>强化血肉</#8B0000>
+    lore:
+    - <gray>黑暗魔法浸透了这块血肉。
+    - <dark_gray>» <red>强劲吸引稀有鱼类。
+  enhanced_ocean_essence:
+    display-name: <#00CED1>强化海洋精华</#00CED1>
+    lore:
+    - <#00CED1>深海蒸馏出的精华。
+    - <dark_gray>» <gold>强劲吸引史诗鱼类。
+  enhanced_golden_roe:
+    display-name: <#FFD700>强化金鱼子</#FFD700>
+    lore:
+    - <gold>受太阳祝福的金色鱼卵。
+    - <dark_gray>» <gold>对史诗鱼类散发着炫目的魅力。
+  enhanced_void_leech:
+    display-name: <#9D00FF>强化虚空水蛭</#9D00FF>
+    lore:
+    - <dark_purple>来自虚空的恐怖寄生生物。
+    - <dark_gray>» <light_purple>传说鱼类无法抗拒。
+  moss_bait:
+    display-name: <#6B8E23>苔藓饵</#6B8E23>
+    lore:
+    - <gray>鱼儿喜爱的湿润苔藓。
+    - <dark_gray>» <white>吸引普通鱼类。
+  glow_berry_bait:
+    display-name: <#FF8C00>发光浆果饵</#FF8C00>
+    lore:
+    - <gray>香甜而发光。
+    - <dark_gray>» <aqua>吸引罕见鱼类。
+  crimson_bait:
+    display-name: <#DC143C>绯红饵</#DC143C>
+    lore:
+    - <gray>产自绯红森林。
+    - <dark_gray>» <red>吸引稀有鱼类。
+  ender_bait:
+    display-name: <#40E0D0>末影饵</#40E0D0>
+    lore:
+    - <gray>以心灵感应引诱鱼儿。
+    - <dark_gray>» <red>吸引稀有鱼类。
+  blaze_bait:
+    display-name: <#FFA500>烈焰饵</#FFA500>
+    lore:
+    - <gray>蕴含下界的高温，暗燃不熄。
+    - <dark_gray>» <gold>吸引史诗鱼类。
+  shulker_bait:
+    display-name: <#C9A0DC>潜影贝饵</#C9A0DC>
+    lore:
+    - <gray>一份受到保护的佳肴。
+    - <dark_gray>» <gold>强力吸引史诗鱼类。
+  wither_bait:
+    display-name: <#4A4A4A>凋灵饵</#4A4A4A>
+    lore:
+    - <gray>以鱼饵形态呈现的死亡本身。
+    - <dark_gray>» <light_purple>吸引传说鱼类。
+  echo_bait:
+    display-name: <#FFFACD>幽响饵</#FFFACD>
+    lore:
+    - <gray>来自深暗之域的低语。
+    - <dark_gray>» <light_purple>传说鱼类无法抗拒。
+  nether_star_bait:
+    display-name: <#F8F8FF>下界星饵</#F8F8FF>
+    lore:
+    - <white>凝聚的星辰能量。
+    - <dark_gray>» <light_purple>神话鱼类的终极鱼饵。

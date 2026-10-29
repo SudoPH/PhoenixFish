@@ -44,7 +44,10 @@ public final class FishRewardHelper {
         double weight = rollWeight(fish);
 
         // v1.6.0 — Big Catch skill: weight çarpanı (istatistikten ÖNCE uygula)
-        if (plugin.getConfig().getBoolean("features.skill-big-catch.enabled", false)) {
+        // v1.6.2 (Fix #3) — Spec: +5% weight per level (config-driven, default 0.05).
+        // v1.8.6 — Use SkillManager.isSkillEnabled() which checks the new
+        // features.skills.types.big-catch path with backward-compat fallback.
+        if (plugin.getSkillManager() != null && plugin.getSkillManager().isSkillEnabled("big")) {
             try {
                 com.phoenix.fish.data.FishingData data = plugin.getCacheManager().getData(player.getUniqueId());
                 if (data != null && data.getBigCatch() > 0) {
@@ -197,10 +200,9 @@ public final class FishRewardHelper {
         }
 
         // v1.6.0 — Contract kontrolü
-        // v1.7.1/v1.8.0 — pass weight so WEIGHT_MILESTONE contracts can match
         if (plugin.getContractManager() != null && plugin.getContractManager().isEnabled()) {
             plugin.getContractManager().checkDailyReset(player);
-            plugin.getContractManager().checkCatch(player, fish.id(), amountToGive, weight);
+            plugin.getContractManager().checkCatch(player, fish.id(), amountToGive);
         }
 
         // v1.6.0 — Season score
@@ -237,13 +239,7 @@ public final class FishRewardHelper {
             return 1;
         }
 
-        // v1.8.0 — read per-level chance from config (was hardcoded 0.10).
-        // Default 0.06 keeps max-level (8) double-catch at 48%.
-        double perLevel = plugin.getConfig().getDouble(
-                "xp-system.skill-per-level.double-catch-chance-per-level", 0.06);
-        double chance = data.getDoubleCatch() * perLevel;
-        // Hard cap at 75% — never let double-catch become near-guaranteed.
-        chance = Math.min(0.75, chance);
+        double chance = data.getDoubleCatch() * 0.10;
         if (ThreadLocalRandom.current().nextDouble() < chance) {
             return 2;
         }
@@ -255,23 +251,16 @@ public final class FishRewardHelper {
         return ThreadLocalRandom.current().nextDouble(fish.minWeight(), fish.maxWeight());
     }
 
-    /**
-     * v1.8.0 — Tournament points per rarity, now config-driven.
-     * Reads from `tournament.points-per-rarity.<rarity>` (1-5).
-     * Defaults preserve the old hardcoded values (1/2/5/12/25) so
-     * existing configs keep working.
-     */
+    // M-21 FIX: rarity-weighted tournament points.
     private static int calculateTournamentPoints(CustomFish fish) {
-        String key = "tournament.points-per-rarity." + fish.rarity();
-        int defaultPoints = switch (fish.rarity()) {
-            case 1 -> 1;
-            case 2 -> 2;
-            case 3 -> 5;
-            case 4 -> 12;
-            case 5 -> 25;
+        return switch (fish.rarity()) {
+            case 1 -> 1;   // common
+            case 2 -> 2;   // uncommon
+            case 3 -> 5;   // rare
+            case 4 -> 12;  // epic
+            case 5 -> 25;  // legendary
             default -> 1;
         };
-        return PhoenixFish.getInstance().getConfig().getInt(key, defaultPoints);
     }
 
     private static void applyWeightToItem(PhoenixFish plugin, ItemStack item,

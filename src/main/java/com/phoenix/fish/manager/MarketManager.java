@@ -28,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MarketManager {
 
     private final PhoenixFish plugin;
-    private final boolean enabled;
+    // v1.6.2 (Fix #4) — was `final boolean`. Now volatile so reload() can update it.
+    private volatile boolean enabled;
 
     /** fishId → current price multiplier (1.0 = normal). */
     private final Map<String, Double> multipliers = new ConcurrentHashMap<>();
@@ -47,6 +48,32 @@ public class MarketManager {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * v1.6.2 (Fix #4) — Re-reads the enabled flag and re-loads state on transition.
+     * Previously the field was final → /pf reload never propagated the new value,
+     * so toggling dynamic-pricing.enabled in config.yml + /pf reload left the
+     * manager silently stuck in its previous state.
+     */
+    public synchronized void reload() {
+        boolean newEnabled = plugin.getConfig().getBoolean("features.dynamic-pricing.enabled", false);
+        if (newEnabled == this.enabled) {
+            // Re-apply recovery on every reload so stale decay recovers during downtime.
+            if (newEnabled) applyRecovery();
+            return;
+        }
+        if (newEnabled) {
+            this.enabled = true;
+            load();
+            if (lastRecoveryTime == 0) lastRecoveryTime = System.currentTimeMillis();
+            plugin.getLogger().info("MarketManager enabled via reload — dynamic pricing active.");
+        } else {
+            save();
+            this.enabled = false;
+            multipliers.clear();
+            plugin.getLogger().info("MarketManager disabled via reload — state saved.");
+        }
     }
 
     // =====================================================================

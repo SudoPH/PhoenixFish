@@ -1,0 +1,40 @@
+# ============================================================
+#  PhoenixFish — Turkish Achievement Localization (tr)
+# ============================================================
+#  Per-achievement display-name + lore for 8 entries.
+#  Missing keys auto-fallback to lang/en/achievements.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+achievements:
+  first-catch:
+    title: İlk Av
+    lore:
+    - <gray>İlk balığını yakala.
+  apprentice-fisher:
+    title: Çırak Balıkçı
+    lore:
+    - <gray>Toplam 50 balık yakala.
+  master-fisher:
+    title: Usta Balıkçı
+    lore:
+    - <gray>Toplam 500 balık yakala.
+  rare-hunter:
+    title: Nadir Avcı
+    lore:
+    - <gray>10 Nadir nadirlikte balık yakala.
+  epic-hunter:
+    title: Epik Avcı
+    lore:
+    - <gray>5 Epik nadirlikte balık yakala.
+  legendary-master:
+    title: Efsanevi Üstat
+    lore:
+    - <gray>1 Efsanevi nadirlikte balık yakala.
+  species-collector:
+    title: Tür Koleksiyoncusu
+    lore:
+    - <gray>25 farklı balık türü keşfet.
+  mutation-hunter:
+    title: Mutasyon Avcısı
+    lore:
+    - <gray>5 mutasyonlu balık yakala.

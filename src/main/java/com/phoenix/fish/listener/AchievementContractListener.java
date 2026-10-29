@@ -15,16 +15,30 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 
 /**
- * v1.7.0 — Achievement + Contract GUI listener.
+ * v1.8.8 — Achievement + Contract GUI listener.
  *
  * <p>Both GUIs are protected against item theft: every click/drag that
  * would move items in or out of the top inventory is cancelled.</p>
  *
  * <p>For the Contract GUI only, after cancelling a click on a contract
- * slot, the listener dispatches a "claim" action to {@link ContractManager}.
- * This lets players claim completed-contract rewards by clicking the
- * slot, without exposing the inventory to item-shift exploits (the click
- * is cancelled BEFORE the claim dispatch — no item ever moves).</p>
+ * slot, the listener dispatches a "claim" action to
+ * {@link ContractManager#handleSlotClick(Player, int)}. This lets players
+ * claim completed-contract rewards by clicking the slot, without exposing
+ * the inventory to item-shift exploits (the click is cancelled BEFORE the
+ * claim dispatch — no item ever moves).</p>
+ *
+ * <p><b>v1.8.8 robustness fixes:</b></p>
+ * <ul>
+ *   <li>Only left-clicks dispatch a claim (right-click, middle-click,
+ *       shift-click, etc. are silent no-ops — prevents accidental claims
+ *       and exploit vectors).</li>
+ *   <li>{@code handleSlotClick} is synchronized + double-claim-guarded
+ *       on the ContractManager side, so even if a packet hack sends
+ *       multiple click events in the same tick, only one reward dispatch
+ *       happens.</li>
+ *   <li>After a successful claim, the GUI is re-opened so the clicked
+ *       slot visually updates to the "claimed" state immediately.</li>
+ * </ul>
  */
 public class AchievementContractListener implements Listener {
 
@@ -64,7 +78,7 @@ public class AchievementContractListener implements Listener {
         if (clicked != null && clicked.equals(topInv)) {
             event.setCancelled(true);
 
-            // Only left-clicks on a Contract GUI dispatch a claim action.
+            // v1.8.8 — Only left-clicks on a Contract GUI dispatch a claim action.
             // Right-clicks, middle-click, shift-clicks, etc. are silent no-ops.
             Object holder = topInv.getHolder();
             if (holder instanceof ContractManager.ContractGUIHolder

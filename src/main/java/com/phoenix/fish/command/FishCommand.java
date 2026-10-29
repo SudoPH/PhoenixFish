@@ -50,6 +50,13 @@ public class FishCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
             @NotNull String[] args) {
+        // v1.8.5 — /pf settings is allowed from console too. Handle it before
+        // the Player cast below.
+        if (args.length >= 1 && "settings".equalsIgnoreCase(args[0])) {
+            new SettingsCommandHandler(plugin).handle(sender, args);
+            return true;
+        }
+
         if (!(sender instanceof Player player)) {
             sender.sendMessage(plugin.getMessageManager().getMessage("player_only", true));
             return true;

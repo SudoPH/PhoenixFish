@@ -1,0 +1,50 @@
+# ============================================================
+#  PhoenixFish — English Contract Template Localization (en)
+# ============================================================
+#  Per-contract template display-name + lore for 10 entries.
+#  Missing keys auto-fallback to lang/en/contracts.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+contracts:
+  common_angler:
+    display-name: <yellow>Common Angler
+    description:
+    - <gray>Catch <white>%amount%</gray> common-rarity fish.
+  plentiful_haul:
+    display-name: <yellow>Plentiful Haul
+    description:
+    - <gray>Catch <white>%amount%</gray> fish of any kind.
+  freshwater_specialist:
+    display-name: <yellow>Freshwater Specialist
+    description:
+    - <gray>Catch <white>%amount%</gray> common fish — small bounty.
+  uncommon_hunter:
+    display-name: <gold>Uncommon Hunter
+    description:
+    - <gray>Catch <white>%amount%</gray> uncommon-rarity fish.
+  rare_specialist:
+    display-name: <aqua>Rare Specialist
+    description:
+    - <gray>Catch <white>%amount%</gray> rare-rarity fish.
+  epic_pursuit:
+    display-name: <light_purple>Epic Pursuit
+    description:
+    - <gray>Catch <white>%amount%</gray> epic-rarity fish.
+  legendary_quest:
+    display-name: <gold><bold>Legendary Quest</bold></gold>
+    description:
+    - <gold>Catch <white>%amount%</white> legendary-rarity fish.</gold>
+  heavy_hauler:
+    display-name: <aqua>Heavy Hauler
+    description:
+    - <gray>Catch <white>%amount%</gray> fish weighing
+    - <gray>at least <white>%value% kg</gray>.
+  trophy_hunter:
+    display-name: <gold><bold>Trophy Hunter</bold></gold>
+    description:
+    - <gold>Catch <white>%amount%</white> fish weighing
+    - <gold>at least <white>%value% kg</white>.
+  cod_craze:
+    display-name: <yellow>Sea Bass Craze
+    description:
+    - <gray>Catch <white>%amount%</gray> Sea Bass.

@@ -1,372 +1,204 @@
-# ==========================================
-# PhoenixFish - 自定义鱼竿 (中文版)
-# ==========================================
-# Rod IDs must be unique and match the IDs in custom_recipes.yml if applicable.
-# luck-multiplier: 提高稀有鱼出现的几率。
-# 警告：插件使用指数级稀有度计算 (luck^(rarity-1))。
-# 不要将此值设置超过 3.0，否则稀有鱼会变得过于常见，破坏经济！
-# (1.0 = 普通, 1.5 = 良好, 2.0 = 终局装备)
-#
-# NEW: fishing-level-requirement = 使用此鱼竿所需的最低钓鱼等级。
-# (1 = 任何人可用, 100 = 仅满级玩家)
+# ============================================================
+#  PhoenixFish — Simplified Chinese Rods Definitions (zh_cn)
+# ============================================================
+#  v1.8.8 — Flat layout. Fully translated display-name + lore for 22 rods.
+# ============================================================
 
 rods:
-  # 默认原版鱼竿（无 custom-model-data）
   default_rod:
-    display-name: "<white>旧鱼竿</white>"
-    material: FISHING_ROD
-    custom-model-data: 0
-    luck-multiplier: 1.0
-    fishing-level-requirement: 1 # 任何人可用
+    display-name: <white>旧鱼竿</white>
     lore:
-      - "<dark_gray>» <gray>标准"
-      - "<gray>一根普通的鱼竿。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.0"
-      - "<dark_gray>所需钓鱼等级：<white>1"
-    # v1.3.5 — 小游戏加成（默认 = 无效果，保持旧行为）
-    minigame:
-      bar-width-bonus: 0
-      progress-rate-bonus: 0.0
-      tension-resistance: 0.0
-      fish-slow-chance: 1.0
-
-  # Tier 1 鱼竿
+    - <dark_gray>» <gray>标准
+    - <gray>基础的鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.0
+    - <dark_gray>所需钓鱼等级：<white>1
   hardwood_rod:
-    display-name: "<#D2B48C>硬木鱼竿</#D2B48C>"
-    material: FISHING_ROD
-    custom-model-data: 20001
-    luck-multiplier: 1.1
-    fishing-level-requirement: 1
+    display-name: <#D2B48C>硬木鱼竿</#D2B48C>
     lore:
-      - "<dark_gray>» <gray>新手"
-      - "<gray>用压缩木材制成，"
-      - "<gray>便宜但实用。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.1"
-      - "<dark_gray>所需钓鱼等级：<white>1"
-    minigame:
-      bar-width-bonus: 0
-      progress-rate-bonus: 0.0
-      tension-resistance: 0.0
-      fish-slow-chance: 1.0
-
-  # Tier 2 鱼竿
+    - <dark_gray>» <gray>入门
+    - <gray>压缩木材制成，
+    - <gray>廉价但实用。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.1
+    - <dark_gray>所需钓鱼等级：<white>1
   iron_rod:
-    display-name: "<white>铁制鱼竿</white>"
-    material: FISHING_ROD
-    custom-model-data: 20002
-    luck-multiplier: 1.2
-    fishing-level-requirement: 10
+    display-name: <white>铁鱼竿</white>
     lore:
-      - "<dark_gray>» <gray>普通"
-      - "<gray>用铁条加固。"
-      - "<gray>坚固耐用，能抵抗断线。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.2"
-      - "<dark_gray>所需钓鱼等级：<white>10"
-    minigame:
-      bar-width-bonus: 1
-      progress-rate-bonus: 0.1
-      tension-resistance: 0.05
-      fish-slow-chance: 0.95
-
-  # Tier 3 鱼竿
+    - <dark_gray>» <gray>2 级
+    - <gray>坚固的铁鱼竿，
+    - <gray>任何天气都可靠。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.2
+    - <dark_gray>所需钓鱼等级：<white>10
   gold_rod:
-    display-name: "<gold>金制鱼竿</gold>"
-    material: FISHING_ROD
-    custom-model-data: 20003
-    luck-multiplier: 1.35
-    fishing-level-requirement: 20
+    display-name: <gold>金鱼竿</gold>
     lore:
-      - "<dark_gray>» <gold>稀有"
-      - "<gold>金镀层吸引更强的魔法。"
-      - "<gray>提供高运气但稍脆弱。"
-      - ""
-      - "<dark_gray>运气倍率：<gold>x1.35"
-      - "<dark_gray>所需钓鱼等级：<gold>20"
-    minigame:
-      bar-width-bonus: 1
-      progress-rate-bonus: 0.2
-      tension-resistance: 0.05
-      fish-slow-chance: 0.9
-
-  # Tier 4 鱼竿
+    - <dark_gray>» <gray>3 级
+    - <gray>闪亮的金鱼竿，
+    - <gray>钓鱼行家珍视。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.4
+    - <dark_gray>所需钓鱼等级：<white>25
   diamond_rod:
-    display-name: "<#55FFFF>钻石鱼竿</#55FFFF>"
-    material: FISHING_ROD
-    custom-model-data: 20004
-    luck-multiplier: 1.5
-    fishing-level-requirement: 35
+    display-name: <aqua>钻石鱼竿</aqua>
     lore:
-      - "<dark_gray>» <aqua>史诗"
-      - "<aqua>用完美切割的钻石打造。"
-      - "<gray>能从深渊深处拖出猎物。"
-      - ""
-      - "<dark_gray>运气倍率：<aqua>x1.5"
-      - "<dark_gray>所需钓鱼等级：<aqua>35"
-    minigame:
-      bar-width-bonus: 2
-      progress-rate-bonus: 0.3
-      tension-resistance: 0.10
-      fish-slow-chance: 0.85
-
-  # Tier 5 鱼竿
+    - <dark_gray>» <gray>4 级
+    - <gray>钻石核心、
+    - <gray>精工制作的鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.6
+    - <dark_gray>所需钓鱼等级：<white>40
   netherite_rod:
-    display-name: "<#5C5C5C><bold>下界合金鱼竿</bold></#5C5C5C>"
-    material: FISHING_ROD
-    custom-model-data: 20005
-    luck-multiplier: 1.7
-    fishing-level-requirement: 50
+    display-name: <#4A4A4A>下界合金鱼竿</#4A4A4A>
     lore:
-      - "<dark_gray>» <dark_red>卓越"
-      - "<dark_red>在地狱之火中锻造。"
-      - "<gray>能轻易驯服传说之鱼。"
-      - ""
-      - "<dark_gray>运气倍率：<dark_red>x1.7"
-      - "<dark_gray>所需钓鱼等级：<dark_red>50"
-    minigame:
-      bar-width-bonus: 2
-      progress-rate-bonus: 0.4
-      tension-resistance: 0.15
-      fish-slow-chance: 0.8
-
-  # Tier 6 鱼竿
+    - <dark_gray>» <gray>5 级
+    - <gray>由远古残骸锻造，
+    - <gray>几乎坚不可摧。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.8
+    - <dark_gray>所需钓鱼等级：<white>55
   ocean_rod:
-    display-name: "<#00CED1><bold>海洋之怒</bold></#00CED1>"
-    material: FISHING_ROD
-    custom-model-data: 20006
-    luck-multiplier: 1.85
-    fishing-level-requirement: 65
+    display-name: <#00CED1>海洋鱼竿</#00CED1>
     lore:
-      - "<dark_gray>» <dark_aqua>神秘"
-      - "<#00CED1>装饰着触手和鹦鹉螺壳。"
-      - "<gray>能吸引海洋霸主。"
-      - ""
-      - "<dark_gray>运气倍率：<dark_aqua>x1.85"
-      - "<dark_gray>所需钓鱼等级：<dark_aqua>65"
-    minigame:
-      bar-width-bonus: 3
-      progress-rate-bonus: 0.5
-      tension-resistance: 0.20
-      fish-slow-chance: 0.75
-
-  # Tier 7 鱼竿
+    - <dark_gray>» <gray>6 级
+    - <gray>与海洋共鸣，
+    - <gray>从远处召唤鱼群。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.0
+    - <dark_gray>所需钓鱼等级：<white>70
   legendary_rod:
-    display-name: "<#FFD700><bold>传说鱼竿</bold></#FFD700>"
-    material: FISHING_ROD
-    custom-model-data: 20007
-    luck-multiplier: 2.0
-    fishing-level-requirement: 80
+    display-name: <light_purple>传奇鱼竿</light_purple>
     lore:
-      - "<dark_gray>» <gold><bold>传说</bold></gold>"
-      - "<gold>用传说中的纯粹魔法编织而成。"
-      - "<gray>将海洋之运赐予使用者。"
-      - ""
-      - "<dark_gray>运气倍率：<gold>x2.0"
-      - "<dark_gray>所需钓鱼等级：<gold>80"
-    minigame:
-      bar-width-bonus: 3
-      progress-rate-bonus: 0.7
-      tension-resistance: 0.25
-      fish-slow-chance: 0.7
-
-  # Tier 8 鱼竿
+    - <dark_gray>» <gray>7 级
+    - <gray>神话中的鱼竿，
+    - <gray>传奇钓客所用。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.2
+    - <dark_gray>所需钓鱼等级：<white>85
   cosmic_rod:
-    display-name: "<#9D00FF><bold>宇宙鱼竿</bold></#9D00FF>"
-    material: FISHING_ROD
-    custom-model-data: 20008
-    luck-multiplier: 2.5
-    fishing-level-requirement: 100
+    display-name: <gradient:#9D00FF:#00CED1>宇宙鱼竿</gradient:#9D00FF:#00CED1>
     lore:
-      - "<dark_gray>» <#9D00FF><bold>神圣</bold></#9D00FF>"
-      - "<#9D00FF>用星尘与龙息锻造。"
-      - "<gray>此鱼竿的尖端能在虚空中垂钓。"
-      - ""
-      - "<dark_gray>运气倍率：<#9D00FF>x2.5"
-      - "<dark_gray>所需钓鱼等级：<#9D00FF>100"
-    minigame:
-      bar-width-bonus: 4
-      progress-rate-bonus: 1.0
-      tension-resistance: 0.30
-      fish-slow-chance: 0.6
-
-  # ==========================================
-  # 强化鱼竿 (Faz 0.8.0 — 阶梯装备)
-  # ==========================================
-  # 制作等级越高 = 鱼竿越好。
-  # 所有 luck-multiplier 值均可调整。
-  # ==========================================
-
+    - <dark_gray>» <gray>8 级
+    - <gray>灌注宇宙之力
+    - <gray>的鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.5
+    - <dark_gray>所需钓鱼等级：<white>95
   enhanced_hardwood_rod:
-    display-name: "<#D2B48C><italic>强化硬木鱼竿</italic></#D2B48C>"
-    material: FISHING_ROD
-    custom-model-data: 21001
-    luck-multiplier: 1.15
-    fishing-level-requirement: 1
+    display-name: <#D2B48C>强化硬木鱼竿</#D2B48C>
     lore:
-      - "<dark_gray>» <gray>强化新手"
-      - "<gray>用铁箍加固。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.15"
-      - "<dark_gray>所需钓鱼等级：<white>1"
-
+    - <dark_gray>» <gray>强化入门
+    - <gray>魔法强化的
+    - <gray>硬木鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.3
+    - <dark_gray>所需钓鱼等级：<white>1
   enhanced_iron_rod:
-    display-name: "<white><italic>回火铁制鱼竿</italic></white>"
-    material: FISHING_ROD
-    custom-model-data: 21002
-    luck-multiplier: 1.3
-    fishing-level-requirement: 10
+    display-name: <white>强化铁鱼竿</white>
     lore:
-      - "<dark_gray>» <gray>强化普通"
-      - "<gray>经过热处理，更耐用。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.3"
-      - "<dark_gray>所需钓鱼等级：<white>10"
-
+    - <dark_gray>» <gray>强化 2 级
+    - <gray>附魔增添幸运的
+    - <gray>铁鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.4
+    - <dark_gray>所需钓鱼等级：<white>10
   enhanced_gold_rod:
-    display-name: "<gold><italic>镀金鱼竿</italic></gold>"
-    material: FISHING_ROD
-    custom-model-data: 21003
-    luck-multiplier: 1.45
-    fishing-level-requirement: 20
+    display-name: <gold>强化金鱼竿</gold>
     lore:
-      - "<dark_gray>» <gold>强化稀有"
-      - "<gold>用附魔金镀金。"
-      - ""
-      - "<dark_gray>运气倍率：<gold>x1.45"
-      - "<dark_gray>所需钓鱼等级：<gold>20"
-
+    - <dark_gray>» <gray>强化 3 级
+    - <gray>嗡鸣着秘能的
+    - <gray>金鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.6
+    - <dark_gray>所需钓鱼等级：<white>25
   enhanced_diamond_rod:
-    display-name: "<#55FFFF><italic>棱镜钻石鱼竿</#55FFFF>"
-    material: FISHING_ROD
-    custom-model-data: 21004
-    luck-multiplier: 1.6
-    fishing-level-requirement: 35
+    display-name: <aqua>强化钻石鱼竿</aqua>
     lore:
-      - "<dark_gray>» <aqua>强化史诗"
-      - "<aqua>用海晶水晶切割。"
-      - ""
-      - "<dark_gray>运气倍率：<aqua>x1.6"
-      - "<dark_gray>所需钓鱼等级：<aqua>35"
-
+    - <dark_gray>» <gray>强化 4 级
+    - <gray>脉动神秘力量的
+    - <gray>钻石鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.8
+    - <dark_gray>所需钓鱼等级：<white>40
   enhanced_netherite_rod:
-    display-name: "<#5C5C5C><bold><italic>炼狱下界合金鱼竿</italic></bold></#5C5C5C>"
-    material: FISHING_ROD
-    custom-model-data: 21005
-    luck-multiplier: 1.8
-    fishing-level-requirement: 50
+    display-name: <#4A4A4A>强化下界合金鱼竿</#4A4A4A>
     lore:
-      - "<dark_gray>» <dark_red>强化卓越"
-      - "<dark_red>注入了灵魂火。"
-      - ""
-      - "<dark_gray>运气倍率：<dark_red>x1.8"
-      - "<dark_gray>所需钓鱼等级：<dark_red>50"
-
+    - <dark_gray>» <gray>强化 5 级
+    - <gray>涌动黑暗能量的
+    - <gray>下界合金鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.0
+    - <dark_gray>所需钓鱼等级：<white>55
   enhanced_ocean_rod:
-    display-name: "<#00CED1><bold><italic>潮汐海洋之怒</italic></bold></#00CED1>"
-    material: FISHING_ROD
-    custom-model-data: 21006
-    luck-multiplier: 1.95
-    fishing-level-requirement: 65
+    display-name: <#00CED1>强化海洋鱼竿</#00CED1>
     lore:
-      - "<dark_gray>» <dark_aqua>强化神秘"
-      - "<#00CED1>受海洋守护者祝福。"
-      - ""
-      - "<dark_gray>运气倍率：<dark_aqua>x1.95"
-      - "<dark_gray>所需钓鱼等级：<dark_aqua>65"
-
+    - <dark_gray>» <gray>强化 6 级
+    - <gray>与深海洋流共振的
+    - <gray>海洋鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.2
+    - <dark_gray>所需钓鱼等级：<white>70
   enhanced_legendary_rod:
-    display-name: "<#FFD700><bold><italic>神话传说鱼竿</italic></bold></#FFD700>"
-    material: FISHING_ROD
-    custom-model-data: 21007
-    luck-multiplier: 2.15
-    fishing-level-requirement: 80
+    display-name: <light_purple>强化传奇鱼竿</light_purple>
     lore:
-      - "<dark_gray>» <gold><bold>强化传说</bold></gold>"
-      - "<gold>用纯粹星光编织。"
-      - ""
-      - "<dark_gray>运气倍率：<gold>x2.15"
-      - "<dark_gray>所需钓鱼等级：<gold>80"
-
+    - <dark_gray>» <gray>强化 7 级
+    - <gray>嗡鸣神话之力的
+    - <gray>传奇鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.4
+    - <dark_gray>所需钓鱼等级：<white>85
   enhanced_cosmic_rod:
-    display-name: "<#9D00FF><bold><italic>天界宇宙鱼竿</italic></bold></#9D00FF>"
-    material: FISHING_ROD
-    custom-model-data: 21008
-    luck-multiplier: 2.7
-    fishing-level-requirement: 100
+    display-name: <gradient:#9D00FF:#00CED1>强化宇宙鱼竿</gradient:#9D00FF:#00CED1>
     lore:
-      - "<dark_gray>» <#9D00FF><bold>强化神圣</bold></#9D00FF>"
-      - "<#9D00FF>用垂死恒星的力量锻造。"
-      - "<gray>尖端能在虚空本身垂钓。"
-      - ""
-      - "<dark_gray>运气倍率：<#9D00FF>x2.7"
-      - "<dark_gray>所需钓鱼等级：<#9D00FF>100"
-
-  # ==========================================
-  # 填充鱼竿 (Faz 1.0.0 — 等级空白)
-  # ==========================================
+    - <dark_gray>» <gray>强化 8 级
+    - <gray>颤动星辰能量的
+    - <gray>宇宙鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x2.7
+    - <dark_gray>所需钓鱼等级：<white>95
   copper_rod:
-    display-name: "<#FF8C00><italic>铜制鱼竿</italic></#FF8C00>"
-    material: FISHING_ROD
-    custom-model-data: 20009
-    luck-multiplier: 1.38
-    fishing-level-requirement: 25
+    display-name: <#B87333>铜鱼竿</#B87333>
     lore:
-      - "<dark_gray>» <#FF8C00>过渡"
-      - "<gray>用铜制作的廉价鱼竿。"
-      - ""
-      - "<dark_gray>运气倍率：<#FF8C00>x1.38"
-      - "<dark_gray>所需钓鱼等级：<white>25"
-
+    - <dark_gray>» <gray>1.5 级
+    - <gray>温暖铜锈的
+    - <gray>铜质鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.15
+    - <dark_gray>所需钓鱼等级：<white>5
   quartz_rod:
-    display-name: "<white><italic>石英鱼竿</italic></white>"
-    material: FISHING_ROD
-    custom-model-data: 20010
-    luck-multiplier: 1.55
-    fishing-level-requirement: 40
+    display-name: <#F5F5DC>石英鱼竿</#F5F5DC>
     lore:
-      - "<dark_gray>» <white>过渡"
-      - "<gray>轻巧但耐用。"
-      - ""
-      - "<dark_gray>运气倍率：<white>x1.55"
-      - "<dark_gray>所需钓鱼等级：<white>40"
-
+    - <dark_gray>» <gray>2.5 级
+    - <gray>阳光下闪耀的
+    - <gray>石英尖鱼竿。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.3
+    - <dark_gray>所需钓鱼等级：<white>15
   amethyst_rod:
-    display-name: "<#9B30FF><italic>紫水晶鱼竿</italic></#9B30FF>"
-    material: FISHING_ROD
-    custom-model-data: 20011
-    luck-multiplier: 1.75
-    fishing-level-requirement: 55
+    display-name: <#9966CC>紫水晶鱼竿</#9966CC>
     lore:
-      - "<dark_gray>» <#9B30FF>过渡"
-      - "<gray>闪烁着水晶能量。"
-      - ""
-      - "<dark_gray>运气倍率：<#9B30FF>x1.75"
-      - "<dark_gray>所需钓鱼等级：<white>55"
-
+    - <dark_gray>» <gray>3.5 级
+    - <gray>紫水晶核心鱼竿，
+    - <gray>嗡鸣晶体能量。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.5
+    - <dark_gray>所需钓鱼等级：<white>30
   coral_rod:
-    display-name: "<#FF7F50><italic>珊瑚鱼竿</italic></#FF7F50>"
-    material: FISHING_ROD
-    custom-model-data: 20012
-    luck-multiplier: 1.9
-    fishing-level-requirement: 70
+    display-name: <#FF7F50>珊瑚鱼竿</#FF7F50>
     lore:
-      - "<dark_gray>» <#FF7F50>过渡"
-      - "<gray>由活珊瑚生长而成。"
-      - ""
-      - "<dark_gray>运气倍率：<#FF7F50>x1.9"
-      - "<dark_gray>所需钓鱼等级：<white>70"
-
+    - <dark_gray>» <gray>4.5 级
+    - <gray>由活珊瑚长成的鱼竿，
+    - <gray>深受海洋生物喜爱。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.7
+    - <dark_gray>所需钓鱼等级：<white>45
   echo_rod:
-    display-name: "<#00FF7F><italic>回响鱼竿</italic></#00FF7F>"
-    material: FISHING_ROD
-    custom-model-data: 20013
-    luck-multiplier: 2.25
-    fishing-level-requirement: 85
+    display-name: <#FFFACD>幽响鱼竿</#FFFACD>
     lore:
-      - "<dark_gray>» <#00FF7F>过渡"
-      - "<gray>与虚空的回响共鸣。"
-      - ""
-      - "<dark_gray>运气倍率：<#00FF7F>x2.25"
-      - "<dark_gray>所需钓鱼等级：<white>85"
+    - <dark_gray>» <gray>5.5 级
+    - <gray>由幽响碎片雕琢，
+    - <gray>与深海共鸣。
+    - ''
+    - <dark_gray>幸运倍率：<white>x1.9
+    - <dark_gray>所需钓鱼等级：<white>60

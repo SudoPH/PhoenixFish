@@ -43,34 +43,38 @@ public final class PhoenixFish extends JavaPlugin {
     private FishingListener fishingListener;
     private CacheManager cacheManager;
     private MessageManager messageManager;
+    // v1.8.5 — Content (fish/baits/rods/contracts/achievements/skills) localization layer.
+    private com.phoenix.fish.manager.ContentLanguageManager contentLanguageManager;
     private CatalogManager catalogManager;
     private TournamentManager tournamentManager;
     private RecordManager recordManager;
     private SkillManager skillManager;
     private EconomyManager economyManager;
     private FishingModeManager fishingModeManager;
-    // v1.6.0 — Yeni manager
     private com.phoenix.fish.manager.AchievementManager achievementManager;
     private com.phoenix.fish.manager.MarketManager marketManager;
     private com.phoenix.fish.manager.ContractManager contractManager;
     private com.phoenix.fish.manager.SeasonManager seasonManager;
 
     private PhoenixFishAPI api;
-
     private PhoenixFishPlaceholder placeholderExpansion;
 
-    private boolean xpEnabled;
-    private boolean discoveryEnabled;
+    // v1.6.2 (Fix #4) — no longer final; re-read on /pf reload so toggling
+    // xp-system.enabled / settings.discovery-enabled takes effect immediately.
+    private volatile boolean xpEnabled;
+    private volatile boolean discoveryEnabled;
 
     @Override
     public void onEnable() {
         instance = this;
 
         saveDefaultConfig();
-        saveResource("messages_en.yml", false);
-        saveResource("messages_tr.yml", false);
+        // v1.8.5 — Message file extraction is handled entirely by MessageManager
+        // and ContentLanguageManager (auto-extract bundled lang/<code>/messages.yml).
+        // No manual saveResource calls here anymore.
 
         this.messageManager = new MessageManager(this);
+        this.contentLanguageManager = new com.phoenix.fish.manager.ContentLanguageManager(this);
         loadPluginResources();
 
         this.xpEnabled = getConfig().getBoolean("xp-system.enabled", false);
@@ -79,12 +83,7 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishManager = new FishManager(this);
         this.fishManager.loadFish();
 
-        // v1.3.7 — ÖNEMLİ: CraftingManager ve BaitManager constructor'larıBurada çağrılır,
-        // ama loadRecipes()/loadBaits() FishingListener oluşturulduktan SONRA çağrılmalı.
-        // Çünkü createItem() metodu ItemFixer'dan rod display-name'ini okuyor.
-        // Eğer loadRecipes() burada çağrılırsa, ItemFixer henüz null olur → "Olta" görünür.
         this.craftingManager = new CraftingManager(this);
-
         this.baitManager = new BaitManager(this);
         this.baitManager.loadBaits();
 
@@ -92,7 +91,6 @@ public final class PhoenixFish extends JavaPlugin {
         this.tournamentManager = new TournamentManager(this);
         this.economyManager = new EconomyManager(this);
         this.skillManager = new SkillManager(this);
-        // v1.6.0 — AchievementManager + MarketManager
         this.achievementManager = new com.phoenix.fish.manager.AchievementManager(this);
         this.marketManager = new com.phoenix.fish.manager.MarketManager(this);
         this.contractManager = new com.phoenix.fish.manager.ContractManager(this);
@@ -105,9 +103,6 @@ public final class PhoenixFish extends JavaPlugin {
         this.fishingListener = new FishingListener(this);
         Bukkit.getPluginManager().registerEvents(fishingListener, this);
 
-        // v1.3.7 — Şimdi FishingListener ve ItemFixer hazır, tarifleri yükleyebiliriz.
-        // createItem() artık ItemFixer'a erişebilir → rod ingredient'larına
-        // gerçek display-name set edilir (örn. "Cosmic Rod" / "宇宙鱼竿").
         this.craftingManager.loadRecipes();
 
         this.catalogManager = new CatalogManager(this);
@@ -116,10 +111,6 @@ public final class PhoenixFish extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new CatalogListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SkillListener(this), this);
         Bukkit.getPluginManager().registerEvents(new SellListener(this), this);
-
-        // v1.6.1 — Achievement & Contract GUI'lerini item hırsızlığına karşı korur.
-        // Önceki sürümde bu GUI'ler Bukkit.createInventory(null, ...) ile açıldığı için
-        // oyuncular başarılmış PAPER/GOLD_INGOT gibi item'ları fare ile çekebiliyordu.
         Bukkit.getPluginManager().registerEvents(new AchievementContractListener(this), this);
 
         registerCommands();
@@ -159,25 +150,14 @@ public final class PhoenixFish extends JavaPlugin {
         if (fishingListener != null)
             fishingListener.shutdown();
 
-        // Disable order: cancel scheduled tasks FIRST so they don't enqueue more DB work
-        // while we're draining the queue. Then save cache, then flush records, then close DB.
         if (cacheManager != null) {
             cacheManager.shutdown();
         }
 
-        // v1.6.0 — AchievementManager + MarketManager save
-        if (achievementManager != null) {
-            achievementManager.save();
-        }
-        if (marketManager != null) {
-            marketManager.shutdown();
-        }
-        if (contractManager != null) {
-            contractManager.shutdown();
-        }
-        if (seasonManager != null) {
-            seasonManager.shutdown();
-        }
+        if (achievementManager != null) achievementManager.save();
+        if (marketManager != null) marketManager.shutdown();
+        if (contractManager != null) contractManager.shutdown();
+        if (seasonManager != null) seasonManager.shutdown();
 
         if (cacheManager != null && database != null) {
             String logPrefix = messageManager != null ? messageManager.getPlainMessage("plugin_saving_cache")
@@ -187,8 +167,6 @@ public final class PhoenixFish extends JavaPlugin {
             Collection<FishingData> allData = cacheManager.getSavableData();
             if (!allData.isEmpty()) {
                 try {
-                    // C-7/C-8 FIX: with rethrow-on-failure in DB managers, batchSave().get() now throws
-                    // ExecutionException on save failure — we log it loudly instead of claiming success.
                     database.batchSave(allData).get(10, TimeUnit.SECONDS);
                     if (messageManager != null)
                         getLogger().info(messageManager.getPlainMessage("plugin_cache_saved"));
@@ -203,8 +181,6 @@ public final class PhoenixFish extends JavaPlugin {
             }
         }
 
-        // C-11 FIX: flush records synchronously so personal bests / server records set just before
-        // shutdown are not lost in a pending async save (RecordManager.saveFile used ForkJoinPool commonPool).
         if (recordManager != null) {
             recordManager.flush();
         }
@@ -221,8 +197,6 @@ public final class PhoenixFish extends JavaPlugin {
             }
         }
 
-        // M-15 FIX: explicitly cancel every plugin task (fixall runnables, ContainerFixTask, etc.)
-        // so none runs one extra tick into shutdown touching the now-closed DB or nulled instance.
         Bukkit.getScheduler().cancelTasks(this);
 
         instance = null;
@@ -234,10 +208,7 @@ public final class PhoenixFish extends JavaPlugin {
             saveResource("rods.yml", false);
             saveResource("custom_recipes.yml", false);
             saveResource("baits.yml", false);
-            saveResource("contract_templates.yml", false);
 
-            // v1.3.5 — Dinamik dil desteği: her dil için fish_<dil>.yml dosyasını
-            // jar'da ara ve varsa çıkar. Hardcoded "tr" kontrolü kalktı.
             String configuredLang = getConfig().getString("settings.language", "en");
             if (configuredLang != null && !configuredLang.trim().isEmpty()
                     && !configuredLang.equalsIgnoreCase("en")) {
@@ -250,8 +221,6 @@ public final class PhoenixFish extends JavaPlugin {
                             + "dosyası sadece istenen dile sahip PhoenixFish sürümlerinde gelir.");
                 }
 
-                // v1.3.5 — Diğer dil bazlı dosyalar (rods_, baits_, custom_recipes_)
-                // Eğer jar'da varsa çıkar; yoksa sessizce geç.
                 for (String prefix : new String[]{"rods_", "baits_", "custom_recipes_"}) {
                     String resource = prefix + configuredLang.trim().toLowerCase() + ".yml";
                     if (getResource(resource) != null) {
@@ -268,7 +237,6 @@ public final class PhoenixFish extends JavaPlugin {
     }
 
     private void setupDatabaseSystem() {
-        // M-26 FIX: clearer diagnostic when DB is intentionally skipped.
         if (!xpEnabled && !discoveryEnabled) {
             getLogger().info("Database not initialized: both xp-system.enabled and "
                     + "settings.discovery-enabled are false. Set either to true to enable persistence.");
@@ -303,6 +271,43 @@ public final class PhoenixFish extends JavaPlugin {
         }
     }
 
+    /**
+     * v1.6.2 (Fix #4) — Lazily initialize the database during /pf reload if the
+     * admin just enabled xp-system.enabled or settings.discovery-enabled (which
+     * were previously false at startup, leaving database=null).
+     *
+     * <p>Without this, a server admin who boots with xp-system disabled and
+     * later flips the config would see "skills_disabled" forever, because
+     * {@link #isXpSystemEnabled()} checks {@code database != null}.</p>
+     *
+     * <p>This method is idempotent: if DB is already initialized it returns
+     * immediately.</p>
+     */
+    private synchronized void ensureDatabaseForReload() {
+        boolean wantXp = getConfig().getBoolean("xp-system.enabled", false);
+        boolean wantDiscovery = getConfig().getBoolean("settings.discovery-enabled", true);
+
+        if (!wantXp && !wantDiscovery) {
+            // Both disabled — that's a valid state, nothing to do.
+            return;
+        }
+
+        if (this.database != null && this.cacheManager != null) {
+            // Already initialized. Caller will update the volatile flags.
+            return;
+        }
+
+        // Transition: DB needs to be (re-)initialized.
+        getLogger().info("Reload detected persistence flag transition — initializing database now.");
+        // Reset stale references first in case database was non-null but cacheManager was null.
+        if (database != null) {
+            try { database.close(); } catch (Throwable ignored) { }
+            database = null;
+        }
+        cacheManager = null;
+        setupDatabaseSystem();
+    }
+
     private void registerCommands() {
         PluginCommand command = getCommand("phoenixfish");
         if (command != null) {
@@ -320,13 +325,11 @@ public final class PhoenixFish extends JavaPlugin {
         if (fish == null || player == null)
             return;
 
-        // v1.6.0 — Config-driven görsel efektler (features.minigame-effects.enabled ise)
         if (getConfig().getBoolean("features.minigame-effects.enabled", true)) {
             String rarityKey = "features.minigame-effects.rarity_" + fish.rarity();
             org.bukkit.configuration.ConfigurationSection effectSec =
                     getConfig().getConfigurationSection(rarityKey);
             if (effectSec != null) {
-                // Particle
                 String particleStr = effectSec.getString("particle", "none");
                 if (!"none".equalsIgnoreCase(particleStr) && !particleStr.isEmpty()) {
                     try {
@@ -335,10 +338,8 @@ public final class PhoenixFish extends JavaPlugin {
                         player.getWorld().spawnParticle(particle, player.getLocation().add(0, 1, 0),
                                 count, 0.5, 0.5, 0.5, 0.05);
                     } catch (IllegalArgumentException ignored) {
-                        // Invalid particle name — skip
                     }
                 }
-                // Sound
                 String soundStr = effectSec.getString("sound", "");
                 if (!soundStr.isEmpty()) {
                     try {
@@ -348,12 +349,10 @@ public final class PhoenixFish extends JavaPlugin {
                         player.playSound(player, sound, volume, pitch);
                     } catch (IllegalArgumentException ignored) { }
                 }
-                // Shake (knockback effect)
                 if (effectSec.getBoolean("shake", false)) {
                     player.setVelocity(player.getVelocity().add(
                             new org.bukkit.util.Vector(0, 0.15, 0)));
                 }
-                // Title
                 if (effectSec.getBoolean("title", false)) {
                     String titleText = effectSec.getString("title_text", "");
                     if (!titleText.isEmpty()) {
@@ -372,11 +371,10 @@ public final class PhoenixFish extends JavaPlugin {
                         player.showTitle(title);
                     }
                 }
-                return;  // Config-driven efektler uygulandı, eski kodu atla
+                return;
             }
         }
 
-        // Eski davranış (config-driven efektler kapalıysa veya rarity için section yoksa)
         if (fish.rarity() >= 4) {
             Map<String, String> ph = Collections.singletonMap("%fish_name%",
                     PlainTextComponentSerializer.plainText().serialize(fish.name()));
@@ -398,78 +396,79 @@ public final class PhoenixFish extends JavaPlugin {
         }
     }
 
+    /**
+     * v1.6.2 (Fix #4) — Comprehensive reload.
+     *
+     * <p>Previous reload path had three defects:</p>
+     * <ol>
+     *   <li>{@code xpEnabled} / {@code discoveryEnabled} were set ONCE in
+     *       {@code onEnable()} and never updated. Toggling them in config.yml
+     *       + /pf reload silently kept the old values → {@code isXpSystemEnabled()}
+     *       kept returning false → {@code /pf skills} replied "skills_disabled".</li>
+     *   <li>The four v1.6.0 managers ({@link AchievementManager}, {@link MarketManager},
+     *       {@link ContractManager}, {@link SeasonManager}) declared
+     *       {@code private final boolean enabled} — only AchievementManager reload
+     *       tried (fragile) reflection to mutate it; the other three were never
+     *       re-read. Each manager now has a {@code reload()} method that refreshes
+     *       its enabled flag AND re-loads definitions/state from the new config.</li>
+     *   <li>Database was never re-initialized. An admin who booted with
+     *       xp-system disabled and later enabled it saw "still disabled" forever,
+     *       because {@code isXpSystemEnabled()} checks {@code database != null}.</li>
+     * </ol>
+     *
+     * <p>Fix: (a) refresh both volatile flags, (b) lazily init DB if needed,
+     * (c) call {@code reload()} on every manager, (d) keep the existing async
+     * execution context from {@code FishCommand.handleReload}.</p>
+     */
     public void reloadAll() {
         long start = System.currentTimeMillis();
 
         reloadConfig();
 
+        // ─── (a) Refresh the persistence flags from the new config ───
         boolean newDiscoveryEnabled = getConfig().getBoolean("settings.discovery-enabled", true);
         if (newDiscoveryEnabled != this.discoveryEnabled) {
-            getLogger().warning(
-                    "settings.discovery-enabled changed from " + this.discoveryEnabled
-                            + " to " + newDiscoveryEnabled
-                            + " but this requires a server restart to take effect.");
+            getLogger().info("settings.discovery-enabled: " + this.discoveryEnabled
+                    + " → " + newDiscoveryEnabled);
+        }
+        boolean newXpEnabled = getConfig().getBoolean("xp-system.enabled", false);
+        if (newXpEnabled != this.xpEnabled) {
+            getLogger().info("xp-system.enabled: " + this.xpEnabled + " → " + newXpEnabled);
         }
 
-        if (messageManager != null) {
-            messageManager.reload();
-        }
+        // ─── (b) Lazily init DB if the admin just enabled persistence ───
+        ensureDatabaseForReload();
 
-        if (fishManager != null) {
-            fishManager.loadFish();
-        }
+        // ─── (c) Now safe to update the volatile flags ───
+        this.discoveryEnabled = newDiscoveryEnabled;
+        this.xpEnabled = newXpEnabled;
 
-        if (baitManager != null) {
-            baitManager.loadBaits();
-        }
-
+        if (messageManager != null) messageManager.reload();
+        // v1.8.5 — Reload ALL content language packs (fish/baits/rods/contracts/
+        // achievements/skills) so /pf reload (and /pf settings language <code>)
+        // pick up language changes immediately.
+        if (contentLanguageManager != null) contentLanguageManager.reload();
+        if (fishManager != null) fishManager.loadFish();
+        if (baitManager != null) baitManager.loadBaits();
         if (fishingListener != null && fishingListener.getItemFixer() != null) {
             fishingListener.getItemFixer().reload();
         }
+        if (craftingManager != null) craftingManager.loadRecipes();
+        if (catalogManager != null) catalogManager.init();
 
-        if (craftingManager != null) {
-            craftingManager.loadRecipes();
-        }
+        // v1.6.2 (Fix #4) — Reload the four v1.6.0 managers properly.
+        // Each reload() re-reads its enabled flag from the freshly-loaded config,
+        // re-loads definitions/state if newly enabled, and saves old state if
+        // newly disabled. No reflection, no stale flags.
+        if (achievementManager != null) achievementManager.reload();
+        if (marketManager != null) marketManager.reload();
+        if (contractManager != null) contractManager.reload();
+        if (seasonManager != null) seasonManager.reload();
 
-        if (catalogManager != null) {
-            catalogManager.init();
-        }
+        // v1.6.2 (Fix #4) — SkillManager.reload() re-reads skill-max-level.
+        if (skillManager != null) skillManager.reload();
 
-        // v1.6.0 — AchievementManager + MarketManager reload
-        if (achievementManager != null) {
-            // Definitions re-read from config
-            try {
-                achievementManager.save();
-                var field = achievementManager.getClass().getDeclaredField("enabled");
-                field.setAccessible(true);
-                field.setBoolean(achievementManager, getConfig().getBoolean("features.achievements.enabled", false));
-            } catch (Throwable ignored) { }
-        }
-        if (marketManager != null) {
-            try {
-                marketManager.save();
-                marketManager.applyRecovery();
-            } catch (Throwable ignored) { }
-        }
-
-        // v1.7.0 — ContractManager reload (re-reads contract_templates.yml)
-        if (contractManager != null) {
-            contractManager.reload();
-        }
-
-        // v1.3.7 — Reload sonrası envanter fix.
-        // Dil değiştiyse (örn. en → zh_cn), oyuncuların envanterindeki eski olta/yemler
-        // hâlâ ESKİ dildeki display-name'i taşıyor. Yeni açılan /pcraft menüsü güncel veriyi
-        // gösterir, ama eldeki eşyalar eski adıyla kalır. Bu fix, reload sonrası tüm online
-        // oyuncuların envanterini tarayıp eski olta/yemleri yeni dildeki display-name'le günceller.
-        //
-        // v1.4.0 (C-1 fix) — Envanter mutation Bukkit API'sinde thread-safe DEĞİL.
-        // reloadAll() async thread'te çağrıldığı için (FishCommand.handleReload → runTaskAsynchronously),
-        // envanter fix'i main thread'e taşımalı. Yoksa ConcurrentModificationException
-        // veya envanter eşyalarının çoğalması/kaybolması riski var.
         if (fishingListener != null && fishingListener.getItemFixer() != null) {
-            // Envanter mutation'ı main thread'e atla. Bukkit.getScheduler().runTask çağrısı
-            // async context'ten çağrılabilir, lambda bir sonraki main-thread tick'te çalışır.
             try {
                 java.util.concurrent.atomic.AtomicInteger totalFixed = new java.util.concurrent.atomic.AtomicInteger(0);
                 org.bukkit.Bukkit.getScheduler().runTask(this, () -> {
@@ -479,31 +478,22 @@ public final class PhoenixFish extends JavaPlugin {
                             if (result != null && result.length >= 2) {
                                 totalFixed.addAndGet(result[0] + result[1]);
                             }
-                        } catch (Throwable ignored) {
-                            // Bir oyuncunun envanteri fix edilemezse sessizce geç.
-                        }
+                        } catch (Throwable ignored) { }
                     }
                     if (totalFixed.get() > 0) {
                         getLogger().info("Inventory fix applied after reload: " + totalFixed.get()
                                 + " items updated across online players.");
                     }
                 });
-            } catch (Throwable ignored) {
-                // Scheduler meşgulse veya plugin disable ise sessizce geç.
-            }
+            } catch (Throwable ignored) { }
         }
 
         long elapsed = System.currentTimeMillis() - start;
         getLogger().info("PhoenixFish config reloaded in " + elapsed + "ms.");
 
-        // Faz 0.9.0: invalidate XP formula cache on reload
         FishingData.invalidateXpCache();
-        // v1.6.1 (bug #3 fix): invalidate skill-max-level cache so config changes
-        // to xp-system.skill-max-level take effect on /pf reload.
         FishingData.invalidateMaxSkillLevelCache();
 
-        // Notify external consumers (e.g. PhoenixCraft) — Faz 1 / 1.3.2 (Madde 2)
-        // They should invalidate caches and close any open GUIs showing stale data.
         try {
             Bukkit.getPluginManager().callEvent(new PhoenixFishReloadEvent(elapsed));
         } catch (Exception e) {
@@ -511,82 +501,30 @@ public final class PhoenixFish extends JavaPlugin {
         }
     }
 
-    public static PhoenixFish getInstance() {
-        return instance;
-    }
+    public static PhoenixFish getInstance() { return instance; }
+    public PhoenixFishAPI getApi() { return api; }
+    public FishManager getFishManager() { return fishManager; }
+    public CraftingManager getCraftingManager() { return craftingManager; }
+    public BaitManager getBaitManager() { return baitManager; }
+    public IDatabase getDatabase() { return database; }
+    public FishingListener getFishingListener() { return fishingListener; }
+    public CacheManager getCacheManager() { return cacheManager; }
+    public MessageManager getMessageManager() { return messageManager; }
 
-    public PhoenixFishAPI getApi() {
-        return api;
+    // v1.8.5 — Content (fish/baits/rods/contracts/achievements/skills) localization layer.
+    public com.phoenix.fish.manager.ContentLanguageManager getContentLanguageManager() {
+        return contentLanguageManager;
     }
-
-    public FishManager getFishManager() {
-        return fishManager;
-    }
-
-    public CraftingManager getCraftingManager() {
-        return craftingManager;
-    }
-
-    public BaitManager getBaitManager() {
-        return baitManager;
-    }
-
-    public IDatabase getDatabase() {
-        return database;
-    }
-
-    public FishingListener getFishingListener() {
-        return fishingListener;
-    }
-
-    public CacheManager getCacheManager() {
-        return cacheManager;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
-    }
-
-    public CatalogManager getCatalogManager() {
-        return catalogManager;
-    }
-
-    public TournamentManager getTournamentManager() {
-        return tournamentManager;
-    }
-
-    public RecordManager getRecordManager() {
-        return recordManager;
-    }
-
-    public SkillManager getSkillManager() {
-        return skillManager;
-    }
-
-    public EconomyManager getEconomyManager() {
-        return economyManager;
-    }
-
-    public FishingModeManager getFishingModeManager() {
-        return fishingModeManager;
-    }
-
-    // v1.6.0 — AchievementManager getter
-    public com.phoenix.fish.manager.AchievementManager getAchievementManager() {
-        return achievementManager;
-    }
-    // v1.6.0 — MarketManager getter
-    public com.phoenix.fish.manager.MarketManager getMarketManager() {
-        return marketManager;
-    }
-    // v1.6.0 — ContractManager getter
-    public com.phoenix.fish.manager.ContractManager getContractManager() {
-        return contractManager;
-    }
-    // v1.6.0 — SeasonManager getter
-    public com.phoenix.fish.manager.SeasonManager getSeasonManager() {
-        return seasonManager;
-    }
+    public CatalogManager getCatalogManager() { return catalogManager; }
+    public TournamentManager getTournamentManager() { return tournamentManager; }
+    public RecordManager getRecordManager() { return recordManager; }
+    public SkillManager getSkillManager() { return skillManager; }
+    public EconomyManager getEconomyManager() { return economyManager; }
+    public FishingModeManager getFishingModeManager() { return fishingModeManager; }
+    public com.phoenix.fish.manager.AchievementManager getAchievementManager() { return achievementManager; }
+    public com.phoenix.fish.manager.MarketManager getMarketManager() { return marketManager; }
+    public com.phoenix.fish.manager.ContractManager getContractManager() { return contractManager; }
+    public com.phoenix.fish.manager.SeasonManager getSeasonManager() { return seasonManager; }
 
     public boolean isXpSystemEnabled() {
         return xpEnabled && database != null;
@@ -594,5 +532,52 @@ public final class PhoenixFish extends JavaPlugin {
 
     public boolean isDiscoveryEnabled() {
         return discoveryEnabled && database != null;
+    }
+
+    // =====================================================================
+    //  v1.8.5 — Config auto-saver
+    //  Used by /pf settings to write back to config.yml and trigger a
+    //  full reloadAll() so the change takes effect immediately.
+    // =====================================================================
+
+    /**
+     * v1.8.5 — Set a config value, persist it to disk, then trigger a
+     * full reloadAll() so all managers pick up the new value.
+     *
+     * <p>This is the single entry point used by {@code /pf settings}.
+     * It mutates the in-memory config, writes it back to {@code config.yml},
+     * and reloads every manager — no server restart required.</p>
+     *
+     * @param path dotted config path (e.g. "language", "features.skill-stamina.enabled")
+     * @param value the new value (String / Boolean / Integer / Double)
+     */
+    public synchronized void setConfigValueAndReload(String path, Object value) {
+        getConfig().set(path, value);
+        try {
+            saveConfig();
+            getLogger().info("Config updated: " + path + " = " + value);
+        } catch (Exception e) {
+            getLogger().severe("Failed to save config.yml after updating " + path + ": " + e.getMessage());
+            return;
+        }
+        // Trigger the full reload chain — same as /pf reload.
+        reloadAll();
+    }
+
+    /**
+     * v1.8.5 — Set a config value AND persist it, but DO NOT trigger a
+     * reload. Used when the caller wants to batch multiple changes and
+     * trigger the reload manually afterward.
+     */
+    public synchronized void setConfigValue(String path, Object value) {
+        getConfig().set(path, value);
+    }
+
+    /**
+     * v1.8.5 — Persist the current in-memory config to disk. Called
+     * after one or more {@link #setConfigValue} calls.
+     */
+    public synchronized void saveConfigNow() {
+        saveConfig();
     }
 }

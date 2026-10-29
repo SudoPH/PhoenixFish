@@ -4,16 +4,22 @@
 #  Albion-style custom fishing system with optional XP,
 #  discovery, minigame, economy, tournaments and records.
 #
-#  * Language files (messages_tr.yml / messages_en.yml) are
-#    generated automatically on first startup.
-#  * After editing this file, restart the server (or use your
-#    reload method) for changes to take effect.
-#  * Supported languages: "tr" and "en"
+#  v1.8.5 — Language files live in /lang/<code>/ subfolders.
+#  Bundled defaults: en, tr, zh_cn. Switch with /pf settings language <code>.
+#  After editing this file, use /pf reload (or /pf settings ...) for
+#  changes to take effect — no server restart required.
+#  Supported bundled languages: "en", "tr", "zh_cn"
 # ============================================================
 
+# v1.8.5 — Top-level language option (preferred over settings.language below).
+# Affects ALL player-facing messages, GUI titles, lore, fish/bait/rod names,
+# contract descriptions, achievement titles, and skill descriptions.
+# Switch live with: /pf settings language <code>
+language: "en"
+
 settings:
-  # Plugin language. Affects ALL player-facing messages.
-  # Valid values: "en" (English) or "tr" (Turkish)
+  # Legacy language option — still honored if the top-level `language:` option
+  # is absent or empty. Prefer using the top-level `language:` instead.
   language: "en"
 
   # Enable the interactive fishing minigame (moving bar + tension).
@@ -40,12 +46,12 @@ settings:
 #  0.2 = +20%, 0.5 = +50%, 0 = disabled
 weather:
   # Extra luck while it is raining.
-  rain-luck-bonus: 0.15
+  rain-luck-bonus: 0.2
 
   # Extra luck while there is a thunderstorm.
   # Storm includes the rain bonus effect and greatly increases
   # the chance of rare/legendary fish.
-  storm-luck-bonus: 0.4
+  storm-luck-bonus: 0.5
 
 # ============================================================
 #  Sound System
@@ -118,22 +124,22 @@ minigame:
   # Default 1.0 = eski davranış (nadirlik etkisi yok).
   # Epik +60%, Efsanevi +100% zorluk önerilir:
   rarity-difficulty-multipliers:
-    1: 1.0    # Common — baseline difficulty
-    2: 1.1    # Uncommon — +10% fight strength
-    3: 1.25   # Rare — +25% fight strength
-    4: 1.55   # Epic — +55% fight strength
-    5: 1.85   # Legendary — +85% fight strength
+    1: 1.0
+    2: 1.0
+    3: 1.2
+    4: 1.6
+    5: 2.0
 
   # ─── v1.3.5 — Nadirlik başına tension cap ───
   # Balığın tension bar'ı bu değere ulaşırsa hat kopar (oyuncu kaybeder).
   # Default 100.0 = eski davranış.
   # Epik ve efsanevi balıklarda daha düşük cap → daha az tolere ederler:
   rarity-tension-cap:
-    1: 100.0  # Common — full bar tolerance
-    2: 100.0  # Uncommon — full bar tolerance
-    3: 95.0   # Rare — 5% less tolerance
-    4: 95.0   # Epic — 5% less tolerance
-    5: 88.0   # Legendary — 12% less tolerance
+    1: 100.0
+    2: 100.0
+    3: 100.0
+    4: 90.0
+    5: 80.0
 
 # ============================================================
 #  XP & Leveling System
@@ -183,7 +189,7 @@ xp-system:
   # Example: A level 50 player gets +100% (x1.0 extra) luck.
   # Note: High values can break the late-game economy by making
   # rare fish too common.
-  level-luck-bonus: 0.015
+  level-luck-bonus: 0.02
 
   # ============================================================
   #  Crafting XP Formula (Faz 0.9.0 — Exponential)
@@ -200,7 +206,7 @@ xp-system:
   #  Faster leveling (casual server):
   #    base: 30, exponent: 1.3
   #  Default (balanced — Option A):
-  #    base: 60, exponent: 1.5
+  #    base: 50, exponent: 1.5
   #  Slower leveling (hardcore server):
   #    base: 80, exponent: 1.8
   #
@@ -231,7 +237,7 @@ xp-system:
     # 1.5 = exponential (default — recommended)
     # 2.0 = very steep (hardcore)
     # Default: 1.5
-    exponent: 1.55
+    exponent: 1.5
 
     # Global XP multiplier. Applies to ALL crafting XP gains.
     # 1.0 = normal, 2.0 = double XP weekend, 0.5 = half XP
@@ -257,22 +263,6 @@ xp-system:
       31-60: 2.5   # Mid game — grind begins
       61-80: 4.0   # Late game — hard
       81-100: 6.0  # Endgame — very hard, takes months
-
-
-  # ============================================================
-  #  Fishing XP Formula (v1.8.0 — NEW, config-driven)
-  # ============================================================
-  #  XP required to advance fishing level N → N+1:
-  #    requiredXp = base × level^exponent
-  #  Defaults (base=100, exp=1.0) preserve the old hardcoded behavior.
-  #  Recommended balanced values: base=80, exponent=1.4
-  #    Level 1→2:    80 XP
-  #    Level 10→11:  2,009 XP
-  #    Level 50→51:  26,727 XP
-  #    Level 99→100: 75,096 XP
-  fishing-xp:
-    base: 80
-    exponent: 1.4
 
   # ============================================================
   #  Tier System (Faz 0.9.0 — Albion-style)
@@ -349,7 +339,7 @@ xp-system:
   # Maximum level for each fishing skill (1-10, clamped).
   # Higher values let players spec deeper into one skill.
   # Skills: Fast Catcher, Master Hunter, Double Catch, Lucky Bait.
-  skill-max-level: 8
+  skill-max-level: 5
 
   # ─── v1.3.5 — Skill başına config-driven değerler ───
   # Bu değerler eskiden hardcoded idi (MinigameTask.java, FishingListener.java,
@@ -357,13 +347,13 @@ xp-system:
   # Default değerler eski hardcoded değerlerle birebir aynıdır (geriye dönük uyumlu).
   skill-per-level:
     # Fast Catcher — her level başına progressRate'e eklenir (MinigameTask).
-    fast-catcher-progress-bonus: 0.4
+    fast-catcher-progress-bonus: 0.5
     # Master Hunter — her level başına luckMultiplier'a eklenir (FishingListener).
-    master-hunter-luck-bonus: 0.015
+    master-hunter-luck-bonus: 0.02
     # Double Catch — her level başına ikinci balık şansı (FishRewardHelper).
-    double-catch-chance-per-level: 0.06
+    double-catch-chance-per-level: 0.10
     # Lucky Bait — her level başına yem tüketmeme şansı (FishingListener).
-    lucky-bait-chance-per-level: 0.10
+    lucky-bait-chance-per-level: 0.20
 
   # ─── v1.5.0 (F-4) — Skill re-spec ───
   # /pf respec komutu ile tüm skill'leri sıfırlayıp puanları geri alabilirsin.
@@ -387,13 +377,6 @@ economy:
 #  If disabled, admins cannot start tournaments via commands.
 tournament:
   enabled: true
-  # v1.8.0 — config-driven rarity points (was hardcoded in FishRewardHelper)
-  points-per-rarity:
-    1: 1     # Common — baseline
-    2: 2     # Uncommon — 2x common
-    3: 5     # Rare — 5x common
-    4: 12    # Epic — 12x common
-    5: 25    # Legendary — 25x common
 
   # ─── v1.5.0 (F-1) — Otomatik tekrarlanan turnuva takvimi ───
   # Yorum satırına alınmış örnek. Aktif etmek için satır başlarındaki "#" işaretini kaldırın.
@@ -516,12 +499,12 @@ features:
 
   # ── #6: Fish Mutations ────────────────────────────────
   fish-mutations:
-    enabled: true
-    chance: 0.03   # 3% chance per catch
+    enabled: false
+    chance: 0.01   # 1% chance per catch
     mutations:
-      shiny: { chance-weight: 0.70, price-multiplier: 3.5, weight-multiplier: 1.30, color: "<rainbow>", lore-prefix: "<rainbow>✦ SHINY ✦ " }
-      albino: { chance-weight: 0.20, price-multiplier: 2.5, weight-multiplier: 1.15, color: "<white>", lore-prefix: "<white>✦ ALBINO ✦ " }
-      golden: { chance-weight: 0.10, price-multiplier: 6.0, weight-multiplier: 1.50, color: "<gold>", lore-prefix: "<gold>✦ GOLDEN ✦ " }
+      shiny: { chance-weight: 0.7, price-multiplier: 5.0, weight-multiplier: 1.5, color: "<rainbow>", lore-prefix: "<rainbow>✦ SHINY ✦ " }
+      albino: { chance-weight: 0.2, price-multiplier: 3.0, weight-multiplier: 1.2, color: "<white>", lore-prefix: "<white>✦ ALBINO ✦ " }
+      golden: { chance-weight: 0.1, price-multiplier: 10.0, weight-multiplier: 2.0, color: "<gold>", lore-prefix: "<gold>✦ GOLDEN ✦ " }
 
   # ── #7: Fishing Stats GUI ────────────────────────────
   fishing-stats:
@@ -529,16 +512,24 @@ features:
 
   # ── #8: Dynamic Pricing ──────────────────────────────
   dynamic-pricing:
-    enabled: true
-    decay-per-sale: 0.97         # each sale drops price 3%
-    recovery-per-hour: 0.02      # faster recovery so casual players aren't punished
-    min-multiplier: 0.40         # slightly higher floor to keep common fish viable
-    max-multiplier: 1.50         # cap idle appreciation
+    enabled: false
+    decay-per-sale: 0.97
+    recovery-per-hour: 0.01
+    min-multiplier: 0.3
+    max-multiplier: 1.5
     save-interval-minutes: 5
 
   # ── #9: Contracts (Daily Quests) ─────────────────────
   contracts:
-    enabled: true
+    enabled: false
+    daily-contract-count: 3
+    reset-hour: 0
+    contract-pool:
+      - { fish: "any_common", amount: 10, reward-money: 200, reward-xp: 20 }
+      - { fish: "any_uncommon", amount: 5, reward-money: 500, reward-xp: 50 }
+      - { fish: "any_rare", amount: 3, reward-money: 1000, reward-xp: 100 }
+      - { fish: "any_epic", amount: 1, reward-money: 3000, reward-xp: 300 }
+      - { fish: "any_legendary", amount: 1, reward-money: 10000, reward-xp: 1000 }
 
   # ── #10: Fishing Seasons ──────────────────────────────
   seasons:
@@ -577,23 +568,59 @@ features:
     milestone-title: true
     milestone-interval: 5
 
-  # ── #13: Skill — Big Catch ────────────────────────────
-  skill-big-catch:
+  # ════════════════════════════════════════════════════════
+  #  v1.8.6 — SKILL SYSTEM: Master Toggle + Granular Sub-Toggles
+  # ════════════════════════════════════════════════════════
+  #  The entire skill system is gated by a single master toggle.
+  #  When the master is false:
+  #    - SkillManager is effectively unloaded (0 resources consumed)
+  #    - /pf skills returns a "disabled" message
+  #    /pf respec returns a "disabled" message
+  #    - No skill points are tracked, no DB columns read/written
+  #    - No gameplay effects (weight bonus, rarity upgrade, tension resist)
+  #  When the master is true, individual skills load based on their
+  #  sub-toggle under `types:`:
+  #    - Disabled sub-skills are HIDDEN from the Skills GUI
+  #    - Disabled sub-skills consume no memory and apply no stat bonuses
+  #    - Disabled sub-skills' levels are still persisted (re-enabling
+  #      keeps progress)
+  #
+  #  Sub-toggle IDs: fast, hunter, double, bait, big-catch, lucky-cast, stamina
+  #  Toggle live with: /pf settings features skills <true|false>
+  #                     /pf settings features skills.types.<id> <true|false>
+  # ════════════════════════════════════════════════════════
+  skills:
+    # Master toggle — when false, the ENTIRE skill system is disabled.
     enabled: true
-    weight-bonus-per-level: 0.04
-    max-level-cap: 8
 
-  # ── #14: Skill — Lucky Cast ──────────────────────────
+    # Granular sub-toggles per skill.
+    # When a sub-toggle is false:
+    #   - The skill icon is HIDDEN from the Skills GUI
+    #   - The skill's stat bonus does NOT apply during gameplay
+    #   - The skill's level is still persisted in the DB
+    types:
+      fast: true              # Fast Catcher — +minigame catch speed
+      hunter: true            # Master Hunter — +Rare+ fish chance
+      double: true            # Double Catch — chance to catch 2 fish
+      bait: true              # Lucky Bait — chance to not consume bait
+      big-catch: false        # Big Catch — +5% fish weight per level
+      lucky-cast: false       # Lucky Cast — +10% rarity upgrade per level
+      stamina: false          # Stamina — +10% tension resistance per level
+
+  # ── v1.6.0 skill parameters (kept for backward compat; the ENABLED
+  #    flags above in `skills.types` are the source of truth) ──
+  # v1.8.6: The `enabled` flags below are IGNORED — use `skills.types.*` instead.
+  # These sections are kept ONLY for their per-level bonus values.
+  skill-big-catch:
+    weight-bonus-per-level: 0.05
+
   skill-lucky-cast:
-    enabled: true
-    rarity-upgrade-chance-per-level: 0.015
+    rarity-upgrade-chance-per-level: 0.10
     max-upgrade: 1
 
-  # ── #15: Skill — Stamina ─────────────────────────────
   skill-stamina:
-    enabled: true
-    tension-resist-per-level: 0.08
-    max-level-cap: 8
+    tension-resist-per-level: 0.10
+    max-level-cap: 3
 
   # ── #16: PlaceholderAPI ──────────────────────────────
   placeholder-api:

@@ -1,0 +1,40 @@
+# ============================================================
+#  PhoenixFish — Simplified Chinese Achievement Localization (zh_cn)
+# ============================================================
+#  Per-achievement display-name + lore for 8 entries.
+#  Missing keys auto-fallback to lang/en/achievements.yml via FileConfiguration.setDefaults.
+# ============================================================
+
+achievements:
+  first-catch:
+    title: 初次钓获
+    lore:
+    - <gray>钓到你的第一条鱼。
+  apprentice-fisher:
+    title: 钓鱼学徒
+    lore:
+    - <gray>累计钓到 50 条鱼。
+  master-fisher:
+    title: 钓鱼大师
+    lore:
+    - <gray>累计钓到 500 条鱼。
+  rare-hunter:
+    title: 稀有猎手
+    lore:
+    - <gray>钓到 10 条稀有稀有度的鱼。
+  epic-hunter:
+    title: 史诗猎手
+    lore:
+    - <gray>钓到 5 条史诗稀有度的鱼。
+  legendary-master:
+    title: 传说宗师
+    lore:
+    - <gray>钓到 1 条传说稀有度的鱼。
+  species-collector:
+    title: 物种收藏家
+    lore:
+    - <gray>发现 25 种不同的鱼。
+  mutation-hunter:
+    title: 突变猎手
+    lore:
+    - <gray>钓到 5 条突变鱼。

@@ -37,7 +37,8 @@ public class AchievementManager {
 
     private final PhoenixFish plugin;
     private final MiniMessage miniMessage;
-    private final boolean enabled;
+    // v1.6.2 (Fix #4) — was `final boolean`. Now volatile so reload() can update it.
+    private volatile boolean enabled;
 
     /** Per-player unlocked achievement IDs. */
     private final Map<UUID, Set<String>> unlocked = new ConcurrentHashMap<>();
@@ -58,6 +59,38 @@ public class AchievementManager {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * v1.6.2 (Fix #4) — Re-reads the enabled flag from the freshly-loaded config
+     * and reloads definitions / unlocks if (newly) enabled.
+     *
+     * <p>Previously the field was {@code final}, so /pf reload never updated it.
+     * The old reload path tried to mutate it via reflection, which was fragile
+     * and only fired for AchievementManager — not for the other three managers.</p>
+     */
+    public synchronized void reload() {
+        boolean newEnabled = plugin.getConfig().getBoolean("features.achievements.enabled", false);
+        if (newEnabled == this.enabled) {
+            // Even if state is unchanged, re-read definitions in case the admin
+            // edited the list (added/removed tiers, changed reward commands).
+            if (newEnabled) loadDefinitions();
+            return;
+        }
+        if (newEnabled) {
+            // Was disabled → now enabled: load everything.
+            this.enabled = true;
+            loadDefinitions();
+            loadUnlocks();
+            plugin.getLogger().info("AchievementManager enabled via reload — "
+                    + definitions.size() + " achievements loaded.");
+        } else {
+            // Was enabled → now disabled: flush state, drop definitions.
+            save();
+            this.enabled = false;
+            definitions.clear();
+            plugin.getLogger().info("AchievementManager disabled via reload — state saved.");
+        }
     }
 
     // =====================================================================
@@ -189,10 +222,14 @@ public class AchievementManager {
     }
 
     private void unlockAchievement(Player player, AchievementDef def) {
+        // v1.8.5 — Achievement title is now localized via ContentLanguageManager.
+        String localizedTitle = plugin.getContentLanguageManager()
+                .getAchievementTitle(def.id(), def.id());
+
         // Chat message
         player.sendMessage(miniMessage.deserialize(
                 "<gold><bold>★ Achievement Unlocked!</bold></gold> <white>"
-                        + def.id() + "</white> <dark_gray>— <gray>" + def.type()));
+                        + localizedTitle + "</white> <dark_gray>— <gray>" + def.type()));
 
         // Title
         if (plugin.getConfig().getBoolean("features.achievements.show-title", true)) {
@@ -202,7 +239,7 @@ public class AchievementManager {
                     java.time.Duration.ofMillis(800));
             Title title = Title.title(
                     miniMessage.deserialize("<gold><bold>★ ACHIEVEMENT!</bold></gold>"),
-                    miniMessage.deserialize("<white>" + def.id() + "</white>"),
+                    miniMessage.deserialize("<white>" + localizedTitle + "</white>"),
                     times);
             player.showTitle(title);
         }
@@ -248,38 +285,60 @@ public class AchievementManager {
 
     public void openGUI(Player player) {
         if (!enabled) {
-            player.sendMessage(miniMessage.deserialize("<red>Achievement system is disabled."));
+            // v1.8.5 — Localized disabled message via MessageManager.
+            String disabledMsg = plugin.getMessageManager().getPlainMessage("achievements_disabled");
+            if (disabledMsg == null || "achievements_disabled".equals(disabledMsg) || disabledMsg.isEmpty()) {
+                disabledMsg = "<red>Achievement system is disabled.";
+            }
+            player.sendMessage(miniMessage.deserialize(disabledMsg));
             return;
         }
-        // v1.6.1 (bug #4 + #26 fix): the previous FishingData fetch here was both
-        // unguarded against a null CacheManager AND never used afterwards (dead fetch).
-        // Removed entirely — openGUI only needs the per-player unlocked-set below.
         Set<String> playerUnlocked = unlocked.getOrDefault(player.getUniqueId(), Collections.emptySet());
 
         int total = definitions.size();
         int unlockedCount = (int) definitions.keySet().stream().filter(playerUnlocked::contains).count();
 
-        // v1.6.1 — FIX: null holder yerine AchievementGUIHolder kullan.
-        // Bu, AchievementListener'ın click/drag event'lerini cancel etmesini sağlar.
+        // v1.8.5 — Localized GUI title via MessageManager (with placeholder substitution).
+        String titleTemplate = plugin.getMessageManager().getPlainMessage("achievements_menu_title");
+        if (titleTemplate == null || "achievements_menu_title".equals(titleTemplate) || titleTemplate.isEmpty()) {
+            titleTemplate = "<dark_gray>» <gold>Achievements <dark_gray>(<white>%unlocked%/%total%</white>)";
+        }
+        String guiTitle = titleTemplate
+                .replace("%unlocked%", String.valueOf(unlockedCount))
+                .replace("%total%", String.valueOf(total));
         Inventory inv = Bukkit.createInventory(new AchievementGUIHolder(), 54,
-                miniMessage.deserialize("<dark_gray>» <gold>Achievements <dark_gray>(<white>"
-                        + unlockedCount + "/" + total + "</white>)"));
+                miniMessage.deserialize(guiTitle));
 
         int slot = 0;
         for (AchievementDef def : definitions.values()) {
             if (slot >= 45) break;
             boolean isUnlocked = playerUnlocked.contains(def.id().toLowerCase());
 
+            // v1.8.5 — Localized achievement title via ContentLanguageManager.
+            String localizedTitle = plugin.getContentLanguageManager()
+                    .getAchievementTitle(def.id(), def.id());
+
             Material mat = isUnlocked ? Material.GOLD_INGOT : Material.GRAY_DYE;
             ItemStack item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
                 meta.displayName(miniMessage.deserialize(
-                        (isUnlocked ? "<gold><bold>" : "<gray><italic>") + def.id()));
+                        (isUnlocked ? "<gold><bold>" : "<gray><italic>") + localizedTitle));
                 List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
-                lore.add(miniMessage.deserialize("<gray>Type: <white>" + def.type()));
-                lore.add(miniMessage.deserialize("<gray>Target: <white>" + def.target()));
-                lore.add(miniMessage.deserialize("<gray>Tier: <white>" + def.tier()));
+
+                // v1.8.5 — Try localized lore from ContentLanguageManager; fall back
+                // to the generic type/target/tier lines.
+                List<String> localizedLore = plugin.getContentLanguageManager()
+                        .getAchievementLore(def.id(), java.util.List.of());
+                if (localizedLore != null && !localizedLore.isEmpty()) {
+                    for (String line : localizedLore) {
+                        lore.add(miniMessage.deserialize(line));
+                    }
+                } else {
+                    lore.add(miniMessage.deserialize("<gray>Type: <white>" + def.type()));
+                    lore.add(miniMessage.deserialize("<gray>Target: <white>" + def.target()));
+                    lore.add(miniMessage.deserialize("<gray>Tier: <white>" + def.tier()));
+                }
                 lore.add(miniMessage.deserialize(""));
                 lore.add(miniMessage.deserialize(
                         isUnlocked ? "<green>✔ Unlocked" : "<dark_red>✖ Locked"));

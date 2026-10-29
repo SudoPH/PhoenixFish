@@ -48,36 +48,16 @@ public class ItemFixer {
     }
 
     private void cacheRodConfigurations() {
-        // v1.3.5 — Dil bazlı rod dosyası yükleme.
-        // Sıra: rods_<dil>.yml → rods.yml (fallback).
-        // Dil bazlı dosya yoksa doğrudan rods.yml kullanılır.
-        String lang = null;
-        try {
-            lang = plugin.getMessageManager().getLanguage();
-        } catch (Throwable ignored) {
-            // MessageManager henüz yüklenmediyse null bırak.
-        }
-        String fileName = "rods.yml";
-        if (lang != null && !lang.trim().isEmpty() && !lang.equalsIgnoreCase("en")) {
-            String candidate = "rods_" + lang.trim().toLowerCase() + ".yml";
-            File candidateFile = new File(plugin.getDataFolder(), candidate);
-            if (candidateFile.exists() || plugin.getResource(candidate) != null) {
-                fileName = candidate;
-            }
-        }
-
-        File rodFile = new File(plugin.getDataFolder(), fileName);
+        // v1.8.5 — Rod data is always loaded from rods.yml at the data folder root.
+        // The localized display-name + lore are looked up per-rod via ContentLanguageManager.
+        File rodFile = new File(plugin.getDataFolder(), "rods.yml");
         if (!rodFile.exists()) {
-            // Fallback: rods.yml
-            fileName = "rods.yml";
+            plugin.saveResource("rods.yml", false);
             rodFile = new File(plugin.getDataFolder(), "rods.yml");
-            if (!rodFile.exists()) {
-                plugin.saveResource("rods.yml", false);
-                rodFile = new File(plugin.getDataFolder(), "rods.yml");
-            }
         }
 
-        plugin.getLogger().info("Loading rods from: " + fileName);
+        plugin.getLogger().info("Loading rods from: rods.yml (lang="
+                + plugin.getContentLanguageManager().getLanguage() + ")");
 
         FileConfiguration rodConfig = YamlConfiguration.loadConfiguration(rodFile);
         ConfigurationSection rodsSec = rodConfig.getConfigurationSection("rods");
@@ -206,19 +186,43 @@ public class ItemFixer {
         return rodCache.get(identifier);
     }
 
+    /**
+     * v1.8.5 — Look up the rod ID for a cached rod section so we can
+     * query the ContentLanguageManager for the localized name + lore.
+     */
+    private String findRodId(ConfigurationSection rodSec) {
+        if (rodSec == null) return null;
+        String name = rodSec.getName();
+        if (name != null && rodIdCache.containsKey(name.toLowerCase())) return name;
+        for (Map.Entry<String, ConfigurationSection> e : rodIdCache.entrySet()) {
+            if (e.getValue() == rodSec) return e.getKey();
+        }
+        return null;
+    }
+
     private FixResult fixRod(ItemStack itemInHand, ItemMeta meta) {
         ConfigurationSection rodSec = findRodByItem(itemInHand);
 
         if (rodSec == null)
             return FixResult.FAILED;
 
+        // v1.8.5 — Localized display-name + lore via ContentLanguageManager.
+        String rodId = findRodId(rodSec);
         String defaultRodName = plugin.getMessageManager().getPlainMessage("item_default_rod_name");
-        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", defaultRodName)));
+        String inlineName = rodSec.getString("display-name", defaultRodName);
+        String localizedName = (rodId != null)
+                ? plugin.getContentLanguageManager().getRodName(rodId, inlineName)
+                : inlineName;
+        meta.displayName(miniMessage.deserialize(localizedName));
         ItemUtils.applyCustomModelData(meta, rodSec);
 
-        if (rodSec.contains("lore")) {
-            List<Component> loreComponents = new ArrayList<>();
-            for (String line : rodSec.getStringList("lore")) {
+        List<String> inlineLore = rodSec.getStringList("lore");
+        List<String> loreLines = (rodId != null)
+                ? plugin.getContentLanguageManager().getRodLore(rodId, inlineLore)
+                : inlineLore;
+        if (!loreLines.isEmpty()) {
+            List<Component> loreComponents = new ArrayList<>(loreLines.size());
+            for (String line : loreLines) {
                 loreComponents.add(miniMessage.deserialize(line));
             }
             meta.lore(loreComponents);
@@ -275,14 +279,24 @@ public class ItemFixer {
         if (meta == null)
             return rod;
 
+        // v1.8.5 — Localized display-name + lore via ContentLanguageManager.
+        String rodId = findRodId(rodSec);
         String defaultRodName = plugin.getMessageManager().getPlainMessage("item_default_rod_name");
-        meta.displayName(miniMessage.deserialize(rodSec.getString("display-name", defaultRodName)));
+        String inlineName = rodSec.getString("display-name", defaultRodName);
+        String localizedName = (rodId != null)
+                ? plugin.getContentLanguageManager().getRodName(rodId, inlineName)
+                : inlineName;
+        meta.displayName(miniMessage.deserialize(localizedName));
 
         ItemUtils.applyCustomModelData(meta, rodSec);
 
-        if (rodSec.contains("lore")) {
-            List<Component> loreComponents = new ArrayList<>();
-            for (String line : rodSec.getStringList("lore")) {
+        List<String> inlineLore = rodSec.getStringList("lore");
+        List<String> loreLines = (rodId != null)
+                ? plugin.getContentLanguageManager().getRodLore(rodId, inlineLore)
+                : inlineLore;
+        if (!loreLines.isEmpty()) {
+            List<Component> loreComponents = new ArrayList<>(loreLines.size());
+            for (String line : loreLines) {
                 loreComponents.add(miniMessage.deserialize(line));
             }
             meta.lore(loreComponents);

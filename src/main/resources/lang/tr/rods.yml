@@ -1,0 +1,194 @@
+# ============================================================
+#  PhoenixFish — Türkçe Olta Yerelleştirmesi (tr)
+# ============================================================
+#  22 olta girişi için görünen ad (display-name) + lore tanımları.
+#  Eksik anahtarlar, FileConfiguration.setDefaults aracılığıyla
+#  otomatik olarak lang/en/rods.yml dosyasına geri döner (fallback).
+# ============================================================
+
+rods:
+  default_rod:
+    display-name: <white>Eski Olta</white>
+    lore:
+    - <dark_gray>» <gray>Standart
+    - <gray>Basit bir olta.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.0'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>1'
+  hardwood_rod:
+    display-name: <#D2B48C>Sert Ağaç Olta</#D2B48C>
+    lore:
+    - <dark_gray>» <gray>Başlangıç
+    - <gray>Sıkıştırılmış ahşaptan yapılmış,
+    - <gray>ucuz ama işlevsel bir olta.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.1'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>1'
+  iron_rod:
+    display-name: <white>Demir Olta</white>
+    lore:
+    - <dark_gray>» <gray>Sıradan
+    - <gray>Demir külçelerle güçlendirilmiş.
+    - <gray>Misina kopmalarına dirençli, sağlam bir olta.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.2'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>10'
+  gold_rod:
+    display-name: <gold>Altın Olta</gold>
+    lore:
+    - <dark_gray>» <gold>Nadir
+    - <gold>Altın kaplama, daha güçlü büyüleri çeker.
+    - <gray>Yüksek şans sağlar ama biraz kırılgandır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <gold>x1.35'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <gold>20'
+  diamond_rod:
+    display-name: <aqua>Elmas Olta</aqua>
+    lore:
+    - <dark_gray>» <aqua>Destansı
+    - <aqua>Kusursuz kesim elmaslarla işlenmiştir.
+    - <gray>Avı en derin uçurumlardan bile çekebilir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <aqua>x1.5'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <aqua>35'
+  netherite_rod:
+    display-name: <#4A4A4A>Netherite Olta</#4A4A4A>
+    lore:
+    - <dark_gray>» <dark_red>Üstün
+    - <dark_red>Cehennem ateşinde dövülmüştür.
+    - <gray>Efsanevi balıkları bile kolayca alt eder.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <dark_red>x1.7'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <dark_red>50'
+  ocean_rod:
+    display-name: <#00CED1>Okyanus Olta</#00CED1>
+    lore:
+    - <dark_gray>» <dark_aqua>Gizemli
+    - <#00CED1>Dokular ve nautilus kabuklarıyla süslenmiştir.
+    - <gray>Denizin efendilerini bile kendine çeker.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <dark_aqua>x1.85'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <dark_aqua>65'
+  legendary_rod:
+    display-name: <light_purple>Efsane Olta</light_purple>
+    lore:
+    - <dark_gray>» <gold><bold>Efsanevi</bold></gold>
+    - <gold>Efsanelerden doğan saf büyüyle örülmüştür.
+    - <gray>Kullanıcısına okyanusun şansını bahşeder.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <gold>x2.0'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <gold>80'
+  cosmic_rod:
+    display-name: <gradient:#9D00FF:#00CED1>Kozmik Olta</gradient:#9D00FF:#00CED1>
+    lore:
+    - <dark_gray>» <#9D00FF><bold>İlahi</bold></#9D00FF>
+    - <#9D00FF>Yıldız tozu ve ejderha nefesiyle dövülmüştür.
+    - <gray>Bu oltanın ucu boşlukta bile balık tutabilir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#9D00FF>x2.5'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <#9D00FF>100'
+  enhanced_hardwood_rod:
+    display-name: <#D2B48C>Güçlendirilmiş Sert Ağaç Olta</#D2B48C>
+    lore:
+    - <dark_gray>» <gray>Güçlendirilmiş Başlangıç
+    - <gray>Demir bağlarla sağlamlaştırılmıştır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.15'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>1'
+  enhanced_iron_rod:
+    display-name: <white>Güçlendirilmiş Demir Olta</white>
+    lore:
+    - <dark_gray>» <gray>Güçlendirilmiş Sıradan
+    - <gray>Ekstra dayanıklılık için ısıyla işlenmiştir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.3'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>10'
+  enhanced_gold_rod:
+    display-name: <gold>Güçlendirilmiş Altın Olta</gold>
+    lore:
+    - <dark_gray>» <gold>Güçlendirilmiş Nadir
+    - <gold>Büyülü altınla kaplanmıştır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <gold>x1.45'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <gold>20'
+  enhanced_diamond_rod:
+    display-name: <aqua>Güçlendirilmiş Elmas Olta</aqua>
+    lore:
+    - <dark_gray>» <aqua>Güçlendirilmiş Destansı
+    - <aqua>Prizmarin kristalleriyle kesilmiştir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <aqua>x1.6'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <aqua>35'
+  enhanced_netherite_rod:
+    display-name: <#4A4A4A>Güçlendirilmiş Netherite Olta</#4A4A4A>
+    lore:
+    - <dark_gray>» <dark_red>Güçlendirilmiş Üstün
+    - <dark_red>Ruh ateşiyle harmanlanmıştır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <dark_red>x1.8'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <dark_red>50'
+  enhanced_ocean_rod:
+    display-name: <#00CED1>Güçlendirilmiş Okyanus Olta</#00CED1>
+    lore:
+    - <dark_gray>» <dark_aqua>Güçlendirilmiş Gizemli
+    - <#00CED1>Okyanus koruyucuları tarafından kutsanmıştır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <dark_aqua>x1.95'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <dark_aqua>65'
+  enhanced_legendary_rod:
+    display-name: <light_purple>Güçlendirilmiş Efsane Olta</light_purple>
+    lore:
+    - <dark_gray>» <gold><bold>Güçlendirilmiş Efsanevi</bold></gold>
+    - <gold>Saf yıldız ışığıyla örülmüştür.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <gold>x2.15'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <gold>80'
+  enhanced_cosmic_rod:
+    display-name: <gradient:#9D00FF:#00CED1>Güçlendirilmiş Kozmik Olta</gradient:#9D00FF:#00CED1>
+    lore:
+    - <dark_gray>» <#9D00FF><bold>Güçlendirilmiş İlahi</bold></#9D00FF>
+    - <#9D00FF>Ölen bir yıldızın gücüyle dövülmüştür.
+    - <gray>Ucu, boşluğun ta kendisinde bile balık tutabilir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#9D00FF>x2.7'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <#9D00FF>100'
+  copper_rod:
+    display-name: <#B87333>Bakır Olta</#B87333>
+    lore:
+    - <dark_gray>» <#FF8C00>Ara Kademe
+    - <gray>Bakırdan yapılmış ekonomik bir olta.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#FF8C00>x1.38'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>25'
+  quartz_rod:
+    display-name: <#F5F5DC>Kuvars Olta</#F5F5DC>
+    lore:
+    - <dark_gray>» <white>Ara Kademe
+    - <gray>Hafif ama dayanıklıdır.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <white>x1.55'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>40'
+  amethyst_rod:
+    display-name: <#9966CC>Ametist Olta</#9966CC>
+    lore:
+    - <dark_gray>» <#9B30FF>Ara Kademe
+    - <gray>Kristal enerjisiyle çıtırtı saçar.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#9B30FF>x1.75'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>55'
+  coral_rod:
+    display-name: <#FF7F50>Mercan Olta</#FF7F50>
+    lore:
+    - <dark_gray>» <#FF7F50>Ara Kademe
+    - <gray>Yaşayan mercandan yetiştirilmiştir.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#FF7F50>x1.9'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>70'
+  echo_rod:
+    display-name: <#FFFACD>Eko Olta</#FFFACD>
+    lore:
+    - <dark_gray>» <#00FF7F>Ara Kademe
+    - <gray>Boşluğun yankısıyla rezonansa girer.
+    - ''
+    - '<dark_gray>Şans Çarpanı: <#00FF7F>x2.25'
+    - '<dark_gray>Gerekli Balıkçılık Seviyesi: <white>85'
