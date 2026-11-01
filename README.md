@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/SudoPH/Icons/main/fish.png" alt="PhoenixFish" width="110" />
-
 # PhoenixFish
 
 **Build Beyond Vanilla Fishing.**
